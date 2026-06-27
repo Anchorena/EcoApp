@@ -1,0 +1,19 @@
+Carpeta plantilla para agregar logos de consultorio, institución u hospital.
+
+1. Crear una carpeta con id simple, por ejemplo:
+   assets/logos/hospital_bicentenario/
+
+2. Guardar el logo como:
+   logo.png
+
+3. Agregar el perfil en config.js dentro de logosInforme.
+
+Ejemplo:
+{
+  id: "hospital_bicentenario",
+  nombre: "Hospital Bicentenario",
+  tipo: "institucional",
+  logo: "assets/logos/hospital_bicentenario/logo.png"
+}
+
+El logo del informe es independiente del médico informante.

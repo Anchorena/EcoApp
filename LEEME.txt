@@ -1,0 +1,4 @@
+EcoApp EchoReport v1.0
+
+Esta carpeta contiene la app web local.
+No borrar assets/logos ni assets/profesionales: ahí están los logos institucionales y firmas digitales.

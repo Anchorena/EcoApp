@@ -1,0 +1,18 @@
+Carpeta plantilla para agregar un médico informante nuevo.
+
+1. Crear una carpeta con id simple, por ejemplo:
+   assets/profesionales/juan_perez/
+
+2. Guardar la firma como:
+   firma.png
+
+3. Agregar el médico en config.js dentro de profesionalesInformantes.
+
+Ejemplo:
+{
+  id: "juan_perez",
+  nombre: "Dr. Juan Pérez",
+  matriculas: "M.N. XXXXX | M.P. XXXXX",
+  especialidad: "Médico Cardiólogo",
+  firma: "assets/profesionales/juan_perez/firma.png"
+}

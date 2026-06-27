@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoApp EchoReport v1.0</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0f172a" />
+</head>
+<body>
+  <div id="app">
+    <header class="app-header no-print">
+      <div class="app-header-main">
+        <div class="app-header-copy">
+          <div class="app-kicker-row">
+            <div class="app-kicker">EcoApp EchoReport v1.0 · Sistema de informes ecocardiográficos</div>
+            <button id="btnThemeToggle" class="theme-toggle" type="button" aria-pressed="false">🌙 Modo nocturno</button>
+          </div>
+          <h1>Informe de Ecocardiografía 2D y Doppler Cardíaco</h1>
+          <p>Generador de informe ecocardiográfico automático.</p>
+        </div>
+      </div>
+      <div class="toolbar-groups">
+        <section class="toolbar-group toolbar-group-primary">
+          <div class="toolbar-title">Estudio</div>
+          <div class="actions">
+            <button id="btnNuevo" type="button">Nuevo estudio</button>
+            <button id="btnEjemplo" type="button">Cargar ejemplo</button>
+            <button id="btnLimpiar" type="button">Limpiar</button>
+            <button id="btnActualizar" type="button">Actualizar interpretación</button>
+            <button id="btnVerInforme" type="button">Ver informe limpio</button>
+            <button id="btnAdjuntarAnexo" type="button">Adjuntar PDF / imágenes</button>
+          </div>
+        </section>
+        <section class="toolbar-group toolbar-group-pdf">
+          <div class="toolbar-title">PDF / impresión</div>
+          <div class="actions">
+            <button id="btnPdfModerno" type="button">Guardar / imprimir PDF largo</button>
+            <button id="btnPdfResumenOS" type="button">Guardar / imprimir PDF corto</button>
+            <button id="btnElegirCarpeta" type="button">Elegir carpeta destino</button>
+            <button id="btnGuardarPdfCarpeta" type="button">Guardar PDF largo en carpeta</button>
+            <button id="btnGuardarPdfResumenCarpeta" type="button">Guardar PDF corto en carpeta</button>
+          </div>
+        </section>
+        <section class="toolbar-group toolbar-group-manage">
+          <div class="toolbar-title">Gestión</div>
+          <div class="actions">
+            <button id="btnGuardarEstudio" type="button">Guardar estudio</button>
+            <button id="btnVerGuardados" type="button">Estudios guardados</button>
+            <button id="btnAyudaClinica" type="button">Ayuda / machete</button>
+          </div>
+        </section>
+      </div>
+    </header>
+
+    <div id="folderStatus" class="folder-status no-print">Carpeta destino: no seleccionada.</div>
+
+    <section id="savedStudiesPanel" class="saved-studies-panel no-print" style="display:none;">
+      <div class="saved-panel-head">
+        <div>
+          <h2>Estudios guardados</h2>
+          <p class="hint">Se guardan en este navegador con fecha y nombre automático. Los anexos PDF/imagen no se almacenan dentro del guardado local.</p>
+        </div>
+        <button id="btnCerrarGuardados" type="button" class="saved-panel-close">Cerrar</button>
+      </div>
+      <div class="saved-filters">
+        <div class="field saved-filter-field"><label for="savedFilterPaciente">Apellido / paciente</label><input id="savedFilterPaciente" type="text" placeholder="Buscar por apellido o nombre" /></div>
+        <div class="field saved-filter-field"><label for="savedFilterDni">DNI</label><input id="savedFilterDni" type="text" placeholder="Buscar DNI" /></div>
+        <div class="field saved-filter-field"><label for="savedFilterOs">Obra social</label><input id="savedFilterOs" type="text" placeholder="Buscar cobertura / prepaga" /></div>
+        <div class="field saved-filter-field"><label for="savedFilterMonth">Mes</label><input id="savedFilterMonth" type="month" /></div>
+        <div class="saved-filter-actions">
+          <button id="btnClearSavedFilters" type="button" class="secondary">Limpiar filtros</button>
+          <div id="savedStudiesCount" class="saved-count">0 resultados</div>
+        </div>
+      </div>
+      <div id="savedStudiesEmpty" class="saved-empty">Todavía no hay estudios guardados.</div>
+      <div id="savedStudiesList" class="saved-studies-list"></div>
+    </section>
+
+    <section id="clinicalHelpPanel" class="clinical-help-panel no-print" style="display:none;">
+      <div class="clinical-help-box">
+        <div class="clinical-help-head">
+          <div>
+            <h2>Ayuda rápida / machete ecocardiográfico</h2>
+            <p class="hint">Referencia práctica para no dejar pasar datos importantes. Usala como apoyo: no reemplaza criterio clínico ni guías completas.</p>
+          </div>
+          <button id="btnCerrarAyudaClinica" type="button" class="saved-panel-close">Cerrar</button>
+        </div>
+
+        <div class="clinical-help-tabs">
+          <button type="button" class="clinical-help-tab active" data-help-tab="valores">Valores normales</button>
+          <button type="button" class="clinical-help-tab" data-help-tab="medicion">Cómo medir</button>
+          <button type="button" class="clinical-help-tab" data-help-tab="valvulas">Severidad valvular</button>
+          <button type="button" class="clinical-help-tab" data-help-tab="conducta">Conducta / estudios</button>
+        </div>
+
+        <div class="clinical-help-content">
+          <div class="clinical-help-section" data-help-section="valores">
+            <div class="help-grid">
+              <div class="help-card"><h3>VI</h3><p><strong>DDVI:</strong> H 42–58 mm / M 38–52 mm.</p><p><strong>VTDVI indexado:</strong> H ≤74 ml/m² / M ≤61 ml/m².</p><p><strong>FEVI:</strong> normal ≥55%.</p></div>
+              <div class="help-card"><h3>AI / AD / VD</h3><p><strong>Volumen AI indexado:</strong> normal ≤34 ml/m².</p><p><strong>VD basal:</strong> normal &lt;36 mm.</p><p><strong>TAPSE:</strong> normal &gt;17 mm.</p></div>
+              <div class="help-card"><h3>VCI / PSAP</h3><p><strong>VCI:</strong> ≤21 mm con colapso &gt;50% sugiere PAD baja.</p><p><strong>Default app:</strong> VCI 20 mm y colapso 50%.</p><p><strong>PSAP:</strong> sospechar elevada si ≥35 mmHg.</p></div>
+              <div class="help-card"><h3>Doppler</h3><p><strong>E/A:</strong> interpretar con edad, FC y E/e'.</p><p><strong>E/e' promedio:</strong> ≥14 sugiere presiones de llenado elevadas.</p><p><strong>GLS:</strong> normal aproximado ≤ -18%.</p></div>
+            </div>
+          </div>
+
+          <div class="clinical-help-section" data-help-section="medicion" style="display:none;">
+            <div class="help-grid">
+              <div class="help-card"><h3>VI / Simpson</h3><p>Medir volúmenes en A4C y A2C evitando foreshortening. Endocardio bien trazado, excluir trabéculas y músculos papilares.</p><p>Si Simpson no es confiable, dejar constancia y usar Teichholz solo como respaldo.</p></div>
+              <div class="help-card"><h3>AI</h3><p>Preferir volumen AI biplano e indexarlo por superficie corporal. El diámetro AP sirve como dato complementario, no como único criterio.</p></div>
+              <div class="help-card"><h3>TSVI / Ao</h3><p>Medir diámetro TSVI en eje largo paraesternal, borde interno a borde interno, en meso-sístole. El error se amplifica porque entra al cálculo como radio al cuadrado.</p></div>
+              <div class="help-card"><h3>Insuficiencias</h3><p>Integrar jet color, vena contracta, PISA/EROA, volumen regurgitante y consecuencias cavitarias. Cuidado con jets excéntricos: suelen subestimarse.</p></div>
+            </div>
+          </div>
+
+          <div class="clinical-help-section" data-help-section="valvulas" style="display:none;">
+            <div class="help-grid">
+              <div class="help-card"><h3>Estenosis aórtica</h3><p><strong>Leve:</strong> Vmax 2.6–2.9 m/s, gradiente medio &lt;20, AVA &gt;1.5 cm².</p><p><strong>Moderada:</strong> Vmax 3.0–3.9, gradiente medio 20–39, AVA 1.0–1.5.</p><p><strong>Severa:</strong> Vmax ≥4.0, gradiente medio ≥40, AVA ≤1.0.</p></div>
+              <div class="help-card"><h3>Estenosis mitral</h3><p>Priorizar área mitral. PHT y gradiente medio son apoyo y dependen de FC, ritmo y flujo.</p><p><strong>Significativa:</strong> área ≤1.5 cm².</p><p><strong>Severa:</strong> área ≤1.0 cm² o gradiente elevado con clínica compatible.</p></div>
+              <div class="help-card"><h3>Estenosis pulmonar</h3><p><strong>Leve:</strong> Vmax &lt;3 m/s o gradiente pico &lt;36 mmHg.</p><p><strong>Moderada:</strong> Vmax 3–4 o pico 36–64.</p><p><strong>Severa:</strong> Vmax ≥4 o pico ≥64.</p></div>
+              <div class="help-card"><h3>Datos discordantes</h3><p>Si área, velocidad y gradiente no coinciden, revisar TSVI, alineación Doppler, bajo flujo, HTA, ritmo, FC y calidad de ventana.</p></div>
+            </div>
+          </div>
+
+          <div class="clinical-help-section" data-help-section="conducta" style="display:none;">
+            <div class="help-grid">
+              <div class="help-card"><h3>Cuándo pedir ETE</h3><p>Mala ventana, sospecha de endocarditis, prótesis valvular, IM/IAo compleja, mecanismo valvular dudoso o discordancia clínica-eco.</p></div>
+              <div class="help-card"><h3>Cuándo pedir eco estrés</h3><p>EAo severa asintomática para desenmascarar síntomas. EAo de bajo flujo/bajo gradiente cuando hace falta diferenciar severa verdadera vs pseudo-severa.</p></div>
+              <div class="help-card"><h3>Cuándo pedir TAC/RMN</h3><p>TAC para calcio valvular aórtico, raíz/aorta, TAVI y anatomía compleja. RMN para volúmenes, función, fibrosis o regurgitaciones discordantes.</p></div>
+              <div class="help-card"><h3>Derivación / Heart Team</h3><p>Valvulopatía severa sintomática, disfunción VI, hipertensión pulmonar, cavidades progresivamente dilatadas, discordancia importante o paciente candidato a intervención.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <main class="layout">
+      <section class="left-column no-print">
+        <article class="card">
+          <h2>Médico / Solicitud</h2>
+          <div class="form-grid">
+            <div class="field"><label for="medicoInformante">Médico informante</label><select id="medicoInformante"></select><div class="select-help">Define encabezado, firma y sello del informe.</div></div>
+            <div class="field"><label for="logoPerfilInforme">Logo / institución del informe</label><select id="logoPerfilInforme"></select><div class="select-help">Independiente del informante: consultorio, hospital o institución.</div></div>
+            <div class="field" id="medicoInformanteOtroWrap" style="display:none;"><label for="medicoInformanteOtro">Nombre informante</label><input id="medicoInformanteOtro" type="text" placeholder="Ej.: Dr./Dra. Nombre Apellido" /></div>
+            <div class="field"><label for="matriculaInformante">Matrículas</label><input id="matriculaInformante" type="text" /></div>
+            <div class="field"><label for="especialidadInformante">Especialidad / pie</label><input id="especialidadInformante" type="text" /></div>
+            <div class="field"><label for="medicoSolicitante">Médico solicitante / especialidad</label><select id="medicoSolicitante"></select><div class="select-help">Primero aparecen colegas frecuentes y al final especialidades / genéricos.</div></div>
+            <div class="field" id="medicoSolicitanteOtroWrap" style="display:none;"><label for="medicoSolicitanteOtro">Otro solicitante</label><input id="medicoSolicitanteOtro" type="text" placeholder="Escribí el nombre o servicio" /></div>
+            <div class="field"><label for="motivo">Motivo</label><select id="motivo"></select><div class="select-help">Opciones frecuentes para cargar más rápido el estudio.</div></div>
+            <div class="field" id="motivoOtroWrap" style="display:none;"><label for="motivoOtro">Otro motivo</label><input id="motivoOtro" type="text" placeholder="Escribí el motivo" /></div>
+            <div class="field"><label for="fecha">Fecha</label><input id="fecha" type="date" /></div>
+          </div>
+        </article>
+
+
+        <article class="card">
+          <h2>Datos del paciente</h2>
+          <div class="form-grid">
+            <div class="field"><label for="paciente">Paciente</label><input id="paciente" type="text" /></div>
+            <div class="field"><label for="dni">DNI</label><input id="dni" type="text" /></div>
+            <div class="field"><label for="sexo">Sexo</label><select id="sexo"><option value=""></option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option></select></div>
+            <div class="field"><label for="edad">Edad</label><input id="edad" type="number" /></div>
+            <div class="field"><label for="obraSocial">Obra social / cobertura</label><select id="obraSocial"></select></div>
+            <div class="field" id="obraSocialOtroWrap" style="display:none;"><label for="obraSocialOtro">Otra cobertura</label><input id="obraSocialOtro" type="text" placeholder="Escribí la cobertura" /></div>
+            <div class="field"><label for="fc">FC</label><input id="fc" type="number" /></div>
+            <div class="field"><label for="peso">Peso (kg)</label><input id="peso" type="number" step="0.1" /></div>
+            <div class="field"><label for="talla">Talla (cm)</label><input id="talla" type="number" step="0.1" /></div>
+          </div>
+          <div id="coverageAlert" class="status-banner warning" style="display:none;">Esta cobertura requiere resumen breve para impresión. Usá el botón <strong>Imprimir resumen corto</strong>.</div>
+        </article>
+
+        <article class="card"><h2>Eco bidimensional</h2><div id="camposEco" class="form-grid"></div></article>
+        <article class="card"><h2>Doppler</h2><div id="camposDoppler" class="form-grid"></div></article>
+
+        <article class="card">
+          <h2>Hallazgos cualitativos</h2>
+          <div class="form-grid">
+            <div class="field"><label for="motilidadGlobal">Motilidad segmentaria global</label><select id="motilidadGlobal"><option value="conservada">Conservada</option><option value="hipocinesia">Hipocinesia</option><option value="discinesia">Discinesia</option><option value="acinesia">Acinesia</option></select></div>
+            <div class="field"><label for="septumIA">Septum IV e IA</label><select id="septumIA"><option value="Indemnes">Indemnes</option><option value="CIA">CIA</option><option value="CIV">CIV</option><option value="Aneurisma de septum interauricular">Aneurisma de septum interauricular</option><option value="Foramen oval permeable">Foramen oval permeable</option><option value="Ductus persistente">Ductus persistente</option></select></div>
+            <div class="field"><label for="trombosMasas">Trombos / masas intracavitarias</label><select id="trombosMasas"><option value="Sin trombos ni masas intracavitarias">Sin trombos ni masas intracavitarias</option><option value="Trombo intracavitario en AI">Trombo intracavitario en AI</option><option value="Trombo intracavitario en VI">Trombo intracavitario en VI</option><option value="Masa intracavitaria compatible con mixoma">Masa intracavitaria compatible con mixoma</option><option value="Otra masa intracavitaria">Otra masa intracavitaria</option></select></div>
+            <div class="field"><label for="vegetaciones">Vegetaciones</label><select id="vegetaciones"><option value="Aparatos valvulares libres">Aparatos valvulares libres</option><option value="Vegetación mitral">Vegetación mitral</option><option value="Vegetación aórtica">Vegetación aórtica</option><option value="Vegetación tricuspídea">Vegetación tricuspídea</option><option value="Vegetación pulmonar">Vegetación pulmonar</option></select></div>
+          </div>
+
+          <h3>Válvula aórtica</h3>
+          <div class="form-grid">
+            <div class="field"><label for="aoMorf">Morfología</label><select id="aoMorf"></select></div>
+            <div class="field"><label for="aoIns">Insuficiencia</label><select id="aoIns"></select></div>
+            <div class="field"><label for="aoEst">Estenosis</label><select id="aoEst"></select></div>
+          </div>
+
+          <h4>Cuantificación de insuficiencia aórtica</h4>
+          <div class="form-grid">
+            <div class="field"><label for="aoJet">Características del jet</label><select id="aoJet"><option value="No evaluado">No evaluado</option><option value="jet pequeño central en TSVI">Jet pequeño central en TSVI</option><option value="jet central intermedio en TSVI">Jet central intermedio en TSVI</option><option value="jet amplio central en TSVI">Jet amplio central en TSVI</option><option value="jet excéntrico">Jet excéntrico</option></select></div>
+            <div class="field"><label for="aoVc">Vena contracta (mm)</label><input id="aoVc" type="number" step="0.1" /></div>
+            <div class="field"><label for="aoPht">Pressure half-time / THP (ms)</label><input id="aoPht" type="number" step="1" /></div>
+            <div class="field"><label for="aoEroa">AORE / EROA (cm²)</label><input id="aoEroa" type="number" step="0.01" /></div>
+            <div class="field"><label for="aoRVol">Volumen regurgitante (ml)</label><input id="aoRVol" type="number" step="1" /></div>
+            <div class="field field-span-2"><label for="aoFlowRev">Reversión holodiastólica en aorta descendente</label><select id="aoFlowRev"><option value="No evaluado">No evaluado</option><option value="Ausente">Ausente</option><option value="Presente no prominente">Presente no prominente</option><option value="Prominente">Prominente</option></select></div>
+          </div>
+
+          <h3>Válvula mitral</h3>
+          <div class="form-grid">
+            <div class="field"><label for="miMorf">Morfología</label><select id="miMorf"></select></div>
+            <div class="field"><label for="miIns">Insuficiencia</label><select id="miIns"></select></div>
+            <div class="field"><label for="miEst">Estenosis</label><select id="miEst"></select></div>
+          </div>
+
+          <h4>Cuantificación de insuficiencia mitral</h4>
+          <div class="form-grid">
+            <div class="field"><label for="miJet">Características del jet</label><select id="miJet"><option value="No evaluado">No evaluado</option><option value="jet pequeño central">Jet pequeño central</option><option value="jet central intermedio">Jet central intermedio</option><option value="jet amplio central">Jet amplio central</option><option value="jet excéntrico">Jet excéntrico</option><option value="jets múltiples">Jets múltiples</option></select></div>
+            <div class="field"><label for="miVc">Vena contracta (mm)</label><input id="miVc" type="number" step="0.1" /></div>
+            <div class="field"><label for="miEroa">AORE / EROA (cm²)</label><input id="miEroa" type="number" step="0.01" /></div>
+            <div class="field"><label for="miRVol">Volumen regurgitante (ml)</label><input id="miRVol" type="number" step="1" /></div>
+            <div class="field field-span-2"><label for="miPisa">Método PISA</label><select id="miPisa"><option value="No evaluado">No evaluado</option><option value="Cuantificación por PISA compatible con insuficiencia mitral leve">Cuantificación por PISA compatible con insuficiencia mitral leve</option><option value="Cuantificación por PISA compatible con insuficiencia mitral moderada">Cuantificación por PISA compatible con insuficiencia mitral moderada</option><option value="Cuantificación por PISA compatible con insuficiencia mitral severa">Cuantificación por PISA compatible con insuficiencia mitral severa</option></select></div>
+          </div>
+
+          <h3>Válvula pulmonar</h3>
+          <div class="form-grid">
+            <div class="field"><label for="puMorf">Morfología</label><select id="puMorf"></select></div>
+            <div class="field"><label for="puIns">Insuficiencia</label><select id="puIns"></select></div>
+            <div class="field"><label for="puEst">Estenosis</label><select id="puEst"></select></div>
+          </div>
+
+          <h3>Válvula tricuspídea</h3>
+          <div class="form-grid">
+            <div class="field"><label for="trMorf">Morfología</label><select id="trMorf"></select></div>
+            <div class="field"><label for="trIns">Insuficiencia</label><select id="trIns"></select></div>
+            <div class="field"><label for="trEst">Estenosis</label><select id="trEst"></select></div>
+          </div>
+
+          <h3>Pericardio</h3>
+          <div class="form-grid"><div class="field"><label for="pericardio">Estado</label><select id="pericardio"></select></div></div>
+        </article>
+
+        <article class="card">
+          <h2>Segmentación miocárdica</h2>
+          <p class="hint segment-intro">Tocá un segmento en el ojo de buey. La narrativa mantiene la referencia anatómica por nombre y la tabla queda como ayuda visual.</p>
+          <div class="segment-simple-board">
+            <div class="segment-board-card">
+              <div class="segment-board-heading">Localización en ojo de buey</div>
+              <div class="bullseye-wrap bullseye-wrap-ref"><svg id="bull17" viewBox="0 0 520 520"></svg></div>
+            </div>
+            <div class="segment-board-card">
+              <div class="segment-board-title">Referencia de segmentos</div>
+              <div id="segmentReferenceList" class="segment-reference-list"></div>
+            </div>
+          </div>
+          <div class="legend"><span><i class="legend-normal"></i> Normal</span><span><i class="legend-hypo"></i> Hipocinesia</span><span><i class="legend-ak"></i> Acinesia</span></div>
+          <div id="segmentosTexto" class="segment-summary"></div>
+        </article>
+      </section>
+
+      <aside class="right-column no-print">
+        <article class="card"><h2>Síntesis del estudio</h2><div id="badges" class="badges"></div><div id="alertas" class="alerts-grid"></div></article>
+        <article class="card"><h2>Cálculos automáticos</h2><div id="calcGrid" class="calc-grid"></div></article>
+        <article class="card">
+          <h2>Edición manual del informe</h2>
+          <div class="form-grid">
+            <div class="field field-span-2"><label for="conclusionManual">Conclusión manual</label><textarea id="conclusionManual" rows="5" placeholder="Si escribís aquí, reemplaza la conclusión automática en la vista previa y en el PDF."></textarea></div>
+            <div class="field field-span-2"><label for="notasAdicionales">Notas adicionales</label><textarea id="notasAdicionales" rows="5" placeholder="Campo libre para agregar observaciones, aclaraciones o comentarios puntuales."></textarea></div>
+          </div>
+        </article>
+        <article class="card">
+          <h2>Anexo / imágenes adjuntas</h2>
+          <p class="hint">La selección del archivo se hace desde la botonera principal. Acá podés importar mediciones del adjunto cargado, revisar el estado y quitarlo si hace falta.</p>
+          <input id="anexoPdfInput" type="file" accept=".pdf,image/*" hidden />
+          <div class="annex-actions annex-actions-compact">
+            <button id="btnImportarAnexo" type="button" disabled>Importar mediciones del adjunto / parser multi-equipo</button>
+            <button id="btnAnexoLimpiar" type="button">Quitar anexo</button>
+          </div>
+          <div id="annexStatus" class="status-banner info" style="display:none;"></div>
+          <div id="annexImportStatus" class="status-banner info" style="display:none;"></div>
+          <div id="annexImportSummary" class="annex-import-summary" style="display:none;"></div>
+          <div id="annexPreviewWrap" style="display:none;">
+            <div id="annexMeta" class="annex-meta"></div>
+            <div id="annexPreview" class="annex-preview-grid"></div>
+          </div>
+        </article>
+        <article class="card"><h2>Vista previa del informe</h2><div id="previewNarrativa" class="preview-block"></div><div id="previewConclusion" class="preview-block preview-conclusion"></div><div id="previewNotasWrap" style="display:none;"><h3>Notas adicionales</h3><div id="previewNotas" class="preview-block"></div></div></article>
+      </aside>
+    </main>
+
+    <section id="print-report-moderno" class="print-report">
+      <div class="report-header">
+        <img src="assets/logos/consultorio_matias/logo.png" alt="Logo" class="report-logo" />
+        <div class="report-header-copy-print">
+          <h1>Informe de Ecocardiografía Bidimensional y Doppler Cardíaco</h1>
+          <p id="printMedico"></p>
+          <p id="printEspecialidad"></p>
+          <p id="printInstitucion" class="report-institution-name"></p>
+        </div>
+      </div>
+      <div id="printPaciente" class="report-patient"></div>
+      <div class="report-summary-box">
+        <h3>Resumen rápido visual</h3>
+        <div id="printBadges" class="badges print-badges"></div>
+      </div>
+      <div class="report-section-block measurements-print-block">
+        <div id="printTablaEco"></div>
+      </div>
+      <div class="report-section-block segments-print-block">
+        <div class="report-bullseye-row">
+          <div class="report-bullseye-box"><h3>Segmentación miocárdica</h3><svg id="printBull17" viewBox="0 0 520 520"></svg></div>
+          <div class="report-bullseye-text"><h3>Motilidad segmentaria</h3><div id="printSegmentosTexto"></div></div>
+        </div>
+        <div id="printQuickRefs" class="report-quickrefs"></div>
+      </div>
+      <div class="report-section-block doppler-print-block">
+        <div id="printTablaDoppler"></div>
+      </div>
+      <div class="report-section-block">
+        <h2>Descripción del estudio</h2>
+        <div id="printDescripcion" class="report-text"></div>
+      </div>
+      <div class="conclusion-signature-block">
+        <h2>Conclusión</h2>
+        <div id="printConclusion" class="report-text report-conclusion"></div>
+        <div id="printNotasWrap" style="display:none;"><h2>Notas adicionales</h2><div id="printNotas" class="report-text"></div></div>
+        <div class="signature-box">
+          <img id="printFirmaImg" src="firma.png" alt="Firma" class="report-signature" />
+          <div class="signature-line"></div>
+          <p><strong id="printFirmaNombre">Dr. Matías Anchorena</strong></p>
+          <p id="printFirmaMatriculas">M.N. 115607 | M.P. 332578</p>
+          <p id="printFirmaEspecialidad">Medicina Intensiva y Cardiología</p>
+        </div>
+      </div>
+      <div class="print-footer" aria-hidden="true"><span class="print-footer-left">EcoApp EchoReport v1.0 by Matias Anchorena</span><span class="print-footer-right"></span></div>
+      <div id="printAnexoWrap" style="display:none;">
+        <h2>Anexo / imágenes adjuntas</h2>
+        <div id="printAnexoMeta" class="annex-meta"></div>
+        <div id="printAnexoPages" class="annex-print-pages"></div>
+      </div>
+    </section>
+
+    <section id="print-report-resumen-os" class="summary-report print-report">
+      <div class="summary-header">
+        <img src="assets/logos/consultorio_matias/logo.png" alt="Logo" class="report-logo" />
+        <div class="report-header-copy-print">
+          <h1>Informe de Ecocardiografía Bidimensional y Doppler Cardíaco</h1>
+          <p id="summaryMedico"></p>
+          <p id="summaryEspecialidad"></p>
+          <p id="summaryInstitucion" class="report-institution-name"></p>
+        </div>
+      </div>
+      <div id="summaryPaciente" class="summary-grid"></div>
+      <div class="summary-block"><h2>Mediciones básicas</h2><div id="summaryTables"></div></div>
+      <div class="summary-block"><h2>Conclusión</h2><div id="summaryConclusion" class="report-text report-conclusion"></div></div>
+      <div class="summary-signature">
+        <img id="summaryFirmaImg" src="firma.png" alt="Firma" class="report-signature" />
+        <div class="signature-line"></div>
+        <p><strong id="summaryFirmaNombre">Dr. Matías Anchorena</strong></p>
+        <p id="summaryFirmaMatriculas">M.N. 115607 | M.P. 332578</p>
+        <p id="summaryFirmaEspecialidad">Medicina Intensiva y Cardiología</p>
+      </div>
+      <div class="print-footer" aria-hidden="true"><span class="print-footer-left">EcoApp EchoReport v1.0 by Matias Anchorena</span><span class="print-footer-right"></span></div>
+      <div id="summaryAnexoWrap" class="summary-block" style="display:none;">
+        <h2>Anexo / imágenes adjuntas</h2>
+        <div id="summaryAnexoMeta" class="annex-meta"></div>
+        <div id="summaryAnexoPages" class="annex-print-pages"></div>
+      </div>
+    </section>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/legacy/build/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script src="pwa-register.js"></script>
+</body>
+</html>

@@ -1,0 +1,3113 @@
+
+:root {
+  --bg: #eef4f7;
+  --card: #ffffff;
+  --border: #c7d4df;
+  --border-strong: #96a8b7;
+  --text: #142235;
+  --muted: #63778d;
+  --title: #071120;
+  --primary: #0d1b2a;
+  --primary-2: #2f6fed;
+  --accent: #0f766e;
+  --accent-2: #7c3aed;
+  --soft: #f6fafc;
+  --ok: #86efac;
+  --warn: #fde68a;
+  --bad: #fca5a5;
+  --shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  --radius: 22px;
+  --radius-sm: 16px;
+  --gap: 18px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+body.dark-mode {
+  --bg: #09111c;
+  --card: #0f1724;
+  --border: #233244;
+  --border-strong: #3b536b;
+  --text: #e8eef7;
+  --muted: #9db0c4;
+  --title: #f8fbff;
+  --primary: #dce7f5;
+  --primary-2: #4f8cff;
+  --accent: #2dd4bf;
+  --accent-2: #a78bfa;
+  --soft: #121e2d;
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --bad: #f87171;
+  --shadow: 0 14px 34px rgba(2, 8, 23, 0.38);
+}
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family:var(--font); transition: background-color .25s ease, color .25s ease; }
+body { padding:18px; }
+h1,h2,h3,p{ margin-top:0; }
+#app{ max-width:1600px; margin:0 auto; }
+.app-header{
+  display:grid;
+  grid-template-columns:minmax(340px, 1.02fr) minmax(620px, 1.18fr);
+  align-items:start;
+  gap:22px;
+  background:linear-gradient(135deg, rgba(247,251,255,0.98) 0%, rgba(239,248,246,0.98) 52%, rgba(239,244,255,0.98) 100%);
+  border:1px solid var(--border);
+  border-radius:30px;
+  padding:24px;
+  box-shadow:var(--shadow);
+  margin-bottom:18px;
+}
+body.dark-mode .app-header{
+  background:linear-gradient(135deg, rgba(10,18,30,0.98) 0%, rgba(10,30,34,0.98) 52%, rgba(18,18,38,0.98) 100%);
+}
+.app-header-main{
+  display:flex;
+  align-items:stretch;
+}
+.app-header-copy{
+  width:100%;
+  max-width:620px;
+  background:rgba(255,255,255,0.62);
+  border:1px solid rgba(199,212,223,0.85);
+  border-radius:24px;
+  padding:22px 22px 20px;
+  backdrop-filter: blur(6px);
+}
+body.dark-mode .app-header-copy{
+  background:rgba(15,23,36,0.66);
+  border-color:rgba(35,50,68,0.95);
+}
+.app-kicker-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:14px; }
+.app-kicker{ font-size:14px; font-weight:900; text-transform:uppercase; letter-spacing:.09em; color:var(--accent); }
+.theme-toggle{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.8);
+  color:var(--title);
+  border-radius:999px;
+  padding:10px 14px;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:var(--shadow);
+  white-space:nowrap;
+}
+body.dark-mode .theme-toggle{
+  background:#152131;
+  color:var(--title);
+}
+.app-header h1{ font-size:clamp(2.8rem, 5vw, 4.6rem); line-height:1.03; color:var(--title); margin-bottom:12px; max-width:10.7ch; letter-spacing:-0.03em; }
+.app-header p{ color:var(--muted); margin:0; font-size:1.05rem; font-weight:600; max-width:32ch; }
+.toolbar-groups{ display:flex; flex-direction:column; gap:14px; }
+.toolbar-group{
+  border:1px solid var(--border);
+  border-radius:22px;
+  background:rgba(255,255,255,0.7);
+  padding:14px 16px 16px;
+  box-shadow:0 10px 22px rgba(15, 23, 42, 0.05);
+}
+body.dark-mode .toolbar-group{
+  background:rgba(15,23,36,0.76);
+}
+.toolbar-title{ font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:.15em; color:var(--accent); margin-bottom:12px; }
+.actions{ display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; }
+.actions button{
+  width:100%;
+  min-height:58px;
+  border:1px solid transparent;
+  border-radius:18px;
+  padding:14px 16px;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:var(--shadow);
+  pointer-events:auto;
+  position:relative;
+  z-index:10;
+  transition:transform .16s ease, box-shadow .16s ease, filter .16s ease, background-color .16s ease;
+}
+.actions button:hover, .theme-toggle:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.03);
+}
+.actions button:active, .theme-toggle:active{ transform:translateY(0); }
+#btnNuevo,#btnActualizar{ background:var(--primary); color:white; }
+body.dark-mode #btnNuevo, body.dark-mode #btnActualizar{ color:#08111e; }
+#btnEjemplo,#btnLimpiar,#btnVerInforme{ background:#e7eef5; color:var(--text); border-color:#d6e1eb; }
+body.dark-mode #btnEjemplo, body.dark-mode #btnLimpiar, body.dark-mode #btnVerInforme{ background:#19283a; border-color:#25384e; color:var(--text); }
+#btnAdjuntarAnexo{ background:linear-gradient(135deg, #0f766e 0%, #149e92 100%); color:white; }
+#btnPdfModerno{ background:linear-gradient(135deg, #2f6fed 0%, #568ef5 100%); color:white; }
+#btnPdfResumenOS{ background:linear-gradient(135deg, #0f766e 0%, #1b9c94 100%); color:white; }
+#btnElegirCarpeta{ background:#fff8ef; color:#9a3412; border:1px solid #fed7aa; }
+body.dark-mode #btnElegirCarpeta{ background:#2a1d14; color:#fdba74; border-color:#5c3d1d; }
+#btnGuardarPdfCarpeta,#btnGuardarPdfResumenCarpeta{ background:linear-gradient(135deg, #7c3aed 0%, #9b5cff 100%); color:white; }
+#btnGuardarEstudio{ background:linear-gradient(135deg, #1d4ed8 0%, #2f6fed 100%); color:white; }
+#btnVerGuardados{ background:#eef4ff; color:#1e3a8a; border:1px solid #c7d2fe; }
+body.dark-mode #btnVerGuardados{ background:#16294b; color:#cfe0ff; border-color:#385b95; }
+#btnAyudaClinica{ background:#eef1f4; color:#1f2937; border-color:#d8e0e7; }
+body.dark-mode #btnAyudaClinica{ background:#1b2837; color:#d9e5f2; border-color:#2d4056; }
+#btnClearSavedFilters{ background:white; color:var(--title); border:1px solid var(--border); box-shadow:var(--shadow); border-radius:14px; padding:10px 12px; font-weight:700; cursor:pointer; }
+body.dark-mode #btnClearSavedFilters{ background:#152131; }
+
+.saved-studies-panel{ background:var(--card); border:1px solid var(--border); border-radius:22px; padding:18px; box-shadow:var(--shadow); margin:-2px 0 18px; }
+.saved-filters{ display:grid; grid-template-columns:repeat(4,minmax(150px,1fr)) auto; gap:12px; align-items:end; margin:10px 0 14px; }
+.saved-filter-field{ margin-bottom:0; }
+.saved-filter-actions{ display:flex; flex-direction:column; gap:8px; min-width:170px; }
+.saved-count{ font-size:12px; color:var(--muted); font-weight:700; }
+.folder-status{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:10px 14px; margin:-4px 0 14px; color:var(--muted); font-size:13px; box-shadow:var(--shadow); }
+.folder-status strong{ color:var(--title); }
+.saved-panel-head{ display:flex; justify-content:space-between; gap:14px; align-items:flex-start; margin-bottom:8px; }
+.saved-panel-head h2{ font-size:1.35rem; margin-bottom:6px; color:var(--title); }
+.saved-panel-close{ border:0; border-radius:14px; padding:10px 14px; background:#e2e8f0; color:var(--text); font-weight:700; cursor:pointer; box-shadow:var(--shadow); }
+.saved-panel-head .hint{ max-width:60ch; }
+.saved-empty{ font-size:13px; color:var(--muted); padding:8px 0; }
+.saved-studies-list{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+.saved-study-item{ border:1px solid var(--border); background:var(--soft); border-radius:16px; padding:12px; }
+.saved-study-head{ display:flex; justify-content:space-between; gap:10px; align-items:flex-start; margin-bottom:8px; }
+.saved-study-title{ font-weight:800; color:var(--title); font-size:1rem; }
+.saved-study-meta{ font-size:12px; color:var(--muted); line-height:1.45; }
+.saved-study-badges{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+.saved-badge{ padding:7px 10px; border-radius:999px; font-size:11px; font-weight:800; border:1px solid var(--border); background:white; color:var(--muted); }
+.saved-badge.active{ color:#14532d; background:#dcfce7; border-color:#86efac; }
+.saved-study-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.saved-study-actions button{ padding:8px 10px; font-size:12px; }
+.saved-study-actions .secondary{ background:white; color:var(--title); border:1px solid var(--border); }
+.saved-study-actions .danger{ background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
+.saved-status-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; }
+.saved-status-btn{ background:white; color:#334155; border:1px solid var(--border); }
+.saved-status-btn.active{ background:#dbeafe; color:#1d4ed8; border-color:#93c5fd; }
+
+.layout{ display:grid; grid-template-columns:1.35fr 0.9fr; gap:18px; align-items:start; }
+.left-column,.right-column{ display:grid; gap:18px; }
+.card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
+.card h2{ font-size:1.4rem; margin-bottom:14px; color:var(--title); }
+.card h3{ margin-top:18px; margin-bottom:10px; font-size:1rem; color:var(--title); }
+.form-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; }
+.field-span-2{ grid-column:span 2; }
+.field{ background:white; border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; }
+.field label{ display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; }
+.field input,.field select,.field textarea{ width:100%; border:0; outline:0; background:transparent; color:var(--text); font-size:15px; font-family:inherit; }
+.field select{ cursor:pointer; }
+.field .hint,.field .vn{ margin-top:6px; font-size:11px; color:var(--muted); }
+.hint{ color:var(--muted); font-size:13px; margin-bottom:12px; }
+.badges{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.badges span{ display:inline-flex; align-items:center; border-radius:999px; padding:8px 12px; font-size:13px; font-weight:700; }
+.print-badges{ margin:4px 0 0 0; }
+.print-badges span{ padding:6px 10px; font-size:12px; }
+.report-summary-box{
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:10px 12px;
+  background:var(--soft);
+  margin:10px 0 12px;
+}
+.report-summary-box h3{
+  font-size:13px;
+  margin:0 0 8px 0;
+  color:var(--title);
+}
+.alerts-grid{ display:grid; gap:12px; }
+.alert-item{ border:1px solid var(--border); border-radius:16px; padding:14px; background:var(--soft); }
+.alert-item strong{ display:block; margin-bottom:6px; }
+.calc-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+.calc-item{ background:var(--soft); border:1px solid var(--border); border-radius:16px; padding:12px; }
+.calc-item .calc-label{ display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
+.calc-item .calc-value{ font-weight:800; font-size:1rem; color:var(--title); }
+.preview-block{ border:1px solid var(--border); background:var(--soft); border-radius:16px; padding:14px; line-height:1.7; margin-bottom:12px; }
+.preview-conclusion{ font-weight:700; }
+.bullseye-wrap{ display:flex; justify-content:center; align-items:center; background:var(--soft); border:1px solid var(--border); border-radius:18px; padding:10px; }
+#bull17{ width:100%; max-width:360px; height:auto; display:block; }
+.legend{ display:flex; flex-wrap:wrap; gap:16px; font-size:13px; margin-top:12px; }
+.legend span{ display:inline-flex; align-items:center; gap:8px; }
+.legend i{ width:14px; height:14px; display:inline-block; border-radius:4px; border:1px solid var(--border-strong); }
+.legend-normal{ background:var(--ok); }
+.legend-hypo{ background:var(--warn); }
+.legend-ak{ background:var(--bad); }
+.segment-summary{ margin-top:12px; border:1px solid var(--border); background:var(--soft); border-radius:16px; padding:12px; line-height:1.7; }
+.segment-intro{ max-width:none; line-height:1.4; margin:4px 0 10px; font-size:13px; color:var(--muted); }
+.segment-simple-board{ display:grid; grid-template-columns:minmax(340px, 480px) minmax(340px, 1fr); gap:14px; align-items:start; }
+.segment-board-card{ border:1px solid var(--border); border-radius:18px; background:var(--soft); padding:14px; box-shadow:0 8px 20px rgba(15, 23, 42, 0.04); }
+.segment-board-heading{ border:2px solid #334155; padding:8px 12px; text-align:center; font-weight:800; color:var(--title); background:white; margin-bottom:14px; }
+.segment-board-title{ font-size:15px; font-weight:800; color:var(--title); margin-bottom:10px; }
+.bullseye-wrap-ref{ background:white; margin-top:0; }
+.segment-reference-list{ display:grid; grid-template-columns:1fr 1fr; border:2px solid #334155; background:#d9f0d8; }
+.segment-ref-item{ display:flex; gap:8px; padding:7px 10px; border-right:1px solid rgba(51,65,85,0.35); border-bottom:1px solid rgba(51,65,85,0.35); font-size:13px; line-height:1.2; }
+.segment-ref-item:nth-child(2n){ border-right:0; }
+.segment-ref-item:nth-last-child(-n+2){ border-bottom:0; }
+.segment-ref-number{ font-weight:900; min-width:22px; color:#0f172a; }
+.segment-ref-name{ color:#1f2937; }
+.segment-shape{ stroke:#334155; stroke-width:1.5; }
+.segment-shape.interactive{ cursor:pointer; transition:transform 0.12s ease, filter 0.12s ease; }
+.segment-shape.interactive:hover{ filter:brightness(0.98); transform:translateY(-1px); }
+.segment-outline{ fill:none; stroke:#334155; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.segment-chamber{ fill:#ffffff; stroke:#94a3b8; stroke-width:1.6; }
+.segment-number{ fill:#0f172a; font-size:13px; font-weight:900; dominant-baseline:middle; pointer-events:none; }
+.segment-small-label{ fill:#334155; font-size:12px; font-weight:800; dominant-baseline:middle; pointer-events:none; }
+.segment-cap-label{ fill:#334155; font-size:16px; font-weight:900; dominant-baseline:middle; pointer-events:none; }
+@media (max-width: 1100px){
+  .segment-simple-board{ grid-template-columns:1fr; }
+}
+@media (max-width: 860px){
+  .segment-reference-list{ grid-template-columns:1fr; }
+  .segment-ref-item,.segment-ref-item:nth-child(2n){ border-right:0; }
+  .segment-ref-item:nth-last-child(-n+2){ border-bottom:1px solid rgba(51,65,85,0.35); }
+  .segment-ref-item:last-child{ border-bottom:0; }
+}
+
+body.dark-mode .field,
+body.dark-mode .saved-study-item,
+body.dark-mode .preview-block,
+body.dark-mode .segment-summary,
+body.dark-mode .help-card,
+body.dark-mode .calc-item,
+body.dark-mode .alert-item,
+body.dark-mode .saved-studies-panel,
+body.dark-mode .folder-status,
+body.dark-mode .card,
+body.dark-mode .clinical-help-box,
+body.dark-mode .annex-thumb-card,
+body.dark-mode .annex-import-summary,
+body.dark-mode .report-summary-box,
+body.dark-mode .status-banner,
+body.dark-mode .toolbar-group,
+body.dark-mode .saved-panel-close,
+body.dark-mode .saved-badge,
+body.dark-mode .saved-status-btn,
+body.dark-mode .clinical-help-tab,
+body.dark-mode .saved-study-actions .secondary,
+body.dark-mode .annex-actions input[type="file"],
+body.dark-mode .annex-print-page,
+body.dark-mode .segment-board-card,
+body.dark-mode .segment-board-heading,
+body.dark-mode .bullseye-wrap,
+body.dark-mode .bullseye-wrap-ref,
+body.dark-mode .segment-reference-list {
+  color: var(--text);
+}
+body.dark-mode .field,
+body.dark-mode .saved-study-item,
+body.dark-mode .preview-block,
+body.dark-mode .segment-summary,
+body.dark-mode .help-card,
+body.dark-mode .calc-item,
+body.dark-mode .alert-item,
+body.dark-mode .saved-studies-panel,
+body.dark-mode .folder-status,
+body.dark-mode .card,
+body.dark-mode .clinical-help-box,
+body.dark-mode .annex-thumb-card,
+body.dark-mode .annex-import-summary,
+body.dark-mode .report-summary-box,
+body.dark-mode .annex-actions input[type="file"],
+body.dark-mode .saved-panel-close,
+body.dark-mode .saved-badge,
+body.dark-mode .saved-status-btn,
+body.dark-mode .clinical-help-tab,
+body.dark-mode .saved-study-actions .secondary,
+body.dark-mode .annex-print-page,
+body.dark-mode .segment-board-card,
+body.dark-mode .segment-board-heading,
+body.dark-mode .bullseye-wrap,
+body.dark-mode .bullseye-wrap-ref,
+body.dark-mode .segment-reference-list {
+  background: var(--soft);
+  border-color: var(--border);
+}
+body.dark-mode .field label,
+body.dark-mode .saved-study-meta,
+body.dark-mode .hint,
+body.dark-mode .annex-meta,
+body.dark-mode .annex-import-muted,
+body.dark-mode .help-card p,
+body.dark-mode .segment-intro,
+body.dark-mode .saved-count,
+body.dark-mode .folder-status,
+body.dark-mode .toolbar-title,
+body.dark-mode .app-header p { color: var(--muted); }
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea { color: var(--text); }
+body.dark-mode .toast{ background:#e6edf8; color:#09111c; }
+
+.toast{ position:fixed; top:18px; right:18px; z-index:9999; background:#0f172a; color:white; padding:12px 16px; border-radius:14px; font-size:14px; box-shadow:var(--shadow); }
+.hidden{ display:none !important; }
+
+.status-banner{
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  font-size:14px;
+  font-weight:700;
+  line-height:1.4;
+}
+.status-banner.warning{
+  background:#fef3c7;
+  border-color:#f59e0b;
+  color:#92400e;
+}
+.status-banner.info{
+  background:#e0f2fe;
+  border-color:#38bdf8;
+  color:#0c4a6e;
+}
+.status-banner.success{
+  background:#dcfce7;
+  border-color:#22c55e;
+  color:#166534;
+}
+.select-help{
+  margin-top:6px;
+  font-size:11px;
+  color:var(--muted);
+}
+
+.print-report{
+  display:none;
+  background:white;
+  color:#111827;
+  margin-top:18px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:22px;
+  box-shadow:var(--shadow);
+}
+.report-header,.classic-header{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  border-bottom:2px solid #e2e8f0;
+  padding-bottom:10px;
+  margin-bottom:10px;
+}
+.report-logo,.classic-logo{
+  width:78px;
+  height:auto;
+  object-fit:contain;
+  flex-shrink:0;
+}
+.report-header h1,.classic-header h1{
+  font-size:1.8rem;
+  margin-bottom:6px;
+  line-height:1.05;
+}
+
+.report-header-copy-print{
+  min-width:0;
+  flex:1 1 auto;
+}
+.report-header-copy-print p{
+  margin:1px 0;
+}
+.report-institution-name{
+  font-weight:800;
+  color:#0f3d40;
+}
+.print-footer{
+  display:none;
+}
+.report-patient{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:4px 8px;
+  margin-bottom:8px;
+  font-size:10px;
+  line-height:1.15;
+}
+.report-patient div{
+  padding:4px 0;
+  border-bottom:1px dashed #cbd5e1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.report-bullseye-row{
+  display:grid;
+  grid-template-columns:240px 1fr;
+  gap:12px;
+  align-items:start;
+  margin:12px 0;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.report-bullseye-box{
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:12px;
+  background:var(--soft);
+}
+.report-bullseye-box h3,
+.report-bullseye-text h3{
+  margin:0 0 8px 0;
+}
+.report-bullseye-box svg{
+  width:100%;
+  max-width:210px;
+  display:block;
+  margin:0 auto;
+}
+.report-description-block{
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.report-bullseye-text{
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:12px;
+  background:var(--soft);
+  min-height:160px;
+}
+.report-section-block{
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.report-section-block h2{
+  margin-bottom:6px;
+  break-after:avoid;
+  page-break-after:avoid;
+}
+.report-text{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px;
+  line-height:1.55;
+  margin-bottom:12px;
+  background:white;
+  font-size:12px;
+  break-before:avoid;
+  page-break-before:avoid;
+}
+.report-conclusion{
+  font-weight:700;
+  break-after:avoid;
+  page-break-after:avoid;
+  margin-bottom:8px;
+}
+.conclusion-signature-block{
+  break-inside:avoid;
+  page-break-inside:avoid;
+  margin-top:10px;
+}
+.signature-box,.report-conclusion,.report-text,.table-section,.table-report{
+  orphans:3;
+  widows:3;
+}
+.signature-box{
+  margin-top:6px;
+  text-align:right;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.report-signature{
+  width:145px;
+  height:auto;
+  object-fit:contain;
+  display:block;
+  margin-left:auto;
+  margin-bottom:6px;
+}
+.signature-line{
+  width:220px;
+  border-top:1px solid #334155;
+  margin-left:auto;
+  margin-bottom:6px;
+}
+.signature-box p{
+  margin:2px 0;
+  font-size:11px;
+  color:#334155;
+  text-align:right;
+  line-height:1.2;
+}
+.table-section{
+  margin-bottom:12px;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.table-section-title{
+  margin:0 0 6px 0;
+  font-size:15px;
+  font-weight:800;
+  color:#0f172a;
+  break-after:avoid;
+  page-break-after:avoid;
+}
+.table-report{
+  width:100%;
+  border-collapse:collapse;
+  margin-bottom:8px;
+  font-size:11px;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.table-report th,.table-report td{
+  border:1px solid var(--border-strong);
+  padding:3px 5px;
+  vertical-align:top;
+}
+.table-report th{
+  background:#e2e8f0;
+  text-align:left;
+}
+
+.summary-print{
+  display:none;
+  background:white;
+  color:#111827;
+  margin-top:18px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  max-width:180mm;
+}
+.summary-header{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  border-bottom:2px solid #e2e8f0;
+  padding-bottom:8px;
+  margin-bottom:10px;
+}
+.summary-header img{
+  width:62px;
+  height:auto;
+  object-fit:contain;
+  flex-shrink:0;
+}
+.summary-header h1{
+  font-size:1.15rem;
+  line-height:1.1;
+  margin-bottom:4px;
+}
+.summary-header p{
+  margin:1px 0;
+  font-size:11px;
+}
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:4px 10px;
+  margin-bottom:10px;
+  font-size:11px;
+}
+.summary-grid div{
+  padding:3px 0;
+  border-bottom:1px dashed #cbd5e1;
+}
+.summary-table{
+  width:100%;
+  border-collapse:collapse;
+  margin:8px 0 10px 0;
+  font-size:10px;
+}
+.summary-table th,.summary-table td{
+  border:1px solid var(--border-strong);
+  padding:4px 5px;
+  vertical-align:top;
+}
+.summary-table th{
+  background:#e2e8f0;
+  text-align:left;
+}
+.summary-block{
+  margin-top:8px;
+}
+.summary-block h2{
+  margin:0 0 6px 0;
+  font-size:13px;
+}
+.summary-signature{
+  margin-top:10px;
+  text-align:right;
+}
+.summary-signature img{
+  width:120px;
+  height:auto;
+  object-fit:contain;
+  display:block;
+  margin-left:auto;
+  margin-bottom:4px;
+}
+.summary-signature .signature-line{
+  width:200px;
+}
+
+@media (max-width: 1200px){
+  .segment-views-grid{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 860px){
+  .segment-views-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px){
+  .segment-views-grid{ grid-template-columns:1fr; }
+  .segment-view-card{ min-height:190px; }
+  .segment-view-card.segment-view-tall{ min-height:230px; }
+}
+
+@media print {
+  @page { size:A4; margin:10mm; }
+
+  html,body{
+    background:white !important;
+    padding:0 !important;
+    margin:0 !important;
+  }
+
+  body *{ visibility:hidden; }
+  .no-print,.toast{ display:none !important; }
+
+  #print-report-moderno,#print-report-clasico,#print-report-resumen-os{
+    display:none !important;
+    visibility:hidden !important;
+  }
+
+  body.print-moderno #print-report-moderno,
+  body.print-clasico #print-report-clasico,
+  body.print-resumen-os #print-report-resumen-os{
+    display:block !important;
+    visibility:visible !important;
+    width:100% !important;
+    border:0 !important;
+    box-shadow:none !important;
+    border-radius:0 !important;
+    padding:0 !important;
+    margin:0 !important;
+    background:white !important;
+  }
+
+  body.print-moderno #print-report-moderno *,
+  body.print-clasico #print-report-clasico *,
+  body.print-resumen-os #print-report-resumen-os *{
+    visibility:visible !important;
+  }
+
+  .report-header h1,.classic-header h1{ font-size:18pt; }
+  .report-patient{ font-size:10pt; }
+  .table-report{ font-size:9pt; }
+  .report-text{ font-size:10pt; }
+
+  .report-bullseye-row,.table-section,.conclusion-signature-block,.signature-box,.summary-block,.summary-signature{
+    break-inside:avoid;
+    page-break-inside:avoid;
+  }
+
+  body.print-resumen-os #print-report-resumen-os{
+    box-shadow:none !important;
+    border:0 !important;
+    border-radius:0 !important;
+    padding:0 !important;
+    margin:0 !important;
+    max-width:none !important;
+  }
+}
+
+@media (max-width: 1200px){
+  .layout{ grid-template-columns:1fr; }
+  .report-patient{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+
+@media (max-width: 720px){
+  body{ padding:10px; }
+  .app-header{ grid-template-columns:1fr; }
+  .form-grid,.calc-grid,.summary-grid,.annex-import-grid{ grid-template-columns:1fr; }
+  .field-span-2{ grid-column:span 1; }
+  .report-bullseye-row{ grid-template-columns:1fr; }
+  .report-patient{ grid-template-columns:1fr; }
+  .actions{ width:100%; }
+  .actions button{ flex:1 1 auto; }
+}
+
+.annex-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+.annex-actions input[type="file"]{
+  flex:1 1 320px;
+  max-width:100%;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px 12px;
+  background:var(--soft);
+  font-size:13px;
+}
+.annex-actions button{
+  border:0;
+  border-radius:14px;
+  padding:10px 14px;
+  background:#e2e8f0;
+  color:var(--text);
+  font-weight:700;
+  cursor:pointer;
+}
+.annex-actions button:disabled{
+  opacity:0.55;
+  cursor:not-allowed;
+}
+.annex-import-summary{
+  margin-top:12px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--soft);
+  padding:12px 14px;
+}
+.annex-import-summary h3{
+  margin:0 0 8px 0;
+  font-size:14px;
+}
+.annex-import-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.annex-import-list{
+  margin:0;
+  padding-left:18px;
+  font-size:13px;
+  line-height:1.45;
+}
+.annex-import-list li + li{
+  margin-top:4px;
+}
+.annex-import-muted{
+  color:var(--muted);
+  font-size:12px;
+}
+.annex-meta{
+  margin:10px 0 8px 0;
+  font-size:12px;
+  color:var(--muted);
+}
+.annex-preview-grid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:flex-start;
+}
+.annex-thumb-card{
+  width:180px;
+  flex:0 0 180px;
+  display:block;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:10px;
+  background:var(--soft);
+  box-shadow:none;
+}
+.annex-thumb-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+  font-size:12px;
+  font-weight:700;
+  color:#334155;
+}
+.annex-thumb-check{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  white-space:nowrap;
+  font-size:11px;
+}
+.annex-thumb-card img{
+  width:100%;
+  height:220px;
+  object-fit:contain;
+  display:block;
+  border-radius:10px;
+  background:white;
+  border:1px solid #dbe4ee;
+}
+.annex-print-pages{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+}
+.annex-print-page{
+  margin:0;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px;
+  background:white;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.annex-print-page img{
+  width:100%;
+  height:auto;
+  display:block;
+}
+.annex-print-page figcaption{
+  margin-top:6px;
+  font-size:11px;
+  color:var(--muted);
+  text-align:center;
+}
+
+@media (max-width: 860px){
+  .saved-panel-head{ flex-direction:column; }
+  .saved-panel-close{ width:100%; }
+}
+
+@media (max-width: 720px){
+  .annex-thumb-card{
+    width:100%;
+    flex:1 1 100%;
+  }
+  .annex-thumb-card img{
+    height:180px;
+  }
+}
+
+
+/* FIX 3: forzar salto de página antes del anexo solo en impresión */
+@media print {
+  #printAnexoWrap,
+  #summaryAnexoWrap {
+    break-before: page;
+    page-break-before: always;
+    margin-top: 0 !important;
+  }
+}
+
+
+.field {
+  position: relative;
+}
+
+.field-indicator {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.field-ok .field-indicator {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.field-missing .field-indicator {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.field-missing input,
+.field-missing select,
+.field-missing textarea {
+  border-color: #fca5a5;
+  box-shadow: inset 0 0 0 1px rgba(185, 28, 28, 0.08);
+}
+
+.field-ok input,
+.field-ok select,
+.field-ok textarea {
+  border-color: #86efac;
+  box-shadow: inset 0 0 0 1px rgba(22, 101, 52, 0.06);
+}
+
+.clinical-help-panel{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:rgba(15,23,42,.45);
+  backdrop-filter:blur(4px);
+}
+.clinical-help-box{
+  width:min(1120px,96vw);
+  max-height:88vh;
+  overflow:auto;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  box-shadow:0 24px 80px rgba(15,23,42,.28);
+  padding:20px;
+}
+.clinical-help-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  border-bottom:1px solid var(--border);
+  padding-bottom:14px;
+  margin-bottom:14px;
+}
+.clinical-help-head h2{ margin:0 0 6px; }
+.clinical-help-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:16px;
+}
+.clinical-help-tab{
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:9px 13px;
+  background:#f8fafc;
+  color:#334155;
+  font-weight:700;
+  cursor:pointer;
+}
+.clinical-help-tab.active{
+  background:#0f172a;
+  color:#fff;
+  border-color:#0f172a;
+}
+.help-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.help-card{
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:14px;
+  background:#f8fafc;
+}
+.help-card h3{
+  margin:0 0 8px;
+  font-size:1rem;
+}
+.help-card p{
+  margin:6px 0;
+  color:#334155;
+  line-height:1.35;
+}
+@media (max-width:900px){
+  .help-grid{ grid-template-columns:1fr; }
+  .clinical-help-box{ max-height:92vh; }
+}
+
+@media (max-width: 880px){
+  .saved-filters{ grid-template-columns:1fr; }
+  .saved-study-head{ flex-direction:column; }
+  .saved-status-actions{ margin-left:0; }
+}
+
+.annex-actions-compact{ align-items:center; }
+.annex-actions-compact button{ min-width:220px; }
+
+
+/* === V25 premium polish + dark mode contrast fixes === */
+.app-header-copy,
+.toolbar-group,
+.card,
+.preview-block,
+.saved-studies-panel,
+.clinical-help-box,
+.segment-board-card,
+.bullseye-wrap,
+.bullseye-wrap-ref,
+.segment-reference-list,
+.annex-import-summary,
+.annex-thumb-card,
+.report-summary-box,
+.folder-status {
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.card,
+.preview-block,
+.saved-studies-panel,
+.clinical-help-box,
+.segment-board-card,
+.bullseye-wrap,
+.bullseye-wrap-ref,
+.segment-reference-list,
+.annex-import-summary,
+.annex-thumb-card,
+.report-summary-box,
+.folder-status {
+  border-radius: 22px;
+}
+
+.section h2,
+.card h2 {
+  letter-spacing: -0.02em;
+}
+
+.annex-actions button {
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: linear-gradient(180deg, #f8fbff 0%, #e8eff7 100%);
+  color: var(--title);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+.annex-actions button:hover:not(:disabled){
+  transform: translateY(-1px);
+  filter: brightness(1.01);
+}
+.annex-actions button:disabled{
+  opacity: 1;
+  background: linear-gradient(180deg, #eef2f7 0%, #dde5ef 100%);
+  color: #7b8ca0;
+  border-color: rgba(148, 163, 184, 0.35);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.status-banner{
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+}
+
+body.dark-mode .app-header-copy,
+body.dark-mode .toolbar-group,
+body.dark-mode .card,
+body.dark-mode .preview-block,
+body.dark-mode .saved-studies-panel,
+body.dark-mode .clinical-help-box,
+body.dark-mode .segment-board-card,
+body.dark-mode .bullseye-wrap,
+body.dark-mode .bullseye-wrap-ref,
+body.dark-mode .segment-reference-list,
+body.dark-mode .annex-import-summary,
+body.dark-mode .annex-thumb-card,
+body.dark-mode .report-summary-box,
+body.dark-mode .folder-status {
+  box-shadow: 0 16px 36px rgba(2, 8, 23, 0.34);
+}
+
+body.dark-mode .annex-actions button {
+  background: linear-gradient(180deg, #1c2a3a 0%, #172230 100%);
+  color: #edf4ff;
+  border: 1px solid #304357;
+  box-shadow: 0 10px 24px rgba(2, 8, 23, 0.28);
+}
+body.dark-mode .annex-actions button:disabled {
+  opacity: 1;
+  background: linear-gradient(180deg, #243243 0%, #1d2938 100%);
+  color: #9fb2c7;
+  border-color: #34485e;
+  box-shadow: none;
+}
+
+body.dark-mode .status-banner.info {
+  background: linear-gradient(180deg, rgba(14, 52, 74, 0.9) 0%, rgba(14, 41, 60, 0.92) 100%);
+  border-color: #38bdf8;
+  color: #d8f2ff;
+}
+body.dark-mode .status-banner.success {
+  background: linear-gradient(180deg, rgba(15, 66, 46, 0.9) 0%, rgba(13, 53, 38, 0.92) 100%);
+  border-color: #34d399;
+  color: #d9ffee;
+}
+body.dark-mode .status-banner.warning {
+  background: linear-gradient(180deg, rgba(79, 49, 14, 0.92) 0%, rgba(64, 39, 11, 0.94) 100%);
+  border-color: #fbbf24;
+  color: #fff1c7;
+}
+
+body.dark-mode .annex-import-list li,
+body.dark-mode .annex-import-summary h3,
+body.dark-mode .annex-preview-grid,
+body.dark-mode .annex-preview-grid strong,
+body.dark-mode .annex-meta strong,
+body.dark-mode #annexMeta,
+body.dark-mode #annexImportSummary,
+body.dark-mode #annexStatus,
+body.dark-mode #annexImportStatus {
+  color: var(--text);
+}
+
+body.dark-mode .annex-import-muted {
+  color: #b5c6d8;
+}
+
+body.dark-mode .annex-thumb-top,
+body.dark-mode .annex-thumb-card small,
+body.dark-mode .annex-print-page figcaption {
+  color: #d8e6f3;
+}
+
+body.dark-mode .annex-thumb-check {
+  background: #152131;
+  border: 1px solid #304357;
+  color: #e8f0fb;
+}
+
+body.dark-mode .section,
+body.dark-mode .card {
+  background: linear-gradient(180deg, rgba(15,23,36,0.92) 0%, rgba(15,24,37,0.98) 100%);
+}
+
+
+/* === V26 report summary: flat / sober for preview + PDF === */
+.print-report .report-summary-box{
+  background:#f8fafc !important;
+  border:1px solid #cbd5e1 !important;
+  border-radius:12px !important;
+  box-shadow:none !important;
+  padding:12px 14px !important;
+  margin:12px 0 14px !important;
+}
+
+.print-report .report-summary-box h3{
+  color:#334155 !important;
+  font-size:13px !important;
+  margin:0 0 10px 0 !important;
+}
+
+.print-report .print-badges{
+  gap:8px;
+  margin:0;
+}
+
+.print-report .print-badges span{
+  border:1px solid #cbd5e1;
+  box-shadow:none !important;
+  font-weight:700;
+}
+
+body.dark-mode .print-report .report-summary-box{
+  background:#f8fafc !important;
+  border-color:#cbd5e1 !important;
+}
+
+body.dark-mode .print-report .report-summary-box h3,
+body.dark-mode .print-report .print-badges span{
+  color:inherit;
+}
+
+
+/* === V27 report bullseye: always light and legible === */
+.print-report .report-bullseye-box,
+.print-report .report-bullseye-text{
+  background:#ffffff !important;
+  border:1px solid #cbd5e1 !important;
+  box-shadow:none !important;
+  color:#111827 !important;
+}
+
+.print-report .report-bullseye-box h3,
+.print-report .report-bullseye-text h3,
+.print-report #printSegmentosTexto,
+.print-report #printSegmentosTexto *{
+  color:#111827 !important;
+}
+
+body.dark-mode .print-report .report-bullseye-box,
+body.dark-mode .print-report .report-bullseye-text{
+  background:#ffffff !important;
+  border-color:#cbd5e1 !important;
+  color:#111827 !important;
+}
+
+
+/* === V28: robust PDF pagination for Windows/Chrome/Edge === */
+.print-report h2,
+.print-report h3,
+.table-section-title {
+  break-after: avoid !important;
+  page-break-after: avoid !important;
+}
+
+.measurements-print-block,
+.segments-print-block,
+.report-description-block,
+.report-section-block {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}
+
+.measurements-print-block h2 {
+  margin-bottom: 8px !important;
+}
+
+.measurements-print-block #printTablaMediciones {
+  break-before: avoid !important;
+  page-break-before: avoid !important;
+}
+
+.segments-print-block {
+  margin-top: 10px !important;
+}
+
+.report-bullseye-row {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}
+
+.report-bullseye-box,
+.report-bullseye-text {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}
+
+.report-bullseye-box svg,
+#printBull17 {
+  display: block !important;
+  visibility: visible !important;
+  overflow: visible !important;
+  width: 100% !important;
+  max-width: 220px !important;
+  height: auto !important;
+  min-height: 210px !important;
+  print-color-adjust: exact !important;
+  -webkit-print-color-adjust: exact !important;
+}
+
+@media print {
+  .print-report h2,
+  .print-report h3,
+  .table-section-title {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  .measurements-print-block {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-bottom: 8px !important;
+  }
+
+  .measurements-print-block h2 {
+    margin: 8px 0 6px 0 !important;
+  }
+
+  .measurements-print-block #printTablaMediciones {
+    break-before: avoid !important;
+    page-break-before: avoid !important;
+  }
+
+  .table-section {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .table-report {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .segments-print-block {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-top: 10px !important;
+  }
+
+  .report-bullseye-row {
+    display: grid !important;
+    grid-template-columns: 230px 1fr !important;
+    gap: 10px !important;
+    align-items: start !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin: 8px 0 10px !important;
+  }
+
+  .report-bullseye-box,
+  .report-bullseye-text {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .report-bullseye-box svg,
+  #printBull17 {
+    display: block !important;
+    visibility: visible !important;
+    overflow: visible !important;
+    width: 210px !important;
+    max-width: 210px !important;
+    height: 210px !important;
+    min-height: 210px !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  #printSegmentosTexto,
+  #printSegmentosTexto * {
+    color: #111827 !important;
+    visibility: visible !important;
+  }
+
+  body.dark-mode .segment-board-title,
+  body.dark-mode .segment-board-heading,
+  body.dark-mode .segment-ref-number,
+  body.dark-mode .segment-ref-name {
+    color: #e8f0fb !important;
+  }
+
+  body.dark-mode .segment-reference-list {
+    background: #122033 !important;
+    border-color: #31465f !important;
+  }
+
+  body.dark-mode .segment-ref-item {
+    border-color: rgba(148, 163, 184, 0.22) !important;
+  }
+}
+
+/* V27b dark-mode fix also outside print */
+body.dark-mode .segment-board-title,
+body.dark-mode .segment-board-heading,
+body.dark-mode .segment-ref-number,
+body.dark-mode .segment-ref-name {
+  color: #e8f0fb !important;
+}
+body.dark-mode .segment-reference-list {
+  background: #122033 !important;
+  border-color: #31465f !important;
+}
+body.dark-mode .segment-ref-item {
+  border-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+
+/* === V29 print fix: keep Mediciones attached to first table and harden bullseye render === */
+.table-caption{
+  caption-side: top;
+  text-align: left;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--title);
+  padding: 0 0 8px 0;
+}
+.table-report thead{ display: table-header-group; }
+.measurements-heading-group{ break-inside: avoid; page-break-inside: avoid; }
+@media print {
+  .measurements-heading-group{
+    display: inline-block !important;
+    width: 100% !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  .measurements-heading-group h2{
+    margin: 8px 0 6px 0 !important;
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+  .first-measurement-table,
+  .first-measurement-table .table-report,
+  .first-measurement-table .table-caption{
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  .table-caption{
+    font-size: 11pt !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    padding: 0 0 6px 0 !important;
+  }
+  .table-report thead{ display: table-header-group !important; }
+  .table-report tbody,
+  .table-report tr,
+  .table-report td,
+  .table-report th{ break-inside: avoid-page; }
+  .print-report #printBull17,
+  .print-report #printBull17 *{
+    visibility: visible !important;
+    opacity: 1 !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+  .print-report #printBull17 .segment-number{ fill: #0f172a !important; }
+  .print-report #printBull17 .segment-outline,
+  .print-report #printBull17 .segment-shape{ stroke: #334155 !important; }
+  .print-report #printBull17 .segment-chamber{
+    fill: #ffffff !important;
+    stroke: #94a3b8 !important;
+  }
+  .print-report #printSegmentosTexto,
+  .print-report #printSegmentosTexto *{
+    color: #111827 !important;
+    opacity: 1 !important;
+  }
+}
+
+
+/* === V30 print layout: first page = header + summary + Eco bidimensional; page 2 starts with Doppler === */
+@media print {
+  @page { size: A4; margin: 8mm; }
+
+  .print-report{
+    font-size: 8.2pt !important;
+    line-height: 1.22 !important;
+  }
+
+  .report-header{
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    margin-bottom: 7px !important;
+    padding-bottom: 7px !important;
+    border-bottom: 1px solid #d8e1ea !important;
+  }
+  .report-logo{
+    width: 58px !important;
+    height: 58px !important;
+    object-fit: contain !important;
+  }
+  .report-header h1{
+    font-size: 15pt !important;
+    line-height: 1.08 !important;
+    margin: 0 0 3px 0 !important;
+  }
+  .report-header p{
+    font-size: 8.6pt !important;
+    line-height: 1.15 !important;
+    margin: 0 0 2px 0 !important;
+  }
+
+  .report-patient{
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0 12px !important;
+    font-size: 8.2pt !important;
+    margin: 0 0 7px 0 !important;
+  }
+  .report-patient div{
+    padding: 2px 0 3px 0 !important;
+    border-bottom: 1px dashed #cbd5e1 !important;
+    line-height: 1.15 !important;
+  }
+
+  .print-report .report-summary-box{
+    padding: 7px 9px !important;
+    margin: 6px 0 8px !important;
+    border-radius: 8px !important;
+  }
+  .print-report .report-summary-box h3{
+    font-size: 9pt !important;
+    margin: 0 0 5px 0 !important;
+  }
+  .print-report .print-badges{
+    gap: 4px !important;
+    row-gap: 4px !important;
+  }
+  .print-report .print-badges span{
+    padding: 3px 6px !important;
+    font-size: 7.4pt !important;
+    line-height: 1.05 !important;
+    border-radius: 999px !important;
+    white-space: nowrap !important;
+  }
+
+  .measurements-print-block,
+  .measurements-print-block #printTablaMediciones{
+    display: block !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    break-before: auto !important;
+    page-break-before: auto !important;
+    margin-top: 0 !important;
+  }
+  .measurements-heading-group{
+    display: block !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-top: 0 !important;
+  }
+  .measurements-heading-group h2{
+    font-size: 15pt !important;
+    margin: 5px 0 4px !important;
+    line-height: 1.08 !important;
+  }
+  .table-section{
+    margin: 0 0 7px 0 !important;
+  }
+  .first-measurement-table{
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  .doppler-measurement-table{
+    break-before: page !important;
+    page-break-before: always !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    margin-top: 0 !important;
+  }
+  .table-caption{
+    font-size: 9.5pt !important;
+    padding: 0 0 3px 0 !important;
+    margin: 0 !important;
+  }
+  .table-report{
+    font-size: 7.8pt !important;
+    line-height: 1.08 !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  .table-report th,
+  .table-report td{
+    padding: 2px 4px !important;
+    line-height: 1.08 !important;
+  }
+  .table-report th{
+    font-size: 7.8pt !important;
+  }
+
+  .segments-print-block{
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-top: 7px !important;
+  }
+}
+
+
+/* === V32 print polish: no mini Doppler box, cleaner segments, better page balance === */
+@media print {
+  .report-summary-box{
+    padding: 10px 12px !important;
+    margin: 8px 0 10px !important;
+  }
+  .print-report .report-summary-box h3{
+    font-size: 9pt !important;
+    margin: 0 0 5px 0 !important;
+  }
+  .print-report .print-badges{
+    gap: 4px !important;
+    row-gap: 4px !important;
+  }
+  .print-report .print-badges span{
+    padding: 3px 6px !important;
+    font-size: 7.35pt !important;
+    line-height: 1.05 !important;
+    border-radius: 999px !important;
+    white-space: nowrap !important;
+  }
+
+  .measurements-heading-group h2{
+    font-size: 15pt !important;
+    margin: 6px 0 4px !important;
+    line-height: 1.06 !important;
+  }
+  .table-caption{
+    font-size: 9.5pt !important;
+    padding: 0 0 3px 0 !important;
+    margin: 0 !important;
+  }
+  .table-report{
+    font-size: 8.05pt !important;
+    line-height: 1.12 !important;
+  }
+  .table-report th,
+  .table-report td{
+    padding: 2.4px 4px !important;
+    line-height: 1.12 !important;
+  }
+
+  .doppler-measurement-table{
+    break-before: page !important;
+    page-break-before: always !important;
+    margin-top: 0 !important;
+  }
+
+  .segments-print-block{
+    margin-top: 6px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  .report-bullseye-row{
+    display: block !important;
+    margin: 6px 0 8px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  .report-bullseye-box{
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    margin: 0 0 6px 0 !important;
+  }
+  .report-bullseye-box h3,
+  .report-bullseye-text h3{
+    font-size: 11pt !important;
+    margin: 0 0 4px 0 !important;
+    line-height: 1.05 !important;
+  }
+  .report-bullseye-box svg{
+    max-width: 170px !important;
+    margin: 0 !important;
+  }
+  .report-bullseye-text{
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+  }
+  #printSegmentosTexto,
+  #printSegmentosTexto *{
+    font-size: 8.2pt !important;
+    line-height: 1.25 !important;
+  }
+
+  .report-section-block h2,
+  .conclusion-signature-block h2{
+    font-size: 14pt !important;
+    margin: 5px 0 4px !important;
+    line-height: 1.04 !important;
+  }
+  .report-text{
+    font-size: 8pt !important;
+    line-height: 1.28 !important;
+    padding: 7px 8px !important;
+    margin-bottom: 6px !important;
+    border-radius: 10px !important;
+  }
+  .report-conclusion{
+    margin-bottom: 5px !important;
+  }
+  .conclusion-signature-block{
+    margin-top: 6px !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+  .signature-box{
+    margin-top: 4px !important;
+    padding-top: 0 !important;
+  }
+  .report-signature{
+    width: 112px !important;
+    margin-bottom: 3px !important;
+  }
+  .signature-line{
+    width: 165px !important;
+    margin: 4px 0 3px auto !important;
+  }
+  .signature-box p{
+    font-size: 7.6pt !important;
+    line-height: 1.12 !important;
+    margin: 0 !important;
+  }
+}
+
+
+/* === V35 print refinement: stronger header, page footer and tighter narrative/signature === */
+@media print {
+  @page { size: A4; margin: 8mm 8mm 14mm 8mm; }
+
+  .print-report{
+    font-size: 8pt !important;
+    line-height: 1.18 !important;
+    padding-bottom: 11mm !important;
+  }
+
+  .report-header,
+  .summary-header{
+    gap: 10px !important;
+    margin-bottom: 8px !important;
+    padding-bottom: 7px !important;
+    align-items: flex-start !important;
+  }
+
+  .report-logo{
+    width: 70px !important;
+    height: auto !important;
+  }
+
+  .summary-header .report-logo,
+  .summary-header img{
+    width: 70px !important;
+  }
+
+  .report-header-copy-print h1,
+  .summary-header .report-header-copy-print h1,
+  .report-header h1,
+  .summary-header h1{
+    font-size: 15.5pt !important;
+    line-height: 1.03 !important;
+    letter-spacing: -0.2px !important;
+    margin: 0 0 4px 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .report-header-copy-print p,
+  .summary-header .report-header-copy-print p,
+  .report-header p,
+  .summary-header p{
+    font-size: 8.15pt !important;
+    line-height: 1.12 !important;
+    margin: 1px 0 !important;
+  }
+
+  .report-patient{
+    margin-bottom: 7px !important;
+  }
+
+  .segments-print-block{
+    margin-top: 4px !important;
+  }
+
+  .report-bullseye-row{
+    margin: 4px 0 6px !important;
+  }
+
+  .report-bullseye-box h3,
+  .report-bullseye-text h3{
+    margin: 0 0 3px 0 !important;
+    font-size: 10.4pt !important;
+  }
+
+  .report-bullseye-box svg,
+  #printBull17{
+    max-width: 160px !important;
+    min-height: 0 !important;
+  }
+
+  .report-section-block h2,
+  .conclusion-signature-block h2,
+  .summary-block h2{
+    font-size: 13pt !important;
+    line-height: 1.04 !important;
+    margin: 4px 0 3px !important;
+  }
+
+  .report-text,
+  .summary-report .report-text{
+    font-size: 7.7pt !important;
+    line-height: 1.2 !important;
+    padding: 6px 7px !important;
+    margin-bottom: 4px !important;
+    border-radius: 9px !important;
+  }
+
+  .report-conclusion{
+    margin-bottom: 4px !important;
+  }
+
+  .conclusion-signature-block{
+    margin-top: 4px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .signature-box,
+  .summary-signature{
+    margin-top: 2px !important;
+    padding-top: 0 !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .report-signature{
+    width: 102px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .signature-line{
+    width: 150px !important;
+    margin: 3px 0 2px auto !important;
+  }
+
+  .signature-box p,
+  .summary-signature p{
+    font-size: 7.35pt !important;
+    line-height: 1.08 !important;
+    margin: 0 !important;
+  }
+
+  body.print-moderno #print-report-moderno .print-footer,
+  body.print-resumen-os #print-report-resumen-os .print-footer{
+    display: flex !important;
+    position: fixed !important;
+    left: 8mm !important;
+    right: 8mm !important;
+    bottom: 4mm !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    font-size: 7.3pt !important;
+    line-height: 1 !important;
+    color: #64748b !important;
+    border-top: 1px solid #dbe3ec !important;
+    padding-top: 2.5mm !important;
+    background: white !important;
+    z-index: 9999 !important;
+  }
+
+  body.print-moderno #print-report-moderno .print-footer *,
+  body.print-resumen-os #print-report-resumen-os .print-footer *{
+    visibility: visible !important;
+  }
+
+  .print-footer-left{
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+  }
+
+  .print-footer-right::after{
+    content: counter(page) " / " counter(pages);
+    font-weight: 700 !important;
+  }
+}
+
+
+/* === V35 print refinement: page 1 bullseye, page 2 doppler, PDF footer via jsPDF === */
+@media print {
+  @page { size: A4; margin: 8mm 8mm 14mm 8mm; }
+
+  .print-report,
+  .summary-report {
+    padding-bottom: 16mm !important;
+  }
+
+  .report-header,
+  .summary-header {
+    gap: 12px !important;
+  }
+
+  .report-logo,
+  .summary-header .report-logo,
+  .summary-header img {
+    width: 82px !important;
+    height: auto !important;
+  }
+
+  .report-header-copy-print h1,
+  .summary-header .report-header-copy-print h1,
+  .report-header h1,
+  .summary-header h1 {
+    font-size: 15.2pt !important;
+    white-space: nowrap !important;
+  }
+
+  .measurements-print-block {
+    margin-bottom: 2px !important;
+  }
+
+  .segments-print-block {
+    margin-top: 2px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .report-bullseye-row {
+    margin: 2px 0 4px !important;
+    align-items: stretch !important;
+  }
+
+  .report-bullseye-box,
+  .report-bullseye-text {
+    padding: 7px 8px !important;
+  }
+
+  .report-bullseye-box svg,
+  #printBull17 {
+    max-width: 175px !important;
+  }
+
+  .doppler-print-block {
+    break-before: page !important;
+    page-break-before: always !important;
+    margin-top: 0 !important;
+  }
+
+  .doppler-print-block .table-section {
+    margin-top: 0 !important;
+  }
+
+  .report-section-block h2,
+  .conclusion-signature-block h2,
+  .summary-block h2 {
+    margin-top: 3px !important;
+  }
+
+  .report-text,
+  .summary-report .report-text {
+    font-size: 7.55pt !important;
+    line-height: 1.18 !important;
+  }
+
+  .conclusion-signature-block,
+  .signature-box,
+  .summary-signature {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .signature-box {
+    padding-top: 1px !important;
+  }
+
+  .report-signature {
+    width: 96px !important;
+  }
+
+  body.print-moderno #print-report-moderno .print-footer,
+  body.print-resumen-os #print-report-resumen-os .print-footer {
+    display: none !important;
+  }
+}
+
+/* === V35b: segmentación y motilidad lado a lado + exportación PDF unificada === */
+.segments-print-block .report-bullseye-row{
+  display:grid !important;
+  grid-template-columns:minmax(230px, 280px) minmax(280px, 1fr) !important;
+  gap:12px !important;
+  align-items:stretch !important;
+}
+.segments-print-block .report-bullseye-box,
+.segments-print-block .report-bullseye-text{
+  min-height:0 !important;
+  box-sizing:border-box !important;
+}
+.segments-print-block .report-bullseye-box svg,
+.segments-print-block #printBull17{
+  width:100% !important;
+  max-width:230px !important;
+  height:auto !important;
+  min-height:0 !important;
+  display:block !important;
+  margin:0 auto !important;
+  overflow:visible !important;
+}
+
+@media print{
+  .segments-print-block{
+    margin-top:4px !important;
+    break-inside:avoid !important;
+    page-break-inside:avoid !important;
+  }
+  .segments-print-block .report-bullseye-row{
+    display:grid !important;
+    grid-template-columns:215px 1fr !important;
+    gap:10px !important;
+    align-items:stretch !important;
+    margin:4px 0 6px !important;
+    break-inside:avoid !important;
+    page-break-inside:avoid !important;
+  }
+  .segments-print-block .report-bullseye-box,
+  .segments-print-block .report-bullseye-text{
+    border:1px solid #cbd5e1 !important;
+    border-radius:12px !important;
+    background:#ffffff !important;
+    color:#0f172a !important;
+    padding:7px 8px !important;
+    box-shadow:none !important;
+    break-inside:avoid !important;
+    page-break-inside:avoid !important;
+  }
+  .segments-print-block .report-bullseye-box h3,
+  .segments-print-block .report-bullseye-text h3{
+    font-size:10pt !important;
+    line-height:1.08 !important;
+    margin:0 0 5px 0 !important;
+    color:#0f172a !important;
+  }
+  .segments-print-block .report-bullseye-box svg,
+  .segments-print-block #printBull17{
+    width:100% !important;
+    max-width:185px !important;
+    min-height:0 !important;
+    height:auto !important;
+    display:block !important;
+    margin:0 auto !important;
+    overflow:visible !important;
+    print-color-adjust:exact !important;
+    -webkit-print-color-adjust:exact !important;
+  }
+  .segments-print-block #printSegmentosTexto,
+  .segments-print-block #printSegmentosTexto *{
+    font-size:8.8pt !important;
+    line-height:1.3 !important;
+    color:#111827 !important;
+  }
+}
+
+@media (max-width: 720px){
+  .segments-print-block .report-bullseye-row{
+    grid-template-columns:1fr !important;
+  }
+}
+
+/* === V35c final print balance === */
+@media print {
+  @page { size: A4; margin: 8mm 8mm 14mm 8mm; }
+
+  .print-report,
+  .summary-report {
+    padding-bottom: 16mm !important;
+  }
+
+  .report-header,
+  .summary-header {
+    gap: 10px !important;
+    margin-bottom: 6px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .report-logo,
+  .summary-header .report-logo,
+  .summary-header img {
+    width: 72px !important;
+    height: auto !important;
+  }
+
+  .report-header-copy-print h1,
+  .summary-header .report-header-copy-print h1,
+  .report-header h1,
+  .summary-header h1 {
+    font-size: 14.6pt !important;
+    line-height: 1.02 !important;
+    white-space: nowrap !important;
+    margin-bottom: 3px !important;
+  }
+
+  .report-header-copy-print p,
+  .summary-header .report-header-copy-print p,
+  .report-header p,
+  .summary-header p {
+    font-size: 8pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .report-patient {
+    margin-bottom: 5px !important;
+    font-size: 8pt !important;
+  }
+
+  .report-patient div {
+    padding: 2px 0 !important;
+    line-height: 1.1 !important;
+  }
+
+  .print-report .report-summary-box {
+    padding: 6px 8px !important;
+    margin: 5px 0 6px !important;
+    border-radius: 8px !important;
+  }
+
+  .print-report .report-summary-box h3 {
+    margin-bottom: 4px !important;
+    font-size: 8.8pt !important;
+  }
+
+  .print-report .print-badges {
+    gap: 3px !important;
+    row-gap: 3px !important;
+  }
+
+  .print-report .print-badges span {
+    padding: 2px 6px !important;
+    font-size: 7pt !important;
+    line-height: 1.02 !important;
+  }
+
+  .measurements-heading-group h2 {
+    font-size: 14.2pt !important;
+    margin: 4px 0 3px !important;
+  }
+
+  .table-section {
+    margin: 0 0 5px 0 !important;
+  }
+
+  .table-caption {
+    font-size: 9pt !important;
+    padding-bottom: 2px !important;
+  }
+
+  .table-report {
+    font-size: 7.45pt !important;
+    line-height: 1.04 !important;
+  }
+
+  .table-report th,
+  .table-report td {
+    padding: 1.6px 4px !important;
+    line-height: 1.04 !important;
+  }
+
+  .segments-print-block {
+    margin-top: 4px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .report-bullseye-row {
+    display: grid !important;
+    grid-template-columns: 230px 1fr !important;
+    gap: 10px !important;
+    align-items: start !important;
+    margin: 4px 0 5px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .report-bullseye-box,
+  .report-bullseye-text {
+    border: 1px solid #d5dee7 !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    padding: 8px 10px !important;
+    min-height: 0 !important;
+  }
+
+  .report-bullseye-box h3,
+  .report-bullseye-text h3 {
+    font-size: 10pt !important;
+    margin: 0 0 4px 0 !important;
+    line-height: 1.04 !important;
+  }
+
+  .report-bullseye-box svg,
+  #printBull17,
+  .segments-print-block #printBull17 {
+    width: 165px !important;
+    max-width: 165px !important;
+    height: 165px !important;
+    min-height: 165px !important;
+    display: block !important;
+    margin: 0 auto !important;
+  }
+
+  #printSegmentosTexto,
+  #printSegmentosTexto * {
+    font-size: 8pt !important;
+    line-height: 1.2 !important;
+  }
+
+  .doppler-measurement-table,
+  #printTablaDoppler {
+    break-before: page !important;
+    page-break-before: always !important;
+    margin-top: 0 !important;
+  }
+
+  .report-section-block h2,
+  .conclusion-signature-block h2,
+  .summary-block h2 {
+    font-size: 12.6pt !important;
+    margin: 4px 0 3px !important;
+  }
+
+  .report-text,
+  .summary-report .report-text {
+    font-size: 7.45pt !important;
+    line-height: 1.16 !important;
+    padding: 5px 7px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .conclusion-signature-block {
+    margin-top: 4px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .signature-box,
+  .summary-signature {
+    margin-top: 1px !important;
+    padding-top: 0 !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .report-signature {
+    width: 88px !important;
+    margin-bottom: 1px !important;
+  }
+
+  .signature-line {
+    width: 140px !important;
+    margin: 2px 0 2px auto !important;
+  }
+
+  .signature-box p,
+  .summary-signature p {
+    font-size: 7pt !important;
+    line-height: 1.04 !important;
+  }
+}
+
+
+/* === V36: badge AD + nombre automático en impresión + balance de página 1 === */
+@media print {
+  .print-report .report-summary-box {
+    margin: 5px 0 8px !important;
+  }
+
+  .measurements-heading-group h2 {
+    margin-top: 6px !important;
+  }
+
+  .measurements-print-block {
+    margin-bottom: 5px !important;
+  }
+
+  .segments-print-block {
+    margin-top: 8px !important;
+  }
+
+  .report-bullseye-row {
+    margin: 6px 0 7px !important;
+  }
+
+  .report-bullseye-box,
+  .report-bullseye-text {
+    padding: 9px 11px !important;
+  }
+
+  #printSegmentosTexto,
+  #printSegmentosTexto * {
+    line-height: 1.24 !important;
+  }
+}
+
+/* === V36b: paginación natural y página 1 menos amontonada ===
+   El Doppler deja de arrancar obligado en página nueva. Así se aprovecha
+   el blanco inferior de la página 1 cuando queda espacio disponible. */
+
+#print-report-moderno .report-header{
+  margin-bottom: 12px !important;
+  padding-bottom: 10px !important;
+}
+
+#print-report-moderno .report-patient{
+  margin-bottom: 12px !important;
+  row-gap: 5px !important;
+}
+
+#print-report-moderno .report-patient div{
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+
+#print-report-moderno .report-summary-box{
+  margin: 10px 0 14px !important;
+  padding: 12px 14px !important;
+}
+
+#print-report-moderno .print-badges{
+  gap: 6px !important;
+  row-gap: 6px !important;
+}
+
+#print-report-moderno .print-badges span{
+  padding: 4px 7px !important;
+  line-height: 1.12 !important;
+}
+
+#print-report-moderno .measurements-heading-group h2{
+  margin: 9px 0 6px !important;
+}
+
+#print-report-moderno .table-section{
+  margin-bottom: 8px !important;
+}
+
+#print-report-moderno .table-report{
+  font-size: 11.3px !important;
+  line-height: 1.16 !important;
+}
+
+#print-report-moderno .table-report th,
+#print-report-moderno .table-report td{
+  padding: 3px 5px !important;
+  line-height: 1.16 !important;
+}
+
+#print-report-moderno .segments-print-block{
+  margin-top: 16px !important;
+}
+
+#print-report-moderno .report-bullseye-row{
+  grid-template-columns: 245px 1fr !important;
+  gap: 14px !important;
+  margin: 10px 0 14px !important;
+  align-items: stretch !important;
+}
+
+#print-report-moderno .report-bullseye-box,
+#print-report-moderno .report-bullseye-text{
+  padding: 13px 14px !important;
+  min-height: 248px !important;
+}
+
+#print-report-moderno .report-bullseye-box svg,
+#print-report-moderno #printBull17,
+#print-report-moderno .segments-print-block #printBull17{
+  width: 205px !important;
+  max-width: 205px !important;
+  height: 205px !important;
+  min-height: 205px !important;
+}
+
+#print-report-moderno .doppler-print-block,
+#print-report-moderno #printTablaDoppler{
+  break-before: auto !important;
+  page-break-before: auto !important;
+  margin-top: 14px !important;
+}
+
+#print-report-moderno .doppler-print-block,
+#print-report-moderno .doppler-print-block .table-section,
+#print-report-moderno .doppler-print-block .table-report{
+  break-inside: auto !important;
+  page-break-inside: auto !important;
+}
+
+#print-report-moderno .doppler-print-block tr{
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}
+
+@media print {
+  #print-report-moderno .report-header{
+    margin-bottom: 10px !important;
+    padding-bottom: 9px !important;
+  }
+
+  #print-report-moderno .report-patient{
+    margin-bottom: 10px !important;
+    row-gap: 4px !important;
+  }
+
+  #print-report-moderno .report-patient div{
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+  }
+
+  #print-report-moderno .report-summary-box{
+    margin: 8px 0 12px !important;
+    padding: 9px 11px !important;
+  }
+
+  #print-report-moderno .print-badges{
+    gap: 5px !important;
+    row-gap: 5px !important;
+  }
+
+  #print-report-moderno .print-badges span{
+    padding: 3px 7px !important;
+    font-size: 7.15pt !important;
+    line-height: 1.08 !important;
+  }
+
+  #print-report-moderno .measurements-heading-group h2{
+    margin: 7px 0 5px !important;
+  }
+
+  #print-report-moderno .table-report{
+    font-size: 7.8pt !important;
+    line-height: 1.12 !important;
+  }
+
+  #print-report-moderno .table-report th,
+  #print-report-moderno .table-report td{
+    padding: 2.25px 4px !important;
+    line-height: 1.12 !important;
+  }
+
+  #print-report-moderno .segments-print-block{
+    margin-top: 12px !important;
+  }
+
+  #print-report-moderno .report-bullseye-row{
+    grid-template-columns: 245px 1fr !important;
+    gap: 12px !important;
+    margin: 8px 0 12px !important;
+    align-items: stretch !important;
+  }
+
+  #print-report-moderno .report-bullseye-box,
+  #print-report-moderno .report-bullseye-text{
+    padding: 11px 12px !important;
+    min-height: 238px !important;
+  }
+
+  #print-report-moderno .report-bullseye-box svg,
+  #print-report-moderno #printBull17,
+  #print-report-moderno .segments-print-block #printBull17{
+    width: 198px !important;
+    max-width: 198px !important;
+    height: 198px !important;
+    min-height: 198px !important;
+  }
+
+  #print-report-moderno .doppler-print-block,
+  #print-report-moderno #printTablaDoppler{
+    break-before: auto !important;
+    page-break-before: auto !important;
+    margin-top: 12px !important;
+  }
+
+  #print-report-moderno .doppler-print-block,
+  #print-report-moderno .doppler-print-block .table-section,
+  #print-report-moderno .doppler-print-block .table-report{
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  #print-report-moderno .doppler-print-block tr{
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+
+/* === V36c: PDF visual definitivo — página 1 completa y página 2 respirada === */
+#print-report-moderno .report-quickrefs{
+  margin-top: 10px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  background: #f8fafc !important;
+  padding: 10px 12px !important;
+  color: #0f172a !important;
+  box-sizing: border-box !important;
+}
+#print-report-moderno .quickref-title{
+  font-weight: 800 !important;
+  font-size: 10.8pt !important;
+  line-height: 1.1 !important;
+  margin-bottom: 2px !important;
+}
+#print-report-moderno .quickref-subtitle{
+  font-size: 8.4pt !important;
+  color: #475569 !important;
+  margin-bottom: 7px !important;
+}
+#print-report-moderno .quickref-grid{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+  row-gap: 5px !important;
+  margin-bottom: 7px !important;
+}
+#print-report-moderno .quickref-chip,
+#print-report-moderno .quickref-ok,
+#print-report-moderno .quickref-missing{
+  display: inline-flex !important;
+  align-items: center !important;
+  border-radius: 999px !important;
+  padding: 3px 7px !important;
+  font-size: 8pt !important;
+  line-height: 1.05 !important;
+  border: 1px solid #d6e0ea !important;
+  background: #ffffff !important;
+  white-space: nowrap !important;
+}
+#print-report-moderno .quickref-chip.muted{
+  color: #64748b !important;
+}
+#print-report-moderno .quickref-missing{
+  border-color: #fed7aa !important;
+  background: #fff7ed !important;
+  color: #9a3412 !important;
+  margin-left: 4px !important;
+}
+#print-report-moderno .quickref-ok{
+  border-color: #bbf7d0 !important;
+  background: #f0fdf4 !important;
+  color: #166534 !important;
+  margin-left: 4px !important;
+}
+#print-report-moderno .quickref-meta{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  font-size: 8pt !important;
+  line-height: 1.15 !important;
+  color: #334155 !important;
+  margin-bottom: 7px !important;
+}
+#print-report-moderno .quickref-missing-row{
+  font-size: 8pt !important;
+  line-height: 1.2 !important;
+  color: #334155 !important;
+}
+
+@media print {
+  @page { size: A4; margin: 8mm 8mm 13mm 8mm; }
+
+  #print-report-moderno.print-report{
+    font-size: 8.4pt !important;
+    line-height: 1.22 !important;
+  }
+
+  #print-report-moderno .report-header{
+    margin-bottom: 12px !important;
+    padding-bottom: 10px !important;
+  }
+
+  #print-report-moderno .report-logo{
+    width: 78px !important;
+  }
+
+  #print-report-moderno .report-patient{
+    margin-bottom: 12px !important;
+    font-size: 8.25pt !important;
+    row-gap: 5px !important;
+  }
+
+  #print-report-moderno .report-patient div{
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    line-height: 1.15 !important;
+  }
+
+  #print-report-moderno .report-summary-box{
+    margin: 10px 0 14px !important;
+    padding: 11px 13px !important;
+  }
+
+  #print-report-moderno .print-badges span{
+    padding: 3.4px 7px !important;
+    font-size: 7.35pt !important;
+    line-height: 1.08 !important;
+  }
+
+  #print-report-moderno .measurements-heading-group h2{
+    font-size: 15pt !important;
+    margin: 9px 0 6px !important;
+  }
+
+  #print-report-moderno .table-caption{
+    font-size: 9.5pt !important;
+    padding-bottom: 4px !important;
+  }
+
+  #print-report-moderno .table-report{
+    font-size: 8.15pt !important;
+    line-height: 1.16 !important;
+  }
+
+  #print-report-moderno .table-report th,
+  #print-report-moderno .table-report td{
+    padding: 3.1px 5px !important;
+    line-height: 1.16 !important;
+  }
+
+  #print-report-moderno .segments-print-block{
+    margin-top: 18px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  #print-report-moderno .segments-print-block .report-bullseye-row{
+    grid-template-columns: 285px 1fr !important;
+    gap: 16px !important;
+    margin: 10px 0 12px !important;
+    align-items: stretch !important;
+  }
+
+  #print-report-moderno .segments-print-block .report-bullseye-box,
+  #print-report-moderno .segments-print-block .report-bullseye-text{
+    padding: 14px 15px !important;
+    min-height: 292px !important;
+    border-radius: 14px !important;
+  }
+
+  #print-report-moderno .segments-print-block .report-bullseye-box h3,
+  #print-report-moderno .segments-print-block .report-bullseye-text h3{
+    font-size: 11pt !important;
+    margin-bottom: 9px !important;
+  }
+
+  #print-report-moderno .segments-print-block .report-bullseye-box svg,
+  #print-report-moderno #printBull17,
+  #print-report-moderno .segments-print-block #printBull17{
+    width: 238px !important;
+    max-width: 238px !important;
+    height: 238px !important;
+    min-height: 238px !important;
+  }
+
+  #print-report-moderno #printSegmentosTexto,
+  #print-report-moderno #printSegmentosTexto *{
+    font-size: 9.2pt !important;
+    line-height: 1.38 !important;
+  }
+
+  #print-report-moderno .report-quickrefs{
+    margin-top: 12px !important;
+    padding: 12px 13px !important;
+    min-height: 108px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  #print-report-moderno .quickref-title{
+    font-size: 10.4pt !important;
+  }
+
+  #print-report-moderno .quickref-subtitle{
+    font-size: 8pt !important;
+    margin-bottom: 6px !important;
+  }
+
+  #print-report-moderno .quickref-chip,
+  #print-report-moderno .quickref-ok,
+  #print-report-moderno .quickref-missing{
+    font-size: 7.65pt !important;
+    padding: 2.8px 6.5px !important;
+  }
+
+  #print-report-moderno .quickref-meta{
+    font-size: 7.6pt !important;
+  }
+
+  #print-report-moderno .quickref-missing-row{
+    font-size: 7.6pt !important;
+  }
+
+  #print-report-moderno .doppler-print-block,
+  #print-report-moderno #printTablaDoppler{
+    break-before: page !important;
+    page-break-before: always !important;
+    margin-top: 0 !important;
+  }
+
+  #print-report-moderno .doppler-print-block{
+    margin-bottom: 20px !important;
+  }
+
+  #print-report-moderno .doppler-print-block .table-section{
+    margin-bottom: 18px !important;
+  }
+
+  #print-report-moderno .doppler-print-block + .report-section-block{
+    margin-top: 18px !important;
+  }
+
+  #print-report-moderno .report-section-block h2,
+  #print-report-moderno .conclusion-signature-block h2{
+    font-size: 14pt !important;
+    line-height: 1.08 !important;
+    margin: 12px 0 7px !important;
+  }
+
+  #print-report-moderno .report-text{
+    font-size: 8.35pt !important;
+    line-height: 1.32 !important;
+    padding: 10px 12px !important;
+    margin-bottom: 15px !important;
+    border-radius: 11px !important;
+  }
+
+  #print-report-moderno .conclusion-signature-block{
+    margin-top: 14px !important;
+  }
+
+  #print-report-moderno .report-conclusion{
+    padding: 10px 12px !important;
+    margin-bottom: 18px !important;
+  }
+
+  #print-report-moderno .signature-box{
+    margin-top: 14px !important;
+    padding-top: 3px !important;
+  }
+
+  #print-report-moderno .report-signature{
+    width: 118px !important;
+    margin-bottom: 5px !important;
+  }
+
+  #print-report-moderno .signature-line{
+    width: 175px !important;
+    margin: 6px 0 4px auto !important;
+  }
+
+  #print-report-moderno .signature-box p{
+    font-size: 7.9pt !important;
+    line-height: 1.14 !important;
+  }
+}
+
+
+/* === V36d: balance final 2 paginas - segmentacion vuelve a pagina 1 y pagina 2 respirada === */
+@media print {
+  @page { size: A4; margin: 7mm 8mm 13mm 8mm; }
+
+  #print-report-moderno.print-report{
+    font-size: 8.15pt !important;
+    line-height: 1.18 !important;
+    padding-bottom: 13mm !important;
+  }
+
+  #print-report-moderno .report-header{
+    margin-bottom: 8px !important;
+    padding-bottom: 7px !important;
+    gap: 10px !important;
+  }
+
+  #print-report-moderno .report-logo{
+    width: 72px !important;
+    height: auto !important;
+  }
+
+  #print-report-moderno .report-header h1,
+  #print-report-moderno .report-header-copy-print h1{
+    font-size: 14.9pt !important;
+    line-height: 1.03 !important;
+    margin: 0 0 3px 0 !important;
+    white-space: nowrap !important;
+  }
+
+  #print-report-moderno .report-header p,
+  #print-report-moderno .report-header-copy-print p{
+    font-size: 8.05pt !important;
+    line-height: 1.1 !important;
+    margin: 1px 0 !important;
+  }
+
+  #print-report-moderno .report-patient{
+    margin-bottom: 8px !important;
+    font-size: 8.1pt !important;
+    row-gap: 3px !important;
+    column-gap: 12px !important;
+  }
+
+  #print-report-moderno .report-patient div{
+    padding-top: 2.7px !important;
+    padding-bottom: 2.7px !important;
+    line-height: 1.12 !important;
+  }
+
+  #print-report-moderno .report-summary-box{
+    margin: 7px 0 9px !important;
+    padding: 8px 10px !important;
+    border-radius: 9px !important;
+  }
+
+  #print-report-moderno .report-summary-box h3{
+    font-size: 8.9pt !important;
+    margin: 0 0 4px 0 !important;
+  }
+
+  #print-report-moderno .print-badges{
+    gap: 4px !important;
+    row-gap: 4px !important;
+  }
+
+  #print-report-moderno .print-badges span{
+    padding: 2.7px 6.5px !important;
+    font-size: 7.15pt !important;
+    line-height: 1.06 !important;
+  }
+
+  #print-report-moderno .measurements-heading-group h2{
+    font-size: 14.6pt !important;
+    margin: 6px 0 4px !important;
+    line-height: 1.05 !important;
+  }
+
+  #print-report-moderno .table-caption{
+    font-size: 9.25pt !important;
+    padding-bottom: 2.5px !important;
+    line-height: 1.05 !important;
+  }
+
+  #print-report-moderno .table-section{
+    margin-bottom: 6px !important;
+  }
+
+  #print-report-moderno .table-report{
+    font-size: 7.85pt !important;
+    line-height: 1.09 !important;
+    border-collapse: collapse !important;
+  }
+
+  #print-report-moderno .table-report th,
+  #print-report-moderno .table-report td{
+    padding: 2.15px 4.5px !important;
+    line-height: 1.09 !important;
+  }
+
+  #print-report-moderno .segments-print-block{
+    margin-top: 9px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  #print-report-moderno .segments-print-block .report-bullseye-row{
+    grid-template-columns: 238px 1fr !important;
+    gap: 12px !important;
+    margin: 6px 0 7px !important;
+    align-items: stretch !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  #print-report-moderno .segments-print-block .report-bullseye-box,
+  #print-report-moderno .segments-print-block .report-bullseye-text{
+    padding: 10px 11px !important;
+    min-height: 224px !important;
+    border-radius: 12px !important;
+    border: 1px solid #d5dee7 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  #print-report-moderno .segments-print-block .report-bullseye-box h3,
+  #print-report-moderno .segments-print-block .report-bullseye-text h3{
+    font-size: 10.35pt !important;
+    margin: 0 0 6px 0 !important;
+    line-height: 1.08 !important;
+  }
+
+  #print-report-moderno .segments-print-block .report-bullseye-box svg,
+  #print-report-moderno #printBull17,
+  #print-report-moderno .segments-print-block #printBull17{
+    width: 188px !important;
+    max-width: 188px !important;
+    height: 188px !important;
+    min-height: 188px !important;
+    display: block !important;
+    margin: 0 auto !important;
+  }
+
+  #print-report-moderno #printSegmentosTexto,
+  #print-report-moderno #printSegmentosTexto *{
+    font-size: 8.65pt !important;
+    line-height: 1.28 !important;
+  }
+
+  #print-report-moderno .report-quickrefs{
+    margin-top: 5px !important;
+    padding: 6px 8px !important;
+    min-height: 0 !important;
+    border-radius: 10px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  #print-report-moderno .quickref-title{
+    font-size: 8.9pt !important;
+    margin-bottom: 3px !important;
+  }
+
+  #print-report-moderno .quickref-subtitle{
+    display: none !important;
+  }
+
+  #print-report-moderno .quickref-grid{
+    gap: 3px !important;
+    row-gap: 3px !important;
+    margin-bottom: 4px !important;
+  }
+
+  #print-report-moderno .quickref-chip,
+  #print-report-moderno .quickref-ok,
+  #print-report-moderno .quickref-missing{
+    font-size: 6.95pt !important;
+    line-height: 1.02 !important;
+    padding: 2px 5px !important;
+  }
+
+  #print-report-moderno .quickref-meta{
+    display: none !important;
+  }
+
+  #print-report-moderno .quickref-missing-row{
+    font-size: 7.05pt !important;
+    line-height: 1.12 !important;
+  }
+
+  #print-report-moderno .doppler-print-block,
+  #print-report-moderno #printTablaDoppler{
+    break-before: page !important;
+    page-break-before: always !important;
+    margin-top: 0 !important;
+  }
+
+  #print-report-moderno .doppler-print-block{
+    margin-bottom: 18px !important;
+  }
+
+  #print-report-moderno .doppler-print-block .table-section{
+    margin-bottom: 17px !important;
+  }
+
+  #print-report-moderno .doppler-print-block + .report-section-block{
+    margin-top: 17px !important;
+  }
+
+  #print-report-moderno .report-section-block h2,
+  #print-report-moderno .conclusion-signature-block h2{
+    font-size: 13.7pt !important;
+    line-height: 1.08 !important;
+    margin: 12px 0 7px !important;
+  }
+
+  #print-report-moderno .report-text{
+    font-size: 8.15pt !important;
+    line-height: 1.30 !important;
+    padding: 9px 11px !important;
+    margin-bottom: 14px !important;
+    border-radius: 11px !important;
+  }
+
+  #print-report-moderno .conclusion-signature-block{
+    margin-top: 14px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  #print-report-moderno .report-conclusion{
+    padding: 9px 11px !important;
+    margin-bottom: 16px !important;
+  }
+
+  #print-report-moderno .signature-box{
+    margin-top: 13px !important;
+    padding-top: 3px !important;
+  }
+
+  #print-report-moderno .report-signature{
+    width: 116px !important;
+    margin-bottom: 5px !important;
+  }
+
+  #print-report-moderno .signature-line{
+    width: 172px !important;
+    margin: 6px 0 4px auto !important;
+  }
+
+  #print-report-moderno .signature-box p{
+    font-size: 7.75pt !important;
+    line-height: 1.13 !important;
+  }
+}
+
+
+/* === V36f: leyenda de índices y pie propio de impresión/PDF === */
+@media print {
+  body.print-moderno #print-report-moderno,
+  body.print-resumen-os #print-report-resumen-os{
+    counter-reset: ecoPrintedPage 0;
+  }
+
+  body.print-moderno #print-report-moderno .print-footer,
+  body.print-resumen-os #print-report-resumen-os .print-footer{
+    display: flex !important;
+    position: fixed !important;
+    left: 8mm !important;
+    right: 8mm !important;
+    bottom: 4mm !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    font-size: 7.3pt !important;
+    line-height: 1 !important;
+    color: #64748b !important;
+    border-top: 1px solid #dbe3ec !important;
+    padding-top: 2.3mm !important;
+    background: white !important;
+    z-index: 9999 !important;
+  }
+
+  body.print-moderno #print-report-moderno .print-footer *,
+  body.print-resumen-os #print-report-resumen-os .print-footer *{
+    visibility: visible !important;
+  }
+
+  .print-footer-left{
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+  }
+
+  .print-footer-right::after{
+    counter-increment: ecoPrintedPage 1;
+    content: "Página " counter(ecoPrintedPage);
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+  }
+
+  #print-report-moderno .report-quickrefs{
+    padding: 6px 8px !important;
+  }
+
+  #print-report-moderno .quickref-title{
+    font-size: 8.9pt !important;
+    margin-bottom: 4px !important;
+  }
+
+  #print-report-moderno .quickref-grid{
+    margin-bottom: 0 !important;
+  }
+
+  #print-report-moderno .quickref-missing-row,
+  #print-report-moderno .quickref-meta,
+  #print-report-moderno .quickref-subtitle{
+    display: none !important;
+  }
+}
+
+
+/* === V37: parser multi-equipo Sonoscape / ESAOTE / Mindray === */
+.annex-import-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+}
+.annex-import-title-row h3{
+  margin:0;
+}
+.annex-import-equipment{
+  display:inline-flex;
+  align-items:center;
+  border:1px solid #cfe0f3;
+  border-radius:999px;
+  padding:4px 10px;
+  font-size:12px;
+  font-weight:700;
+  color:#0f4c81;
+  background:#f2f7fc;
+  white-space:nowrap;
+}
+.annex-import-list.annex-import-values li{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  border-bottom:1px dashed #e2e8f0;
+  padding:3px 0;
+}
+.annex-import-value{
+  font-weight:700;
+  color:#102033;
+  text-align:right;
+}
+.annex-import-muted strong{
+  color:#102033;
+}
+
+
+
+/* EchoReport v1.0: marca mínima en pie de impresión nativa; el PDF por carpeta usa jsPDF. */
+.print-footer-left{
+  display:inline !important;
+  font-weight:600 !important;
+  white-space:nowrap !important;
+  color:#8090a0 !important;
+}
+@media print{
+  body.print-moderno #print-report-moderno .print-footer,
+  body.print-resumen-os #print-report-resumen-os .print-footer{
+    font-size:6.4pt !important;
+    color:#8090a0 !important;
+    border-top:1px solid #dbe3ec !important;
+    padding-top:2.2mm !important;
+  }
+  body.print-moderno #print-report-moderno .print-footer-left,
+  body.print-resumen-os #print-report-resumen-os .print-footer-left{
+    display:inline !important;
+    font-weight:600 !important;
+  }
+}
