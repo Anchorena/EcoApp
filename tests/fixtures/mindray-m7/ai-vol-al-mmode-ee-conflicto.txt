@@ -1,0 +1,25 @@
+Nomb: PRUEBA, OCHO
+ID: SYN-M7-0008 DOB: 01/01/1958 Edad: 68Años Sexo: Femenino
+Cardío adulto
+Fecha Exa: 13/10/2026
+Equipo usado: MINDRAY M7
+Indicaciones y datos clínicos
+Altura: 160.0cm Weight: 66.00kg BSA: 1.69m² HR: 81Bpm
+Cardiology Ultrasound Report - 1 / 1 Pág.
+2D Measurements
+Atria Volume
+AI Vol(A-L)
+Diám AI: 4.10cm AI Vol(A-L): 58.00ml
+AD Vol(Simp)
+AD Vol(A4C): 35.00ml
+M-Mode Measurements
+Dimensions
+AI/Ao(M)
+Diám AI: 3.70cm Diám ao: 3.00cm
+AI/Ao: 1.23
+Doppler Measurements
+Mitral Valve
+E Vel VM: 90.00cm/s MV E/E' Septal: 12.5
+TDI Measurements
+MV E/Ea
+MV E/E' Septal: 14.1 E/E' lateral VM: 9.0

@@ -1,0 +1,62 @@
+[
+  {
+    "fixture": "sonoscape-s6/basico.txt",
+    "expected": "sonoscape-s6/basico.expected.json"
+  },
+  {
+    "fixture": "esaote/basico.txt",
+    "expected": "esaote/basico.expected.json"
+  },
+  {
+    "fixture": "mindray-m8/basico.txt",
+    "expected": "mindray-m8/basico.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/teichm-simpsonbp-ai-monoplano.txt",
+    "expected": "mindray-m7/teichm-simpsonbp-ai-monoplano.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/teich2d-hr-propio-salto-pagina.txt",
+    "expected": "mindray-m7/teich2d-hr-propio-salto-pagina.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/hr-encabezado-psvd-ai-bp.txt",
+    "expected": "mindray-m7/hr-encabezado-psvd-ai-bp.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/valores-contradictorios.txt",
+    "expected": "mindray-m7/valores-contradictorios.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/aorta-solo-mmode.txt",
+    "expected": "mindray-m7/aorta-solo-mmode.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/conflicto-mismo-nivel.txt",
+    "expected": "mindray-m7/conflicto-mismo-nivel.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/aorta-prioridad-dimensions.txt",
+    "expected": "mindray-m7/aorta-prioridad-dimensions.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/ai-vol-al-mmode-ee-conflicto.txt",
+    "expected": "mindray-m7/ai-vol-al-mmode-ee-conflicto.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/ai-vol-al-con-aiao2d.txt",
+    "expected": "mindray-m7/ai-vol-al-con-aiao2d.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/deteccion-m9-explicito.txt",
+    "expected": "mindray-m7/deteccion-m9-explicito.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/deteccion-m8-explicito.txt",
+    "expected": "mindray-m7/deteccion-m8-explicito.expected.json"
+  },
+  {
+    "fixture": "mindray-m7/deteccion-m7-estructural.txt",
+    "expected": "mindray-m7/deteccion-m7-estructural.expected.json"
+  }
+]

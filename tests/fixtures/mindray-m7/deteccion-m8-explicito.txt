@@ -1,0 +1,11 @@
+Nomb: PRUEBA, DIEZ
+ID: SYN-M8-0010 DOB: 01/01/1960 Edad: 66Años Sexo: Masculino
+Fecha Exa: 02/02/2026
+Equipo usado: MINDRAY M8
+Indicaciones y datos clínicos
+Altura: 170.0cm Weight: 75.00kg BSA: 1.86m²
+Cardiology Ultrasound Report - 1 / 2 Pág.
+2D Measurements
+Ventricle Volume
+Simpson BP
+VFD(Simp BP): 110.00ml VFS(Simp BP): 45.00ml

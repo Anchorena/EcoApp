@@ -1,0 +1,6 @@
+{
+  "isMindrayM7": false,
+  "notEquipment": "Mindray M7",
+  "equipment": "Mindray M8/M9",
+  "absent": ["vtdSimpson", "vtsSimpson"]
+}

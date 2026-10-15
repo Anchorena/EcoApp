@@ -1,0 +1,122 @@
+Consultorio de Prueba
+Nomb: PRUEBA, SINTETICA M7
+ID: SYN-M7-0001
+DOB: 01/01/1970 Edad: 56Años
+Sexo: Masculino
+Domicilio de prueba 123
+Telephone: 0000000000
+Fax:
+Web:
+Cardío adulto
+Fecha Exa: 14/10/2026
+Equipo usado: MINDRAY M7
+Operador: Dr. Operador Prueba
+Indicaciones y datos clínicos
+Altura: 175.0cm Weight: 82.00kg BSA: 1.98m²
+Cardiology Ultrasound Report - 1 / 5 Pág.
+2D Measurements
+Dimensions
+AI/Ao(2D)
+Diám AI: 3.80cm Diám ao: 3.20cm
+AI/Ao: 1.19
+Ao/AI(2D)
+Diám AI: 3.80cm Diám ao: 3.20cm
+Ao/AI: 0.84
+Diám VA: 2.10cm ACS: 3.00cm
+Diám TSVI: 2.10cm VD Mayor: 6.00cm
+VD Menor: 3.10cm Diám Asc Aórt: 3.30cm
+Ventricle Volume
+Simpson BP
+LVId2i: 8.50cm LVIs2i: 6.50cm
+LVId4i: 8.70cm LVLIs4i: 6.90cm
+HR: 72Bpm VFD(A2C): 120.00ml
+VFS(A2C): 50.00ml VFD(A4C): 130.00ml
+VFS(A4C): 54.00ml VFD(Simp BP): 125.00ml
+VFS(Simp BP): 52.00ml SV(Simp BP): 73.00ml
+FE(Simp BP): 58.4% SI(Simp BP): 36.87
+CO(Simp BP): 5.256l/min CI(Simp BP): 2.65
+Atria Volume
+AI Vol(Simp)
+AI Vol(A2C): 48.00ml AI Vol(A4C): 55.00ml
+Nomb: PRUEBA, SINTETICA M7
+ID: SYN-M7-0001 DOB: 01/01/1970 Edad: 56Años Sexo: Masculino
+Cardío adulto
+Fecha Exa: 14/10/2026
+Cardiology Ultrasound Report - 2 / 5 Pág.
+AD Vol(Simp)
+AD Vol(A4C): 40.00ml
+M-Mode Measurements
+Ventricle Volume
+Teichholz(M)
+SIVd: 1.10cm DIVId: 5.20cm
+PPVId: 1.00cm SIVs: 1.40cm
+DIVIs: 3.40cm PPVIs: 1.50cm
+VFD(Teich): 129.00ml VFS(Teich): 47.00ml
+SV(Teich): 82.00ml FE(Teich): 63.6%
+SI(Teich): 41.41 FS(Teich): 34.6%
+Doppler Measurements
+Mitral Valve
+E Vel VM: 65.00cm/s MV E PG: 1.69mmHg
+VM A Vel: 80.00cm/s MV A PG: 2.56mmHg
+E/A VM: 0.81
+VMA(VTI)
+Diám TSVI: 2.10cm VTI TSVI: 20.00cm
+Aortic
+Vmáx TSVI: 95.00cm/s PGmáxTSVI: 3.61mmHg
+Vmed TSVI: 60.00cm/s PGmed TSVI: 1.50mmHg
+VTI TSVI: 20.00cm SV TSVI: 69.27ml
+SI TSVI: 34.98 TSVI θ : 0 °
+Vmáx VA: 140.00cm/s PGmáx VA: 7.84mmHg
+Vmed VA: 95.00cm/s PGmed VA: 4.00mmHg
+VTI VA: 28.00cm VA SV: 70.00ml
+VA SI: 35.35 VA θ : 0 °
+VAA(VTI)
+Diám TSVI: 2.10cm VTI TSVI: 20.00cm
+VTI VA: 28.00cm VAA(VTI): 2.47cm ²
+Nomb: PRUEBA, SINTETICA M7
+ID: SYN-M7-0001 DOB: 01/01/1970 Edad: 56Años Sexo: Masculino
+Cardío adulto
+Fecha Exa: 14/10/2026
+Cardiology Ultrasound Report - 3 / 5 Pág.
+Tricuspid Valve
+TV Vmax: 50.00cm/s TV PGmax: 1.00mmHg
+TV E Vel: 45.00cm/s TV E PG: 0.81mmHg
+TV A Vel: 35.00cm/s TV A PG: 0.49mmHg
+VT E/A: 1.29
+TR
+TR Vmax: 60.00cm/s TR PGmax: 1.44mmHg
+PSVD
+TR Vmax: 60.00cm/s TR PGmax: 1.44mmHg
+Pulmonic Valve
+Vmáx TSVD: 70.00cm/s PGmáx TSVD: 1.96mmHg
+Vmed TSVD: 45.00cm/s PGmed TSVD: 0.81mmHg
+TSVD VTI: 15.00cm TSVD θ : 0 °
+Vmáx VP: 100.00cm/s PGmáx VP: 4.00mmHg
+Vmed VP: 70.00cm/s PGmed VP: 2.10mmHg
+VTI VP: 20.00cm VP θ : 0 °
+Qp/Qs
+TSVD VTI: 15.00cm Diám TSVI: 2.10cm
+VTI TSVI: 20.00cm SV TSVI: 69.27ml
+PISA
+PISA RM
+MR Rad: 0.40cm MR Als.Vel: 40.00cm/s
+Fluj RM: 40.2ml/s
+PISA RT
+TR Vmax: 60.00cm/s
+TDI Measurements
+MV E/Ea
+E Vel VM: 65.00cm/s
+Nomb: PRUEBA, SINTETICA M7
+ID: SYN-M7-0001 DOB: 01/01/1970 Edad: 56Años Sexo: Masculino
+Cardío adulto
+Fecha Exa: 14/10/2026
+Cardiology Ultrasound Report - 4 / 5 Pág.
+Imagen ecografía
+Nomb: PRUEBA, SINTETICA M7
+ID: SYN-M7-0001 DOB: 01/01/1970 Edad: 56Años Sexo: Masculino
+Cardío adulto
+Fecha Exa: 14/10/2026
+Cardiology Ultrasound Report - 5 / 5 Pág.
+Imagen ecografía
+Coment:
+Firma (sello): Fecha firma:

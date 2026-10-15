@@ -1,0 +1,6 @@
+{
+  "isMindrayM7": true,
+  "equipment": "Mindray M7",
+  "values": { "fc": 72, "vtdSimpson": 90, "vtsSimpson": 35, "fecha": "2026-03-03" },
+  "warningsInclude": ["Formato M7 detectado por estructura (sin 'Equipo usado: MINDRAY M7'); confirmar equipo."]
+}
