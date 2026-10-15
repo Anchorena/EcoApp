@@ -1579,7 +1579,7 @@
       equipment: "Mindray M7",
       values,
       fieldLabels: getImportFieldLabels(),
-      warnings,
+      warnings: [...new Set(warnings)], // mensajes idénticos (p. ej. AI/Ao(2D) y Ao/AI(2D) repetidos) una sola vez
       rawText: normalized,
       review: uniqueReview,
       rawEntries: [...headerEntries, ...entries]
@@ -1725,6 +1725,7 @@ El PDF propone: ${incomingText}.
     const cfg = NORMAL_RANGES[key];
     if (!cfg) return "";
     if (typeof cfg.normal === "string") {
+      if (cfg.normal === "—") return "—"; // sin rango de referencia propio (p. ej. Teichholz, estimación secundaria)
       return cfg.normal + (cfg.unit ? ` ${cfg.unit}` : "");
     }
     if (typeof cfg.normal === "object") {
@@ -3789,7 +3790,7 @@ El PDF propone: ${incomingText}.
       ["Septum IV", data.sivd, "sivd"],
       ["Pared posterior", data.ppd, "ppd"],
       ["FEVI Simpson", calc.feySimpson, "feySimpson"],
-      ["FEVI Teichholz", calc.feyTeichholz, "feyTeichholz"],
+      ["FEVI Teichholz (estimación secundaria)", calc.feyTeichholz, "feyTeichholz"],
       ["Fracción de acortamiento", calc.fa, "fa"],
       ["Masa VI (ASE)", calc.masaVIase, "masaVIase"],
       ["Índice masa VI", calc.indiceMasaVI, "indiceMasaVI"],
@@ -3856,7 +3857,7 @@ El PDF propone: ${incomingText}.
   function buildMeasurementTableSection(data, calc, section = "all") {
     const rows = [
       ["DDVI", data.ddvi, "ddvi"], ["DSVI", data.dsvi, "dsvi"], ["Septum IV", data.sivd, "sivd"], ["Pared posterior", data.ppd, "ppd"],
-      ["FEVI Simpson", calc.feySimpson, "feySimpson"], ["FEVI Teichholz", calc.feyTeichholz, "feyTeichholz"], ["Fracción de acortamiento", calc.fraccionAcortamiento, "fraccionAcortamiento"],
+      ["FEVI Simpson", calc.feySimpson, "feySimpson"], ["FEVI Teichholz (estimación secundaria)", calc.feyTeichholz, "feyTeichholz"], ["Fracción de acortamiento", calc.fraccionAcortamiento, "fraccionAcortamiento"],
       ["Masa VI (ASE)", calc.masaVI, "masaVI"], ["Índice masa VI", calc.masaIndex, "indiceMasaVI"], ["Aurícula izquierda", data.aiDiam, "aiDiam"],
       ["Volumen AI", data.volAI, "volAI"], ["Vol. AI indexado", calc.volAIIndex, "volAIIndex"], ["Raíz aórtica", data.raizAo, "raizAo"], ["Anillo aórtico", data.aoAnillo, "anilloAo"],
       ["Relación AI/Ao", calc.relAIAo, "relAIAo"], ["VD basal", data.vdBasal, "vdBasal"], ["TAPSE", data.tapse, "tapse"], ["Aurícula derecha", data.ad, "ad"],

@@ -264,7 +264,7 @@ const NORMAL_RANGES = {
   vtdSimpson: { label: "VTD Simpson biplano", unit: "ml", normal: "según sexo/superficie" },
   vtsSimpson: { label: "VTS Simpson biplano", unit: "ml", normal: "según sexo/superficie" },
   feySimpson: { label: "FEVI Simpson", unit: "%", normal: "55–70" },
-  feyTeichholz: { label: "FEVI Teichholz", unit: "%", normal: "55–70" },
+  feyTeichholz: { label: "FEVI Teichholz (estimación secundaria)", unit: "%", normal: "—" },
   fa: { label: "Fracción de acortamiento", unit: "%", normal: "25–45" },
 
   masaVIase: { label: "Masa VI (ASE)", unit: "g", normal: "según sexo" },

@@ -31,8 +31,8 @@ FEVI_Teichholz = (VTD_Teichholz − VTS_Teichholz) / VTD_Teichholz × 100
 - Nunca se usan los mm directamente dentro de la ecuación.
 - No se calcula (todo `null`) si falta DDVI o DSVI, si alguno es ≤ 0 o si `DSVI ≥ DDVI`.
 - Resultados expuestos por `calculateDerived()`: `feyTeichholz`, `vtdTeichholz`, `vtsTeichholz`.
-- Se muestra como "FEVI Teichholz (estimación secundaria)" en el panel de cálculos y como "FEVI Teichholz"
-  en las tablas de mediciones, siempre separada de "FEVI Simpson".
+- Se muestra como "FEVI Teichholz (estimación secundaria)" en el panel de cálculos y en las tablas
+  del informe, sin rango de referencia propio (columna "—"), siempre separada de "FEVI Simpson".
 
 Hasta este cambio, `feyTeichholz` usaba `(DDVI³ − DSVI³) / DDVI³ × 100` (método cúbico simple, no
 Teichholz), que sobrestima la FEVI respecto de Teichholz (por ejemplo, 58,5/44,7 mm daba 55,4 % en lugar

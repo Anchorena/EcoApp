@@ -35,13 +35,15 @@ const jscScriptArgs = typeof arguments !== "undefined" ? Array.from(arguments) :
     return blocks.join("\n\n");
   }
 
-  const app = new Function(`${extractTopLevelFunctions(readText(`${repoRoot}/app.js`))}
+  // config.js es sólo datos globales (TEXTS, NORMAL_RANGES…) que la app carga antes de app.js.
+  const app = new Function(`${readText(`${repoRoot}/config.js`)}
+    ${extractTopLevelFunctions(readText(`${repoRoot}/app.js`))}
     return {
       calculateDerived,
       interpretFey,
       interpretFeyFromCalc: typeof interpretFeyFromCalc === "function" ? interpretFeyFromCalc : null,
       interpretMasa, interpretAI, interpretAD, interpretVD, interpretPSAP, interpretDiastolic, interpretGLS,
-      buildDescription, buildConclusion
+      buildDescription, buildConclusion, buildMeasurementTableSection, getNormalText
     };`)();
 
   // Mismos campos numéricos que getFormData(); todo null salvo lo que el caso define.
@@ -187,6 +189,19 @@ const jscScriptArgs = typeof arguments !== "undefined" ? Array.from(arguments) :
     const { description, interp } = narrative(makeData({}));
     expect.equal("interp.fey.grade", interp.fey.grade, "nr");
     expect.excludes("descripción", description, "Fracción de eyección");
+  });
+
+  // --- Presentación en el informe ---
+  test("Tabla del informe: Teichholz como estimación secundaria, sin rango 55–70", (expect) => {
+    const data = makeData({ ddvi: 58.5, dsvi: 44.7, vtdSimpson: 120, vtsSimpson: 48 });
+    const table = app.buildMeasurementTableSection(data, app.calculateDerived(data), "eco");
+    const teichRow = (table.match(/<tr><td>FEVI Teichholz[^]*?<\/tr>/) || [""])[0];
+    const simpsonRow = (table.match(/<tr><td>FEVI Simpson[^]*?<\/tr>/) || [""])[0];
+    expect.includes("fila Teichholz", teichRow, "FEVI Teichholz (estimación secundaria)");
+    expect.includes("fila Teichholz", teichRow, "<td>—</td>");
+    expect.excludes("fila Teichholz", teichRow, "55–70");
+    expect.includes("fila Simpson (sin cambios)", simpsonRow, "55–70");
+    expect.equal("getNormalText(feyTeichholz)", app.getNormalText("feyTeichholz", "Masculino"), "—");
   });
 
   let failed = 0;

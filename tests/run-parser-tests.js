@@ -108,6 +108,8 @@ const jscScriptArgs = typeof arguments !== "undefined" ? Array.from(arguments) :
       });
     }
     const warningsText = (report.warnings || []).join("\n");
+    const repeated = (report.warnings || []).filter((w, i, all) => all.indexOf(w) !== i);
+    if (repeated.length) failures.push(`warnings repetidos: ${[...new Set(repeated)].map((w) => `"${w}"`).join(", ")}`);
     (expected.warningsInclude || []).forEach((fragment) => {
       if (!warningsText.includes(fragment)) failures.push(`warning faltante: "${fragment}"`);
     });
