@@ -2150,6 +2150,27 @@ El PDF propone: ${incomingText}.
     };
   }
 
+  // Volumen VI por Teichholz: V = 7 / (2.4 + D) × D³, con D en cm → ml. null si D no es válido.
+  function calculateTeichholzVolume(diameterCm) {
+    if (diameterCm === null || diameterCm === undefined || !Number.isFinite(Number(diameterCm)) || Number(diameterCm) <= 0) return null;
+    const d = Number(diameterCm);
+    return (7 / (2.4 + d)) * Math.pow(d, 3);
+  }
+
+  // FEVI estimada por Teichholz a partir de DDVI/DSVI en mm. Estimación lineal secundaria:
+  // nunca reemplaza a Simpson ni se promueve sola a FEVI principal (ver docs/fevi-methods.md).
+  function calculateTeichholz(ddviMm, dsviMm) {
+    const empty = { vtd: null, vts: null, fey: null };
+    if (!hasValue(ddviMm) || !hasValue(dsviMm)) return empty;
+    const dd = Number(ddviMm);
+    const ds = Number(dsviMm);
+    if (!(dd > 0) || !(ds > 0) || ds >= dd) return empty;
+    const vtd = calculateTeichholzVolume(dd / 10);
+    const vts = calculateTeichholzVolume(ds / 10);
+    if (vtd === null || vts === null || vtd <= 0) return empty;
+    return { vtd, vts, fey: ((vtd - vts) / vtd) * 100 };
+  }
+
   function calculateDerived(data) {
     const bsa = data.peso && data.talla ? Math.sqrt((data.peso * data.talla) / 3600) : null;
     const imc = data.peso && data.talla ? data.peso / Math.pow(data.talla / 100, 2) : null;
@@ -2158,13 +2179,11 @@ El PDF propone: ${incomingText}.
     const fa = safeDivide(faBase, data.ddvi);
     const faPct = fa !== null ? fa * 100 : null;
 
-    const feyTeichholz =
-      data.ddvi !== null && data.dsvi !== null && data.ddvi !== 0
-        ? ((Math.pow(data.ddvi, 3) - Math.pow(data.dsvi, 3)) / Math.pow(data.ddvi, 3)) * 100
-        : null;
+    const teichholz = calculateTeichholz(data.ddvi, data.dsvi);
+    const feyTeichholz = teichholz.fey;
 
     const feySimpson =
-      data.vtdSimpson !== null && data.vtsSimpson !== null && data.vtdSimpson !== 0
+      hasValue(data.vtdSimpson) && hasValue(data.vtsSimpson) && data.vtdSimpson > 0 && data.vtsSimpson > 0 && data.vtsSimpson < data.vtdSimpson
         ? ((data.vtdSimpson - data.vtsSimpson) / data.vtdSimpson) * 100
         : null;
 
@@ -2244,14 +2263,18 @@ El PDF propone: ${incomingText}.
     const psap = data.psapManual !== null ? data.psapManual : (gradVDAD !== null && prADestimada !== null ? gradVDAD + prADestimada : null);
     const volAIi = data.volAI !== null && bsa !== null && bsa !== 0 ? data.volAI / bsa : null;
     const volADi = data.volADi !== null ? data.volADi : (data.volAD !== null && bsa !== null && bsa !== 0 ? data.volAD / bsa : null);
-    const feyPrincipal = feySimpson !== null ? feySimpson : feyTeichholz;
-    const feyMethod = feySimpson !== null ? "Simpson" : (feyTeichholz !== null ? "Teichholz" : null);
+    // Sólo Simpson biplano es FEVI principal. Teichholz queda como estimación secundaria (feyTeichholz)
+    // y no se promueve aunque falte Simpson.
+    const feyPrincipal = feySimpson;
+    const feyMethod = feySimpson !== null ? "Simpson" : null;
 
     return {
       bsa,
       imc,
       fa: faPct,
       feyTeichholz,
+      vtdTeichholz: teichholz.vtd,
+      vtsTeichholz: teichholz.vts,
       feySimpson,
       feyPrincipal,
       feyMethod,
@@ -2275,6 +2298,15 @@ El PDF propone: ${incomingText}.
       volAIi,
       volADi
     };
+  }
+
+  // Interpretación de FEVI para la narrativa: sin Simpson no se clasifica la función sistólica,
+  // aunque exista una estimación por Teichholz.
+  function interpretFeyFromCalc(calc) {
+    if (calc.feyPrincipal === null && calc.feyTeichholz !== null) {
+      return { grade: "nr", text: "Fracción de eyección por Simpson no disponible." };
+    }
+    return interpretFey(calc.feyPrincipal, calc.feyMethod);
   }
 
   function interpretFey(value, method = null) {
@@ -3487,7 +3519,7 @@ El PDF propone: ${incomingText}.
       ["IMC", calc.imc, "kg/m²"],
       ["BSA", calc.bsa, "m²"],
       ["FEVI Simpson", calc.feySimpson, "%"],
-      ["FEVI Teichholz", calc.feyTeichholz, "%"],
+      ["FEVI Teichholz (estimación secundaria)", calc.feyTeichholz, "%"],
       ["Fracción de acortamiento", calc.fa, "%"],
       ["Relación AI/Ao", calc.relAiAo, ""],
       ["Anillo aórtico", data.dvao, "mm"],
@@ -3667,7 +3699,7 @@ El PDF propone: ${incomingText}.
       else parts.push(`Hipertrofia excéntrica del ventrículo izquierdo. Índice de masa ventricular aumentado (${formatNumber(calc.indiceMasaVI, 0)} g/m²).`);
     }
 
-    if (calc.feyPrincipal !== null) parts.push(interp.fey.text);
+    if (calc.feyPrincipal !== null || calc.feyTeichholz !== null) parts.push(interp.fey.text);
 
     parts.push(motilityGlobalText(data.motilidadGlobal));
     parts.push(segmentText.long);
@@ -4302,7 +4334,7 @@ El PDF propone: ${incomingText}.
     const calc = calculateDerived(data);
 
     const interp = {
-      fey: interpretFey(calc.feyPrincipal, calc.feyMethod),
+      fey: interpretFeyFromCalc(calc),
       masa: interpretMasa(calc.indiceMasaVI, data.sexo),
       ai: interpretAI(calc.volAIi),
       ad: interpretAD(data.ad, calc.volADi),
