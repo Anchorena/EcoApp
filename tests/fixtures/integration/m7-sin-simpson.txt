@@ -1,0 +1,19 @@
+Nomb: PRUEBA, INTEGRACION
+ID: SYN-M7-0012 DOB: 01/01/1955 Edad: 71Años Sexo: Masculino
+Cardío adulto
+Fecha Exa: 14/10/2026
+Equipo usado: MINDRAY M7
+Indicaciones y datos clínicos
+Altura: 170.0cm Weight: 75.00kg BSA: 1.86m² HR: 74Bpm
+Cardiology Ultrasound Report - 1 / 1 Pág.
+2D Measurements
+Ventricle Volume
+Simp PS(A4C)
+VFD(A4C): 150.00ml VFS(A4C): 80.00ml
+M-Mode Measurements
+Ventricle Volume
+Teichholz(M)
+SIVd: 1.00cm DIVId: 5.85cm
+PPVId: 0.95cm SIVs: 1.20cm
+DIVIs: 4.47cm PPVIs: 1.30cm
+HR: 606Bpm VFD(Teich): 169.87ml
