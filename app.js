@@ -743,7 +743,7 @@
   }
 
   function escapeRegex(value) {
-    return String(value || "").replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");
+    return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   function toTitleCase(value) {
@@ -919,7 +919,7 @@
     return formatNumber(value, decimals);
   }
 
-  function buildImportReport({ equipment, values, fieldLabels, warnings, rawText }) {
+  function buildImportReport({ equipment, values, fieldLabels, warnings, rawText, review = [], rawEntries = [] }) {
     const found = [];
     const missing = [];
     Object.keys(fieldLabels).forEach((field) => {
@@ -934,7 +934,7 @@
     });
     const finalWarnings = Array.isArray(warnings) ? warnings.slice() : [];
     if (!found.length) finalWarnings.push("No se encontraron mediciones reconocibles para importar.");
-    return { equipment, values, found, missing, warnings: finalWarnings, rawText };
+    return { equipment, values, found, missing, warnings: finalWarnings, rawText, review, rawEntries };
   }
 
   function parseSonoscapePdfText(pdfText) {
@@ -1178,8 +1178,419 @@
     return buildImportReport({ equipment: "Mindray M8/M9", values, fieldLabels: getImportFieldLabels(), warnings, rawText: normalized });
   }
 
+  // ---------------------------------------------------------------------------
+  // Mindray M7
+  //
+  // El informe M7 imprime pares "Etiqueta: valorunidad" agrupados en bloques
+  // (2D / M-Mode / Doppler / TDI) y sub-bloques (Teichholz(M), Simpson BP, AI/Ao(2D)…).
+  // La misma etiqueta puede repetirse en distintos bloques con valores distintos
+  // (HR, Diám AI, Diám ao), por eso NO se busca en el texto global: primero se
+  // tokeniza cada par con su bloque y luego se asigna por contexto.
+  // ---------------------------------------------------------------------------
+
+  // Modelo declarado en la línea "Equipo usado: …" (sin cruzar a la línea siguiente); "" si no hay.
+  function getDeclaredEquipment(normalized) {
+    const match = String(normalized || "").match(/Equipo usado:[ \t]*([^\n]*)/i);
+    return match ? cleanText(match[1]) : "";
+  }
+
+  function isMindrayM7Text(normalized) {
+    // La identificación explícita del equipo tiene prioridad absoluta: si declara otro modelo
+    // (M8, M9…), nunca es M7 aunque comparta la estructura del informe.
+    const declared = getDeclaredEquipment(normalized);
+    if (declared) return /^MINDRAY\s*M7\b/i.test(declared);
+    // Sólo sin modelo declarado se acepta la estructura propia del M7 (con aviso en el parser).
+    return /Cardiology Ultrasound Report\s*-\s*\d+\s*\/\s*\d+/i.test(normalized) && /Fecha Exa:/i.test(normalized);
+  }
+
+  function normalizeM7Label(label) {
+    return cleanText(label).replace(/\s+/g, " ").toLowerCase();
+  }
+
+  function tokenizeMindrayM7Text(normalized) {
+    const groups = {
+      "2d measurements": "2D",
+      "m-mode measurements": "M-Mode",
+      "doppler measurements": "Doppler",
+      "tdi measurements": "TDI"
+    };
+    const knownSections = new Set([
+      "dimensions", "ai/ao(2d)", "ao/ai(2d)", "ai/ao(m)", "ao/ai(m)", "ventricle volume", "teichholz(m)", "teichholz(2d)",
+      "simpson bp", "simp ps(a2c)", "simp ps(a4c)", "atria volume", "ai vol(simp)", "ai vol(a-l)", "ad vol(simp)",
+      "mitral valve", "vma(vti)", "aortic", "vaa(vti)", "tricuspid valve", "tr", "psvd", "pulmonic valve",
+      "qp/qs", "pr", "paedp", "pisa", "pisa rm", "pisa rt", "mv e/ea", "indicaciones y datos clínicos"
+    ]);
+    // Los sub-bloques AI/Ao y Ao/AI (2D o M) terminan en su línea de cociente; lo que sigue
+    // vuelve a ser Dimensions general (Diám VA, ACS, Diám ao general…).
+    const ratioClosesBlock = { "ai/ao(2d)": "ai/ao", "ao/ai(2d)": "ao/ai", "ai/ao(m)": "ai/ao", "ao/ai(m)": "ao/ai" };
+    // Líneas sin datos que no cambian de bloque (páginas de imágenes).
+    const ignoredLines = new Set(["imagen ecografía"]);
+    const pairRegex = /([^:\n]+?)\s*:\s*(-?\d+(?:[.,]\d+)?)\s*(cm\/s|cm\s?²|cm2|cm|mm|ml\/s|ml|mmhg|%|bpm|kg|m²|l\/min|ms|°|años)?(?=\s|$)/gi;
+    const entries = [];
+    const headerLines = [];
+    const unknownSections = [];
+    let inHeader = true;
+    let group = "";
+    let section = "";
+
+    normalized.split("\n").forEach((rawLine) => {
+      const line = cleanText(rawLine);
+      if (!line) return;
+      if (/^Nomb:/i.test(line)) inHeader = true;
+      if (/^Cardiology Ultrasound Report\b/i.test(line)) {
+        inHeader = false;
+        return;
+      }
+      const groupKey = line.toLowerCase();
+      if (groups[groupKey]) {
+        inHeader = false;
+        group = groups[groupKey];
+        section = "";
+        return;
+      }
+      if (inHeader) {
+        headerLines.push(line);
+        return;
+      }
+      const pairs = [];
+      let match;
+      pairRegex.lastIndex = 0;
+      while ((match = pairRegex.exec(line)) !== null) {
+        const unitText = (match[3] || "").replace(/\s+/g, "").replace(/^cm2$/i, "cm²");
+        pairs.push({
+          label: cleanText(match[1]).replace(/\s+/g, " "),
+          value: safeNumber(match[2]),
+          unit: unitText.toLowerCase(),
+          unitText,
+          group,
+          section,
+          raw: cleanText(match[0])
+        });
+      }
+      if (pairs.length) {
+        pairs.forEach((pair) => entries.push(pair));
+        const closingLabel = ratioClosesBlock[section.toLowerCase()];
+        if (closingLabel && pairs.some((pair) => normalizeM7Label(pair.label) === closingLabel)) section = "Dimensions";
+        return;
+      }
+      if (line.includes(":") || ignoredLines.has(groupKey)) return;
+      if (knownSections.has(groupKey)) {
+        section = line;
+      } else {
+        // Encabezado desconocido: se marca para que las etiquetas que dependen
+        // de contexto (HR, Diám AI/ao, DIVId…) no se asignen por arrastre.
+        section = `?${line}`;
+        unknownSections.push(line);
+      }
+    });
+
+    return { entries, headerText: headerLines.join("\n"), unknownSections };
+  }
+
+  function parseMindrayM7PdfText(pdfText) {
+    const normalized = normalizeEchoPdfText(pdfText);
+    const { entries, headerText, unknownSections } = tokenizeMindrayM7Text(normalized);
+    const values = {};
+    const warnings = [];
+    const review = [];
+    const consumed = new Set();
+
+    const formatEntry = (entry) => `${formatNumber(entry.value, 2)}${entry.unitText ? ` ${entry.unitText}` : ""}`;
+    const where = (entry) => [entry.group, entry.section].filter(Boolean).join(" › ") || "sin bloque";
+    const addReview = (entry, reason) => {
+      consumed.add(entry);
+      review.push({ label: entry.label, value: formatEntry(entry), section: where(entry), reason });
+    };
+
+    const find = (labels, filter = () => true) => {
+      const wanted = new Set((Array.isArray(labels) ? labels : [labels]).map(normalizeM7Label));
+      return entries.filter((entry) => wanted.has(normalizeM7Label(entry.label)) && filter(entry));
+    };
+    const inSections = (...names) => {
+      const set = new Set(names.map((name) => name.toLowerCase()));
+      return (entry) => set.has(entry.section.toLowerCase());
+    };
+
+    // Convierte a la unidad del modelo común; null si la unidad impresa no es la esperada.
+    const convert = (entry, target) => {
+      const v = Math.abs(entry.value);
+      const unit = entry.unit;
+      if (target === "mm") return unit === "cm" ? v * 10 : unit === "mm" ? v : null;
+      if (target === "m/s") return unit === "cm/s" ? v / 100 : null;
+      if (target === "cm") return unit === "cm" ? v : null;
+      if (target === "ml") return unit === "ml" ? v : null;
+      if (target === "mmhg") return unit === "mmhg" ? v : null;
+      if (target === "cm²") return unit === "cm²" ? v : null;
+      if (target === "cm/s") return unit === "cm/s" ? v : null;
+      if (target === "bpm") return unit === "bpm" ? v : null;
+      return null;
+    };
+
+    // Asigna un campo sólo si todos los candidatos coinciden; si difieren, no importa y avisa.
+    const assign = (field, candidates, target, description) => {
+      if (!candidates.length) return null;
+      const converted = candidates.map((entry) => ({ entry, value: convert(entry, target) }));
+      const badUnit = converted.filter((item) => item.value === null);
+      if (badUnit.length) {
+        badUnit.forEach((item) => addReview(item.entry, `Unidad inesperada para ${description}; no se importa.`));
+        candidates.forEach((entry) => consumed.add(entry));
+        warnings.push(`${description}: unidad no reconocida en el PDF; revisar manualmente.`);
+        return null;
+      }
+      const distinct = [...new Set(converted.map((item) => Number(item.value.toFixed(4))))];
+      candidates.forEach((entry) => consumed.add(entry));
+      if (distinct.length > 1) {
+        converted.forEach((item) => addReview(item.entry, `Valores distintos de ${description} en el PDF; no se importa ninguno.`));
+        warnings.push(`${description}: el PDF trae valores distintos (${converted.map((item) => `${formatEntry(item.entry)} en ${where(item.entry)}`).join("; ")}); no se importó, revisar.`);
+        return null;
+      }
+      values[field] = converted[0].value;
+      return values[field];
+    };
+
+    // Asigna por niveles de prioridad (método/sección). Los conflictos sólo se evalúan
+    // dentro del primer nivel que tenga candidatos; los niveles inferiores quedan para
+    // revisión y, si difieren del valor elegido, generan un warning.
+    const assignByPriority = (field, tiers, target, description) => {
+      const available = tiers.filter((tier) => tier.candidates.length);
+      if (!available.length) return null;
+      const [chosen, ...lower] = available;
+      const value = assign(field, chosen.candidates, target, description);
+      lower.forEach((tier) => {
+        tier.candidates.forEach((entry) => {
+          const converted = convert(entry, target);
+          const differs = value !== null && converted !== null && Math.abs(converted - value) > 1e-4;
+          addReview(entry, `${tier.name}: menor prioridad que ${chosen.name}; no se usa.`);
+          if (differs) warnings.push(`${description}: ${tier.name} (${formatEntry(entry)}) difiere de ${chosen.name}; se usa ${chosen.name}.`);
+        });
+      });
+      if (value !== null && chosen.fallbackWarning) warnings.push(chosen.fallbackWarning);
+      return value;
+    };
+
+    // --- Datos demográficos (encabezado) ---
+    values.paciente = normalizeImportedPatientName(findTextByPatterns(headerText, /^Nomb:\s*(.+?)(?:\s+ID:.*)?$/im));
+    values.sexo = normalizeImportedSex(findTextByPatterns(headerText, /Sexo:\s*([A-Za-zÁÉÍÓÚáéíóú]+)/i));
+    values.edad = findNumberByPatterns(headerText, /Edad:\s*(\d+)\s*A/i);
+    values.fecha = normalizeImportedDate(findTextByPatterns(headerText, /Fecha Exam?:\s*(\d{2}\/\d{2}\/\d{4})/i));
+    values.talla = findNumberByPatterns(headerText, /Altura:\s*([\d.,]+)\s*cm/i);
+    values.peso = findNumberByPatterns(headerText, /(?:Weight|Peso):\s*([\d.,]+)\s*kg/i);
+    const equipmentId = findTextByPatterns(headerText, /^ID:\s*(\S+)/im);
+    if (equipmentId) {
+      review.push({ label: "ID", value: equipmentId, section: "encabezado", reason: "ID interno del equipo; no se usa como DNI." });
+    }
+
+    // Pares numéricos del encabezado (HR, Pres RA) en la línea de datos clínicos.
+    const headerEntries = [];
+    headerText.split("\n").forEach((line) => {
+      const regex = /(HR|Pres RA)\s*:\s*(-?\d+(?:[.,]\d+)?)\s*(bpm|mmhg)/gi;
+      let match;
+      while ((match = regex.exec(line)) !== null) {
+        headerEntries.push({ label: match[1], value: safeNumber(match[2]), unit: match[3].toLowerCase(), unitText: match[3], group: "encabezado", section: "", raw: match[0] });
+      }
+    });
+
+    // --- FC: encabezado > Simpson BP. Nunca HR de Teichholz u otros bloques. ---
+    const hrHeader = headerEntries.filter((entry) => entry.label.toUpperCase() === "HR");
+    const hrSimpson = find("HR", inSections("Simpson BP"));
+    const hrOthers = find("HR").filter((entry) => !hrSimpson.includes(entry));
+    let fcSource = "";
+    if (hrHeader.length) {
+      values.fc = hrHeader[0].value;
+      fcSource = "encabezado";
+    } else if (hrSimpson.length === 1) {
+      values.fc = hrSimpson[0].value;
+      fcSource = "Simpson BP";
+      consumed.add(hrSimpson[0]);
+      warnings.push(`FC tomada del bloque Simpson BP (${formatNumber(values.fc, 0)} lpm): el encabezado no trae FC; verificar.`);
+    }
+    [...(fcSource === "encabezado" ? hrSimpson : []), ...hrOthers].forEach((entry) => {
+      const differs = hasValue(values.fc) && Math.abs(entry.value - values.fc) > 10;
+      addReview(entry, differs ? "HR de un bloque de medición distinta de la FC clínica; no se usa." : "HR de un bloque de medición; no se usa como FC clínica.");
+      if (differs) warnings.push(`HR ${formatNumber(entry.value, 0)} lpm en ${where(entry)} difiere de la FC importada (${formatNumber(values.fc, 0)} lpm, ${fcSource}); se ignora.`);
+    });
+    if (!hasValue(values.fc) && hrOthers.length) {
+      warnings.push("No se encontró FC en el encabezado ni en Simpson BP; las HR de otros bloques no se usan. Cargar FC manualmente.");
+    }
+
+    // --- VI: Teichholz. Puede venir como Teichholz(2D) o Teichholz(M); si están ambos,
+    // se aplica la prioridad general del parser: medición 2D explícita antes que M-Mode.
+    [["ddvi", "DIVId", "DDVI (DIVId)"], ["dsvi", "DIVIs", "DSVI (DIVIs)"], ["sivd", "SIVd", "Septum IV (SIVd)"], ["ppd", "PPVId", "Pared posterior (PPVId)"]].forEach(([field, label, description]) => {
+      assignByPriority(field, [
+        { name: "Teichholz(2D)", candidates: find(label, inSections("Teichholz(2D)")) },
+        { name: "Teichholz(M)", candidates: find(label, inSections("Teichholz(M)")) }
+      ], "mm", description);
+    });
+
+    // --- Simpson: sólo biplano ---
+    assign("vtdSimpson", find("VFD(Simp BP)"), "ml", "VTD Simpson biplano");
+    assign("vtsSimpson", find("VFS(Simp BP)"), "ml", "VTS Simpson biplano");
+    const monoplane = find(["VFD(A4C)", "VFS(A4C)", "VFD(A2C)", "VFS(A2C)"]);
+    monoplane.forEach((entry) => addReview(entry, "Volumen monoplano; no es Simpson biplano."));
+    if ((!hasValue(values.vtdSimpson) || !hasValue(values.vtsSimpson)) && monoplane.length) {
+      warnings.push("El PDF sólo trae Simpson monoplano (A4C/A2C); no se importa como biplano. Revisar FEVI.");
+    } else if (!hasValue(values.vtdSimpson) || !hasValue(values.vtsSimpson)) {
+      warnings.push("No se detectó Simpson biplano completo; revisar FEVI antes de imprimir.");
+    }
+
+    // --- Aurículas ---
+    assign("volAI", find(["AI Vol(BP)", "AI Vol(Simp BP)"]), "ml", "Volumen AI biplano");
+    const aiMono = find(["AI Vol(A4C)", "AI Vol(A2C)"]);
+    if (!hasValue(values.volAI) && aiMono.length) {
+      warnings.push("Volumen AI sólo monoplano (A4C/A2C); no se importa como volumen biplano. Revisar.");
+    }
+    aiMono.forEach((entry) => addReview(entry, "Volumen AI monoplano; no se usa como volumen AI biplano."));
+    assign("volAD", find("AD Vol(A4C)"), "ml", "Volumen AD (A4C)");
+
+    // --- AI y raíz aórtica, por niveles (sólo hay conflicto bloqueante dentro de un mismo nivel):
+    //   aiDiam: AI/Ao(2D)·Ao/AI(2D) > AI/Ao(M)·Ao/AI(M) (con aviso). Un "Diám AI" de otro bloque sólo
+    //           se usaría si su semántica estuviera validada; hoy ninguno lo está. En particular, el
+    //           "Diám AI" del bloque AI Vol(A-L) es parte del método área-longitud de volumen AI y no
+    //           está demostrado que sea el diámetro lineal estándar: NO alimenta aiDiam.
+    //   raizAo: 2D Dimensions general > AI/Ao(2D)·Ao/AI(2D) > M-Mode (con aviso).
+    const in2D = (...names) => (entry) => entry.group === "2D" && names.includes(entry.section.toLowerCase());
+    const inMMode = (...names) => (entry) => entry.group === "M-Mode" && (!names.length || names.includes(entry.section.toLowerCase()));
+    const diamTiers = {
+      aiDiam: [
+        { name: "AI/Ao(2D)", candidates: find("Diám AI", in2D("ai/ao(2d)", "ao/ai(2d)")) },
+        { name: "AI/Ao(M)", candidates: find("Diám AI", inMMode("ai/ao(m)", "ao/ai(m)")), fallbackWarning: "Diámetro AI tomado de M-Mode (AI/Ao(M)); no hay medición AI/Ao(2D). Verificar." }
+      ],
+      raizAo: [
+        { name: "2D Dimensions", candidates: find("Diám ao", in2D("dimensions")) },
+        { name: "AI/Ao(2D)", candidates: find("Diám ao", in2D("ai/ao(2d)", "ao/ai(2d)")) },
+        { name: "M-Mode", candidates: find("Diám ao", inMMode()), fallbackWarning: "Raíz aórtica (Diám ao) tomado de M-Mode (no hay medición 2D); verificar." }
+      ]
+    };
+    assignByPriority("aiDiam", diamTiers.aiDiam, "mm", "Diámetro AI");
+    assignByPriority("raizAo", diamTiers.raizAo, "mm", "Raíz aórtica (Diám ao)");
+    ["Diám AI", "Diám ao"].forEach((label) => {
+      find(label).filter((entry) => !consumed.has(entry)).forEach((entry) => {
+        const section = entry.section.toLowerCase();
+        if (section === "ai vol(a-l)") addReview(entry, "Medición asociada al método area-length de volumen AI; no se mapea a aiDiam automáticamente.");
+        else if (section.startsWith("?")) addReview(entry, `Bloque no reconocido ("${entry.section.slice(1)}"); no se asigna.`);
+        else addReview(entry, `${label} en un bloque cuya semántica no está validada para este campo; no se mapea.`);
+      });
+    });
+
+    // --- TSVI / válvula aórtica ---
+    assign("diamTsvi", find("Diám TSVI"), "mm", "Diámetro TSVI");
+    assign("vtiTsvi", find("VTI TSVI"), "cm", "VTI TSVI");
+    assign("vmaxTsvi", find("Vmáx TSVI"), "m/s", "Vmáx TSVI");
+    assign("vmaxAo", find("Vmáx VA"), "m/s", "Vmáx aórtica");
+    assign("gradAoPico", find("PGmáx VA"), "mmhg", "Gradiente pico aórtico");
+    assign("gradAo", find("PGmed VA"), "mmhg", "Gradiente medio aórtico");
+    assign("vtiAo", find("VTI VA"), "cm", "VTI aórtico");
+    assign("aoArea", find("VAA(VTI)"), "cm²", "Área valvular aórtica (VTI)");
+
+    // --- Mitral ---
+    assign("ondaE", find("E Vel VM"), "m/s", "Onda E");
+    assign("ondaA", find("VM A Vel"), "m/s", "Onda A");
+    assign("eSeptal", find("Vel. septal E' VM"), "cm/s", "e′ septal");
+    assign("eLateral", find("Vel. lateral E' VM"), "cm/s", "e′ lateral");
+    const ratio = (field, labels, description) => {
+      const candidates = find(labels);
+      if (!candidates.length) return;
+      candidates.forEach((entry) => consumed.add(entry));
+      const distinct = [...new Set(candidates.map((entry) => Math.abs(entry.value)))];
+      if (distinct.length === 1) {
+        values[field] = distinct[0];
+        return;
+      }
+      candidates.forEach((entry) => addReview(entry, `Valores distintos de ${description} en el PDF; no se importa ninguno.`));
+      warnings.push(`${description}: valores distintos en el PDF (${candidates.map((entry) => `${formatEntry(entry)} en ${where(entry)}`).join("; ")}); no se importó, revisar.`);
+    };
+    ratio("eeSeptal", "MV E/E' Septal", "E/e′ septal");
+    ratio("eeLateral", "E/E' lateral VM", "E/e′ lateral");
+    ratio("eePromedioManual", "MV E/E'", "E/e′ promedio");
+    assign("miEroa", find("EROA RM"), "cm²", "EROA IM");
+
+    // --- Pulmonar: Vmáx VP / PGmáx VP / PGmed VP pertenecen al bloque Pulmonic Valve (válvula).
+    // Vmáx/Vmed/PG/VTI TSVD son del tracto de salida del VD: sin campo en el modelo, quedan sin mapear.
+    assign("vmaxPulm", find("Vmáx VP"), "m/s", "Vmáx pulmonar");
+    assign("gradPulmPico", find("PGmáx VP"), "mmhg", "Gradiente pico pulmonar");
+    assign("gradPulm", find("PGmed VP"), "mmhg", "Gradiente medio pulmonar");
+
+    // --- Tricúspide / presiones ---
+    // TV Vmax (bloque Tricuspid Valve) es el flujo anterógrado tricuspídeo → vmaxTric.
+    // TR Vmax (bloques TR / PSVD / PISA RT) es el jet de insuficiencia → trVmax. No se mezclan.
+    // "0" en el M7 significa campo no medido: no utilizable.
+    // TR Vmax < 1 m/s: SALVAGUARDA TÉCNICA DEL PARSER, no criterio diagnóstico. Se trata como
+    // medición de baja confiabilidad para estimar PSAP: el valor original queda en revisión con
+    // warning, pero no se carga en trVmax (calculateDerived() lo usaría para la PSAP) ni se usa
+    // la PSVD que el equipo derivó de él para alimentar psapManual/conclusión.
+    const TR_VMAX_MIN_AUTO_PSAP = 1; // m/s
+    const dropZero = (list, description) => list.filter((entry) => {
+      if (Math.abs(entry.value) > 0) return true;
+      addReview(entry, `${description} = 0 (no medido); no se importa.`);
+      return false;
+    });
+    assign("vmaxTric", dropZero(find("TV Vmax"), "TV Vmax"), "m/s", "Vmáx tricuspídea");
+    const trCandidates = dropZero(find("TR Vmax"), "TR Vmax");
+    const pgCandidates = dropZero(find("TR PGmax"), "TR PGmax");
+    const psvdCandidates = find("PSVD");
+    const trValue = trCandidates.length ? assign("trVmax", trCandidates, "m/s", "TR Vmax") : null;
+    if (trValue !== null && trValue < TR_VMAX_MIN_AUTO_PSAP) {
+      delete values.trVmax;
+      trCandidates.forEach((entry) => addReview(entry, "TR Vmax < 1 m/s: baja confiabilidad para estimar PSAP; no se carga automáticamente (salvaguarda del parser)."));
+      pgCandidates.forEach((entry) => addReview(entry, "Gradiente derivado de un TR Vmax de baja confiabilidad; no se carga automáticamente."));
+      psvdCandidates.forEach((entry) => addReview(entry, "PSVD del equipo derivada de un TR Vmax de baja confiabilidad; no se usa para la PSAP."));
+      warnings.push(`TR Vmax ${formatNumber(trValue, 2)} m/s: baja confiabilidad para estimar PSAP (salvaguarda del parser, no criterio diagnóstico). No se cargan automáticamente TR Vmax, gradiente ni PSVD; el valor original queda en revisión.`);
+    } else if (trValue !== null) {
+      assign("tvPg", pgCandidates, "mmhg", "Gradiente VD-AD (TR PGmax)");
+      assign("psapManual", psvdCandidates, "mmhg", "PSVD informada");
+    } else {
+      pgCandidates.forEach((entry) => addReview(entry, "Sin TR Vmax utilizable; no se importa."));
+      psvdCandidates.forEach((entry) => addReview(entry, "Sin TR Vmax utilizable; no se usa para la PSAP."));
+    }
+    const rapEntries = [...headerEntries.filter((entry) => /^Pres RA$/i.test(entry.label)), ...find(["RAP", "Pres RA"])];
+    assign("prADmanual", rapEntries, "mmhg", "Presión AD / RAP");
+    if (hasValue(values.psapManual)) {
+      warnings.push("El M7 informa RAP/PSVD; se importan como valores informados y tienen prioridad sobre la estimación por VCI.");
+    } else if (hasValue(values.prADmanual)) {
+      warnings.push("El M7 informa RAP; se importa como PAD informada y tiene prioridad sobre la estimación por VCI. La PSVD no se importó.");
+    }
+
+    // --- Lo que no se asignó queda visible para revisión ---
+    // Se omiten sólo derivados del propio equipo (SV/CO/FE…, gradientes calculados, ángulos, cocientes).
+    const derivedLabel = /^(?:(?:SV|SI|CO|CI|FE|EF|FS)\(.*\)|VFD\(Teich\)|VFS\(Teich\)|.*\bθ|AI\/Ao|Ao\/AI|E\/A VM|VT E\/A|MV [EA] PG|TV [EA] PG|PGmáx ?TSVI|PGmed TSVI|PGmáx TSVD|PGmed TSVD|SV TSVI|SI TSVI|VA SV|VA SI|LVId[24]i|LVL?Is[24]i)$/i;
+    entries.forEach((entry) => {
+      if (consumed.has(entry) || derivedLabel.test(entry.label)) return;
+      if (entry.section.startsWith("?")) addReview(entry, `Bloque no reconocido ("${entry.section.slice(1)}"); no se asigna.`);
+      else if (/TSVD/i.test(entry.label)) addReview(entry, "Tracto de salida del VD (TSVD): sin campo en el modelo de EcoApp; no se mapea.");
+      else addReview(entry, "Sin equivalente confirmado en el modelo de EcoApp.");
+    });
+    if (unknownSections.length) {
+      warnings.push(`Bloques no reconocidos en el PDF: ${[...new Set(unknownSections)].join(", ")}. Sus valores quedan para revisión.`);
+    }
+    if (!getDeclaredEquipment(normalized)) {
+      warnings.push("Formato M7 detectado por estructura (sin 'Equipo usado: MINDRAY M7'); confirmar equipo.");
+    }
+
+    const uniqueReview = [];
+    const seen = new Set();
+    review.forEach((item) => {
+      const key = `${item.label}|${item.value}|${item.reason}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      uniqueReview.push(item);
+    });
+
+    return buildImportReport({
+      equipment: "Mindray M7",
+      values,
+      fieldLabels: getImportFieldLabels(),
+      warnings: [...new Set(warnings)], // mensajes idénticos (p. ej. AI/Ao(2D) y Ao/AI(2D) repetidos) una sola vez
+      rawText: normalized,
+      review: uniqueReview,
+      rawEntries: [...headerEntries, ...entries]
+    });
+  }
+
   function parseEchoPdfText(pdfText) {
     const normalized = normalizeEchoPdfText(pdfText);
+    if (isMindrayM7Text(normalized)) {
+      return parseMindrayM7PdfText(normalized);
+    }
     if (/Mindray|Equipo usado:\s*Mindray|Cardiolog[ií]a\s*-\s*\d+\s*\/\s*\d+\s*Page|Nomb:/i.test(normalized)) {
       return parseMindrayPdfText(normalized);
     }
@@ -1238,6 +1649,11 @@
       ? `<div class="annex-import-muted"><strong>Notas:</strong> ${report.warnings.map(escapeHtml).join(" ")}</div>`
       : `<div class="annex-import-muted">Revisá los valores importados antes de imprimir el informe.</div>`;
 
+    const review = Array.isArray(report.review) ? report.review : [];
+    const reviewHtml = review.length
+      ? `<details style="margin-top:10px;"><summary><strong>Datos del PDF no importados / a revisar (${review.length})</strong></summary><ul class="annex-import-list">${review.map((item) => `<li><span>${escapeHtml(item.label)}<br><span class="annex-import-muted">${escapeHtml(item.section)} — ${escapeHtml(item.reason)}</span></span><span class="annex-import-value">${escapeHtml(item.value)}</span></li>`).join("")}</ul></details>`
+      : "";
+
     wrap.innerHTML = `
       <div class="annex-import-title-row">
         <h3>Lectura preliminar del PDF</h3>
@@ -1254,6 +1670,7 @@
         </div>
       </div>
       <div style="margin-top:10px;">${warningsHtml}</div>
+      ${reviewHtml}
     `;
     wrap.style.display = "block";
   }
@@ -1308,6 +1725,7 @@ El PDF propone: ${incomingText}.
     const cfg = NORMAL_RANGES[key];
     if (!cfg) return "";
     if (typeof cfg.normal === "string") {
+      if (cfg.normal === "—") return "—"; // sin rango de referencia propio (p. ej. Teichholz, estimación secundaria)
       return cfg.normal + (cfg.unit ? ` ${cfg.unit}` : "");
     }
     if (typeof cfg.normal === "object") {
@@ -1733,6 +2151,27 @@ El PDF propone: ${incomingText}.
     };
   }
 
+  // Volumen VI por Teichholz: V = 7 / (2.4 + D) × D³, con D en cm → ml. null si D no es válido.
+  function calculateTeichholzVolume(diameterCm) {
+    if (diameterCm === null || diameterCm === undefined || !Number.isFinite(Number(diameterCm)) || Number(diameterCm) <= 0) return null;
+    const d = Number(diameterCm);
+    return (7 / (2.4 + d)) * Math.pow(d, 3);
+  }
+
+  // FEVI estimada por Teichholz a partir de DDVI/DSVI en mm. Estimación lineal secundaria:
+  // nunca reemplaza a Simpson ni se promueve sola a FEVI principal (ver docs/fevi-methods.md).
+  function calculateTeichholz(ddviMm, dsviMm) {
+    const empty = { vtd: null, vts: null, fey: null };
+    if (!hasValue(ddviMm) || !hasValue(dsviMm)) return empty;
+    const dd = Number(ddviMm);
+    const ds = Number(dsviMm);
+    if (!(dd > 0) || !(ds > 0) || ds >= dd) return empty;
+    const vtd = calculateTeichholzVolume(dd / 10);
+    const vts = calculateTeichholzVolume(ds / 10);
+    if (vtd === null || vts === null || vtd <= 0) return empty;
+    return { vtd, vts, fey: ((vtd - vts) / vtd) * 100 };
+  }
+
   function calculateDerived(data) {
     const bsa = data.peso && data.talla ? Math.sqrt((data.peso * data.talla) / 3600) : null;
     const imc = data.peso && data.talla ? data.peso / Math.pow(data.talla / 100, 2) : null;
@@ -1741,13 +2180,11 @@ El PDF propone: ${incomingText}.
     const fa = safeDivide(faBase, data.ddvi);
     const faPct = fa !== null ? fa * 100 : null;
 
-    const feyTeichholz =
-      data.ddvi !== null && data.dsvi !== null && data.ddvi !== 0
-        ? ((Math.pow(data.ddvi, 3) - Math.pow(data.dsvi, 3)) / Math.pow(data.ddvi, 3)) * 100
-        : null;
+    const teichholz = calculateTeichholz(data.ddvi, data.dsvi);
+    const feyTeichholz = teichholz.fey;
 
     const feySimpson =
-      data.vtdSimpson !== null && data.vtsSimpson !== null && data.vtdSimpson !== 0
+      hasValue(data.vtdSimpson) && hasValue(data.vtsSimpson) && data.vtdSimpson > 0 && data.vtsSimpson > 0 && data.vtsSimpson < data.vtdSimpson
         ? ((data.vtdSimpson - data.vtsSimpson) / data.vtdSimpson) * 100
         : null;
 
@@ -1827,14 +2264,18 @@ El PDF propone: ${incomingText}.
     const psap = data.psapManual !== null ? data.psapManual : (gradVDAD !== null && prADestimada !== null ? gradVDAD + prADestimada : null);
     const volAIi = data.volAI !== null && bsa !== null && bsa !== 0 ? data.volAI / bsa : null;
     const volADi = data.volADi !== null ? data.volADi : (data.volAD !== null && bsa !== null && bsa !== 0 ? data.volAD / bsa : null);
-    const feyPrincipal = feySimpson !== null ? feySimpson : feyTeichholz;
-    const feyMethod = feySimpson !== null ? "Simpson" : (feyTeichholz !== null ? "Teichholz" : null);
+    // Sólo Simpson biplano es FEVI principal. Teichholz queda como estimación secundaria (feyTeichholz)
+    // y no se promueve aunque falte Simpson.
+    const feyPrincipal = feySimpson;
+    const feyMethod = feySimpson !== null ? "Simpson" : null;
 
     return {
       bsa,
       imc,
       fa: faPct,
       feyTeichholz,
+      vtdTeichholz: teichholz.vtd,
+      vtsTeichholz: teichholz.vts,
       feySimpson,
       feyPrincipal,
       feyMethod,
@@ -1858,6 +2299,15 @@ El PDF propone: ${incomingText}.
       volAIi,
       volADi
     };
+  }
+
+  // Interpretación de FEVI para la narrativa: sin Simpson no se clasifica la función sistólica,
+  // aunque exista una estimación por Teichholz.
+  function interpretFeyFromCalc(calc) {
+    if (calc.feyPrincipal === null && calc.feyTeichholz !== null) {
+      return { grade: "nr", text: "Fracción de eyección por Simpson no disponible." };
+    }
+    return interpretFey(calc.feyPrincipal, calc.feyMethod);
   }
 
   function interpretFey(value, method = null) {
@@ -3070,7 +3520,7 @@ El PDF propone: ${incomingText}.
       ["IMC", calc.imc, "kg/m²"],
       ["BSA", calc.bsa, "m²"],
       ["FEVI Simpson", calc.feySimpson, "%"],
-      ["FEVI Teichholz", calc.feyTeichholz, "%"],
+      ["FEVI Teichholz (estimación secundaria)", calc.feyTeichholz, "%"],
       ["Fracción de acortamiento", calc.fa, "%"],
       ["Relación AI/Ao", calc.relAiAo, ""],
       ["Anillo aórtico", data.dvao, "mm"],
@@ -3250,7 +3700,7 @@ El PDF propone: ${incomingText}.
       else parts.push(`Hipertrofia excéntrica del ventrículo izquierdo. Índice de masa ventricular aumentado (${formatNumber(calc.indiceMasaVI, 0)} g/m²).`);
     }
 
-    if (calc.feyPrincipal !== null) parts.push(interp.fey.text);
+    if (calc.feyPrincipal !== null || calc.feyTeichholz !== null) parts.push(interp.fey.text);
 
     parts.push(motilityGlobalText(data.motilidadGlobal));
     parts.push(segmentText.long);
@@ -3340,7 +3790,7 @@ El PDF propone: ${incomingText}.
       ["Septum IV", data.sivd, "sivd"],
       ["Pared posterior", data.ppd, "ppd"],
       ["FEVI Simpson", calc.feySimpson, "feySimpson"],
-      ["FEVI Teichholz", calc.feyTeichholz, "feyTeichholz"],
+      ["FEVI Teichholz (estimación secundaria)", calc.feyTeichholz, "feyTeichholz"],
       ["Fracción de acortamiento", calc.fa, "fa"],
       ["Masa VI (ASE)", calc.masaVIase, "masaVIase"],
       ["Índice masa VI", calc.indiceMasaVI, "indiceMasaVI"],
@@ -3407,7 +3857,7 @@ El PDF propone: ${incomingText}.
   function buildMeasurementTableSection(data, calc, section = "all") {
     const rows = [
       ["DDVI", data.ddvi, "ddvi"], ["DSVI", data.dsvi, "dsvi"], ["Septum IV", data.sivd, "sivd"], ["Pared posterior", data.ppd, "ppd"],
-      ["FEVI Simpson", calc.feySimpson, "feySimpson"], ["FEVI Teichholz", calc.feyTeichholz, "feyTeichholz"], ["Fracción de acortamiento", calc.fraccionAcortamiento, "fraccionAcortamiento"],
+      ["FEVI Simpson", calc.feySimpson, "feySimpson"], ["FEVI Teichholz (estimación secundaria)", calc.feyTeichholz, "feyTeichholz"], ["Fracción de acortamiento", calc.fraccionAcortamiento, "fraccionAcortamiento"],
       ["Masa VI (ASE)", calc.masaVI, "masaVI"], ["Índice masa VI", calc.masaIndex, "indiceMasaVI"], ["Aurícula izquierda", data.aiDiam, "aiDiam"],
       ["Volumen AI", data.volAI, "volAI"], ["Vol. AI indexado", calc.volAIIndex, "volAIIndex"], ["Raíz aórtica", data.raizAo, "raizAo"], ["Anillo aórtico", data.aoAnillo, "anilloAo"],
       ["Relación AI/Ao", calc.relAIAo, "relAIAo"], ["VD basal", data.vdBasal, "vdBasal"], ["TAPSE", data.tapse, "tapse"], ["Aurícula derecha", data.ad, "ad"],
@@ -3885,7 +4335,7 @@ El PDF propone: ${incomingText}.
     const calc = calculateDerived(data);
 
     const interp = {
-      fey: interpretFey(calc.feyPrincipal, calc.feyMethod),
+      fey: interpretFeyFromCalc(calc),
       masa: interpretMasa(calc.indiceMasaVI, data.sexo),
       ai: interpretAI(calc.volAIi),
       ad: interpretAD(data.ad, calc.volADi),

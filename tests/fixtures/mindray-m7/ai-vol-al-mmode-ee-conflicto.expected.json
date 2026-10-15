@@ -1,0 +1,16 @@
+{
+  "equipment": "Mindray M7",
+  "values": { "fc": 81, "aiDiam": 37, "raizAo": 30, "volAD": 35, "ondaE": 0.9, "eeLateral": 9 },
+  "absent": ["eeSeptal", "volAI"],
+  "warningsInclude": [
+    "Diámetro AI tomado de M-Mode (AI/Ao(M)); no hay medición AI/Ao(2D). Verificar.",
+    "Raíz aórtica (Diám ao) tomado de M-Mode (no hay medición 2D); verificar.",
+    "E/e′ septal: valores distintos en el PDF"
+  ],
+  "warningsExclude": ["Bloques no reconocidos", "difiere de AI Vol(A-L)"],
+  "reviewInclude": [
+    "Diám AI :: Medición asociada al método area-length de volumen AI; no se mapea a aiDiam automáticamente.",
+    "MV E/E' Septal :: Valores distintos de E/e′ septal",
+    "AI Vol(A-L)"
+  ]
+}

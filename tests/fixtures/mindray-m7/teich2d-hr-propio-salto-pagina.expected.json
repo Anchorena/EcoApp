@@ -1,0 +1,12 @@
+{
+  "equipment": "Mindray M7",
+  "values": {
+    "paciente": "Prueba Dos", "edad": 21, "fecha": "2026-09-02", "talla": 170, "peso": 65, "fc": 68,
+    "ddvi": 46, "dsvi": 30, "sivd": 8, "ppd": 7.5,
+    "vtdSimpson": 96, "vtsSimpson": 38, "aiDiam": 29, "raizAo": 23, "diamTsvi": 19,
+    "ondaE": 0.72, "ondaA": 0.45, "vmaxAo": 0.95, "gradAoPico": 3.61
+  },
+  "absent": ["dni", "trVmax", "tvPg", "psapManual", "volAI", "volAD"],
+  "warningsInclude": ["FC tomada del bloque Simpson BP (68 lpm)", "HR 82 lpm en 2D › Teichholz(2D) difiere de la FC importada"],
+  "reviewInclude": ["HR", "TR Vmax", "TR PGmax", "VFD(A4C)", "VFS(A4C)"]
+}

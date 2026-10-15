@@ -1,0 +1,32 @@
+Nomb: PRUEBA, SEIS
+ID: SYN-M7-0006 DOB: 01/01/1980 Edad: 46Años Sexo: Femenino
+Cardío adulto
+Fecha Exa: 12/10/2026
+Equipo usado: MINDRAY M7
+Indicaciones y datos clínicos
+Altura: 165.0cm Weight: 62.00kg BSA: 1.68m² HR: 75Bpm
+Cardiology Ultrasound Report - 1 / 1 Pág.
+2D Measurements
+Ventricle Volume
+Teichholz(2D)
+SIVd: 0.90cm DIVId: 4.70cm
+PPVId: 0.85cm DIVIs: 3.00cm
+Teichholz(2D)
+SIVd: 0.90cm DIVId: 5.10cm
+PPVId: 0.85cm DIVIs: 3.00cm
+M-Mode Measurements
+Ventricle Volume
+Teichholz(M)
+SIVd: 0.95cm DIVId: 4.90cm
+PPVId: 0.85cm DIVIs: 3.10cm
+Doppler Measurements
+Tricuspid Valve
+TV Vmax: 48.00cm/s TV PGmax: 0.92mmHg
+TR
+TR Vmax: 85.00cm/s TR PGmax: 2.89mmHg
+PSVD
+RAP: 3.00mmHg TR Vmax: 85.00cm/s
+TR PGmax: 2.89mmHg PSVD: 5.89mmHg
+Pulmonic Valve
+Vmáx TSVD: 75.00cm/s PGmáx TSVD: 2.25mmHg
+Vmáx VP: 110.00cm/s PGmáx VP: 4.84mmHg

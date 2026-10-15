@@ -1,0 +1,15 @@
+{
+  "equipment": "Mindray M7",
+  "isMindrayM7": true,
+  "warningsExclude": ["Formato M7 detectado por estructura"],
+  "values": {
+    "paciente": "Prueba Tres", "sexo": "Femenino", "edad": 66, "fecha": "2026-08-05", "talla": 158, "peso": 60,
+    "fc": 64, "ddvi": 48, "dsvi": 31, "sivd": 10, "ppd": 9,
+    "vtdSimpson": 82, "vtsSimpson": 30.5, "volAI": 62, "volAD": 38, "raizAo": 29, "diamTsvi": 20,
+    "ondaE": 0.55, "ondaA": 0.75, "vmaxTric": 0.45,
+    "trVmax": 2.8, "tvPg": 31.36, "psapManual": 39.36, "prADmanual": 8
+  },
+  "absent": ["dni", "aiDiam"],
+  "warningsInclude": ["HR 606 lpm en M-Mode › Teichholz(M) difiere de la FC importada (64 lpm, encabezado)", "El M7 informa RAP/PSVD"],
+  "reviewInclude": ["HR", "AI Vol(A4C)", "AI Vol(A2C)", "Diám VA", "Diám Asc Aórt"]
+}

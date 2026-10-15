@@ -1,0 +1,39 @@
+esaoteMyLab
+Apellido PRUEBA Nombre SINTETICA ESAOTE
+Identificador SYN-0001
+Sexo F Edad 63 A
+Fecha examen 10/09/2026
+Peso 71.0 kg
+Altura 162 cm
+HR 68 bpm
+M-Mode
+Diam diastolico VI 47 mm
+Diam sistolico VI 30 mm
+Septo IV diastole 10 mm
+Pared post diastole VI 9 mm
+B-Mode
+Volumen diast biplano VI 98 ml
+Volumen sist biplano VI 38 ml
+Diametro AI 37 mm
+Vol AI (MOD A4C) 48 ml
+Vol AI (MOD A2C) 52 ml
+Diám senos Valsalva 32 mm
+Diametro aortico 21 mm
+Diam AI/diam ao 1.16
+Diast eje largo ventr dcho 35 mm
+TAPSE 21 mm
+Vel pico onda E mit 0.72 m/s
+Vel pico onda A mit 0.80 m/s
+Onda e' lateral 0.11 m/s
+Onda e' septal 0.08 m/s
+Vel max VA 1.35 m/s
+Gradiente med aorta 4 mmHg
+GrP AoD 7 mmHg
+Flujo Ao VTI 0.25 m
+Area aortica efect (VTI) 2.7 cm²
+Diametro TSVI 21 mm
+VTI TSVI 0.20 m
+Vel pico TAOVI 0.98 m/s
+Vel reg tricusp 2.40 m/s
+Grad reg tricusp 23 mmHg
+Pericardio libre

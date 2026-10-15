@@ -1,0 +1,21 @@
+Nomb: PRUEBA, NUEVE
+ID: SYN-M7-0009 DOB: 01/01/1975 Edad: 51Años Sexo: Masculino
+Cardío adulto
+Fecha Exa: 13/10/2026
+Equipo usado: MINDRAY M7
+Indicaciones y datos clínicos
+Altura: 176.0cm Weight: 80.00kg BSA: 1.96m² HR: 66Bpm
+Cardiology Ultrasound Report - 1 / 1 Pág.
+2D Measurements
+Dimensions
+AI/Ao(2D)
+Diám AI: 3.80cm Diám ao: 3.10cm
+AI/Ao: 1.23
+Atria Volume
+AI Vol(A-L)
+Diám AI: 4.10cm AI Vol(A-L): 60.00ml
+M-Mode Measurements
+Dimensions
+AI/Ao(M)
+Diám AI: 3.50cm Diám ao: 2.90cm
+AI/Ao: 1.21

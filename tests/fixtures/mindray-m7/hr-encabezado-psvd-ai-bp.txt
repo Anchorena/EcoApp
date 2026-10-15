@@ -1,0 +1,68 @@
+Consultorio de Prueba
+Nomb: PRUEBA, TRES
+ID: SYN-M7-0003
+DOB: 01/01/1970 Edad: 66Años
+Sexo: Femenino
+Domicilio de prueba 123
+Cardío adulto
+Fecha Exa: 05/08/2026
+Equipo usado: MINDRAY M7
+Operador: Dr. Operador Prueba
+Indicaciones y datos clínicos
+Altura: 158.0cm Weight: 60.00kg BSA: 1.62m² HR: 64Bpm Pres RA: 8.00mmHg
+Cardiology Ultrasound Report - 1 / 3 Pág.
+2D Measurements
+Dimensions
+Diám ao: 2.90cm Diám VA: 2.10cm
+Diám TSVI: 2.00cm Diám Asc Aórt: 3.10cm
+Ventricle Volume
+Simpson BP
+LVId2i: 7.00cm LVIs2i: 5.00cm
+LVId4i: 7.10cm LVLIs4i: 5.10cm
+HR: 66Bpm VFD(A2C): 80.00ml
+VFS(A2C): 30.00ml VFD(A4C): 84.00ml
+VFS(A4C): 31.00ml VFD(Simp BP): 82.00ml
+VFS(Simp BP): 30.50ml SV(Simp BP): 51.50ml
+FE(Simp BP): 62.8% SI(Simp BP): 31.79
+Atria Volume
+AI Vol(Simp)
+AI Vol(A2C): 60.00ml AI Vol(A4C): 64.00ml
+AI Vol(BP): 62.00ml
+AD Vol(Simp)
+AD Vol(A4C): 38.00ml
+M-Mode Measurements
+Ventricle Volume
+Teichholz(M)
+SIVd: 1.00cm DIVId: 4.80cm
+PPVId: 0.90cm SIVs: 1.30cm
+DIVIs: 3.10cm PPVIs: 1.40cm
+HR: 606Bpm VFD(Teich): 107.00ml
+Nomb: PRUEBA, TRES
+ID: SYN-M7-0003 Sexo: Femenino
+Cardío adulto
+Fecha Exa: 05/08/2026
+Cardiology Ultrasound Report - 2 / 3 Pág.
+Doppler Measurements
+Mitral Valve
+E Vel VM: 55.00cm/s MV E PG: 1.21mmHg
+VM A Vel: 75.00cm/s MV A PG: 2.25mmHg
+E/A VM: 0.73
+Tricuspid Valve
+TV Vmax: 45.00cm/s TV PGmax: 0.81mmHg
+TR
+TR Vmax: 280.00cm/s TR PGmax: 31.36mmHg
+PSVD
+RAP: 8.00mmHg TR Vmax: 280.00cm/s
+TR PGmax: 31.36mmHg PSVD: 39.36mmHg
+PR
+PAEDP
+RAP: 8.00mmHg
+PISA
+PISA RT
+TR Vmax: 280.00cm/s
+Nomb: PRUEBA, TRES
+ID: SYN-M7-0003 Sexo: Femenino
+Cardío adulto
+Fecha Exa: 05/08/2026
+Cardiology Ultrasound Report - 3 / 3 Pág.
+Coment:

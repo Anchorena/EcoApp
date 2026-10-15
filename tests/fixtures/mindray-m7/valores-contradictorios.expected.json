@@ -1,0 +1,33 @@
+{
+  "equipment": "Mindray M7",
+  "values": {
+    "fc": 88,
+    "raizAo": 33,
+    "sivd": 10,
+    "ppd": 9,
+    "dsvi": 32,
+    "ddvi": 50
+  },
+  "absent": [
+    "aiDiam",
+    "vtdSimpson",
+    "vtsSimpson"
+  ],
+  "warningsInclude": [
+    "Diámetro AI: el PDF trae valores distintos",
+    "DDVI (DIVId): Teichholz(M) (5,30 cm) difiere de Teichholz(2D); se usa Teichholz(2D).",
+    "HR 689 lpm en M-Mode › Teichholz(M) difiere de la FC importada (88 lpm, encabezado)",
+    "El PDF sólo trae Simpson monoplano",
+    "Bloques no reconocidos en el PDF: Bloque Prueba(2D)"
+  ],
+  "reviewInclude": [
+    "Diám AI",
+    "DIVId",
+    "VFD(A4C)",
+    "VFS(A4C)",
+    "HR",
+    "Diám AI :: Valores distintos de Diámetro AI",
+    "Diám AI :: AI/Ao(M): menor prioridad que AI/Ao(2D)",
+    "Diám AI :: Bloque no reconocido"
+  ]
+}

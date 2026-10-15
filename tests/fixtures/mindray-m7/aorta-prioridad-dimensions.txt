@@ -1,0 +1,23 @@
+Nomb: PRUEBA, SIETE
+ID: SYN-M7-0007 DOB: 01/01/1965 Edad: 61Años Sexo: Masculino
+Cardío adulto
+Fecha Exa: 13/10/2026
+Equipo usado: MINDRAY M7
+Indicaciones y datos clínicos
+Altura: 172.0cm Weight: 78.00kg BSA: 1.91m² HR: 70Bpm
+Cardiology Ultrasound Report - 1 / 1 Pág.
+2D Measurements
+Dimensions
+AI/Ao(2D)
+Diám AI: 3.60cm Diám ao: 2.14cm
+AI/Ao: 1.68
+Ao/AI(2D)
+Diám AI: 3.60cm Diám ao: 2.14cm
+Ao/AI: 0.59
+Diám ao: 2.52cm Diám VA: 2.00cm
+ACS: 2.40cm Diám TSVI: 1.95cm
+M-Mode Measurements
+Dimensions
+Ao/AI(M)
+Diám AI: 3.90cm Diám ao: 3.15cm
+Ao/AI: 0.81
