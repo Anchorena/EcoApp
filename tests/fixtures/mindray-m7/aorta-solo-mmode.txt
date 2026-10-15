@@ -1,0 +1,18 @@
+Consultorio de Prueba
+Nomb: PRUEBA, CINCO
+ID: SYN-M7-0005
+DOB: 01/01/1970 Edad: 70Años
+Sexo: Femenino
+Domicilio de prueba 123
+Cardío adulto
+Fecha Exa: 11/10/2026
+Equipo usado: MINDRAY M7
+Operador: Dr. Operador Prueba
+Indicaciones y datos clínicos
+Altura: 160.0cm Weight: 58.00kg BSA: 1.60m² HR: 59Bpm
+Cardiology Ultrasound Report - 1 / 3 Pág.
+M-Mode Measurements
+Dimensions
+AI/Ao(M)
+Diám AI: 3.50cm Diám ao: 2.80cm
+AI/Ao: 1.25

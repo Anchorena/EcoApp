@@ -1,0 +1,11 @@
+Nomb: PRUEBA, ONCE
+ID: SYN-M7-0011 DOB: 01/01/1970 Edad: 56Años Sexo: Femenino
+Fecha Exa: 03/03/2026
+Equipo usado:
+Indicaciones y datos clínicos
+Altura: 160.0cm Weight: 60.00kg BSA: 1.62m² HR: 72Bpm
+Cardiology Ultrasound Report - 1 / 1 Pág.
+2D Measurements
+Ventricle Volume
+Simpson BP
+VFD(Simp BP): 90.00ml VFS(Simp BP): 35.00ml

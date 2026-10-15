@@ -1,0 +1,12 @@
+{
+  "equipment": "Mindray M7",
+  "values": {
+    "fc": 59,
+    "aiDiam": 35,
+    "raizAo": 28
+  },
+  "warningsInclude": [
+    "Diámetro AI tomado de M-Mode (AI/Ao(M))",
+    "Raíz aórtica (Diám ao) tomado de M-Mode"
+  ]
+}

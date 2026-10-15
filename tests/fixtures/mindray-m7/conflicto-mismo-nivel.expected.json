@@ -1,0 +1,32 @@
+{
+  "equipment": "Mindray M7",
+  "values": {
+    "fc": 75,
+    "dsvi": 30,
+    "sivd": 9,
+    "ppd": 8.5,
+    "vmaxTric": 0.48,
+    "vmaxPulm": 1.1,
+    "gradPulmPico": 4.84,
+    "prADmanual": 3
+  },
+  "absent": [
+    "ddvi",
+    "trVmax",
+    "tvPg",
+    "psapManual"
+  ],
+  "warningsInclude": [
+    "DDVI (DIVId): el PDF trae valores distintos",
+    "Septum IV (SIVd): Teichholz(M) (0,95 cm) difiere de Teichholz(2D); se usa Teichholz(2D).",
+    "TR Vmax 0,85 m/s: baja confiabilidad para estimar PSAP",
+    "El M7 informa RAP; se importa como PAD informada"
+  ],
+  "reviewInclude": [
+    "DIVId",
+    "TR Vmax",
+    "TR PGmax",
+    "PSVD",
+    "Vmáx TSVD"
+  ]
+}

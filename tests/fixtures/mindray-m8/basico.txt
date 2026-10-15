@@ -1,0 +1,24 @@
+Nomb: PRUEBA, SINTETICA M8 ID: SYN-M8-01
+Sexo: Masculino Edad: 55 Años
+Cardiología Adulto
+Fecha Exam: 03/08/2026
+Equipo usado: Mindray M8
+Altura: 172.0 cm Peso: 80.0 kg HR: 66 bpm
+Cardiología - 1 / 4 Page
+EDV(BP):101.74ml ESV(BP):41.55ml
+AI Vol(A4C):45.10ml AI Vol(A2C):49.80ml
+AD Vol(A4C):33.20ml
+RA Vol Index(A4C):16.6
+DVDd:3.10cm
+DIVId:4.94cm DIVIs:3.33cm
+SIVd:1.02cm PPVId:0.95cm
+E Vel VM:75.10cm/s VM A Vel:68.40cm/s
+Vel. septal E' VM:7.20cm/s Vel. lateral E' VM:10.10cm/s
+MV E/E' Septal:10.4 E/E' lateral VM:7.4 MV E/E':8.7
+Diámetro TSVI:2.05cm VTI TSVI:19.20cm Vmáx TSVI:92.00cm/s
+Vmáx VA:131.00cm/s PGmed VA:3.90mmHg PGmáx VA:6.86mmHg
+VTI VA:24.10cm VAA(VTI):2.70cm²
+TR Vmax:250.00cm/s TR PGmax:25.00mmHg
+RAP:3.00mmHg PSVD:28.00mmHg
+EROA RM:0.10cm² Flujo RM:12.0ml
+Pericardio Libre

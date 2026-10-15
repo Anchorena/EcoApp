@@ -1,0 +1,14 @@
+{
+  "equipment": "Mindray M7",
+  "values": { "fc": 66, "aiDiam": 38, "raizAo": 31 },
+  "absent": ["volAI"],
+  "warningsInclude": [
+    "Diámetro AI: AI/Ao(M) (3,50 cm) difiere de AI/Ao(2D); se usa AI/Ao(2D)."
+  ],
+  "warningsExclude": ["Diámetro AI tomado de M-Mode", "Diámetro AI: el PDF trae valores distintos", "Bloques no reconocidos"],
+  "reviewInclude": [
+    "Diám AI :: Medición asociada al método area-length de volumen AI; no se mapea a aiDiam automáticamente.",
+    "Diám AI :: AI/Ao(M): menor prioridad que AI/Ao(2D)",
+    "AI Vol(A-L)"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "equipment": "Mindray M7",
+  "values": {
+    "fc": 70,
+    "raizAo": 25.2,
+    "aiDiam": 36,
+    "diamTsvi": 19.5
+  },
+  "warningsInclude": [
+    "Raíz aórtica (Diám ao): AI/Ao(2D) (2,14 cm) difiere de 2D Dimensions; se usa 2D Dimensions.",
+    "Raíz aórtica (Diám ao): M-Mode (3,15 cm) difiere de 2D Dimensions; se usa 2D Dimensions.",
+    "Diámetro AI: AI/Ao(M) (3,90 cm) difiere de AI/Ao(2D); se usa AI/Ao(2D)."
+  ],
+  "warningsExclude": [
+    "Raíz aórtica (Diám ao): el PDF trae valores distintos",
+    "tomado de M-Mode"
+  ],
+  "reviewInclude": [
+    "Diám ao :: AI/Ao(2D): menor prioridad que 2D Dimensions",
+    "Diám ao :: M-Mode: menor prioridad que 2D Dimensions",
+    "Diám AI :: AI/Ao(M): menor prioridad que AI/Ao(2D)",
+    "Diám VA",
+    "ACS"
+  ]
+}

@@ -1,0 +1,64 @@
+Consultorio de Prueba
+Nomb: PRUEBA, DOS
+ID: SYN-M7-0002
+DOB: 01/01/1970 Edad: 21Años
+Sexo: Masculino
+Domicilio de prueba 123
+Cardío adulto
+Fecha Exa: 02/09/2026
+Equipo usado: MINDRAY M7
+Operador: Dr. Operador Prueba
+Indicaciones y datos clínicos
+Altura: 170.0cm Weight: 65.00kg BSA: 1.75m²
+Cardiology Ultrasound Report - 1 / 3 Pág.
+2D Measurements
+Dimensions
+AI/Ao(2D)
+Diám AI: 2.90cm Diám ao: 2.30cm
+AI/Ao: 1.26
+Ao/AI(2D)
+Diám AI: 2.90cm Diám ao: 2.30cm
+Ao/AI: 0.79
+Diám VA: 2.00cm ACS: 2.10cm
+Diám TSVI: 1.90cm
+Ventricle Volume
+Teichholz(2D)
+SIVd: 0.80cm DIVId: 4.60cm
+PPVId: 0.75cm SIVs: 1.00cm
+DIVIs: 3.00cm PPVIs: 1.30cm
+HR: 82Bpm VFD(Teich): 97.00ml
+VFS(Teich): 35.00ml SV(Teich): 62.00ml
+FE(Teich): 63.9% SI(Teich): 35.43
+CO(Teich): 5.084l/min CI(Teich): 2.91
+FS(Teich): 34.8%
+Simpson BP
+LVId2i: 7.50cm LVIs2i: 5.20cm
+LVId4i: 7.60cm LVLIs4i: 5.50cm
+HR: 68Bpm VFD(A2C): 100.00ml
+VFS(A2C): 40.00ml VFD(A4C): 92.00ml
+Nomb: PRUEBA, DOS
+ID: SYN-M7-0002 Sexo: Masculino
+Cardío adulto
+Fecha Exa: 02/09/2026
+Cardiology Ultrasound Report - 2 / 3 Pág.
+VFS(A4C): 36.00ml VFD(Simp BP): 96.00ml
+VFS(Simp BP): 38.00ml SV(Simp BP): 58.00ml
+FE(Simp BP): 60.4% SI(Simp BP): 33.14
+CO(Simp BP): 3.944l/min CI(Simp BP): 2.25
+Doppler Measurements
+Mitral Valve
+E Vel VM: 72.00cm/s MV E PG: 2.07mmHg
+VM A Vel: 45.00cm/s MV A PG: 0.81mmHg
+E/A VM: 1.60
+Aortic
+Vmáx VA: 95.00cm/s PGmáx VA: 3.61mmHg
+TR
+TR Vmax: 0cm/s TR PGmax: 0mmHg
+PSVD
+TR Vmax: 0cm/s TR PGmax: 0mmHg
+Nomb: PRUEBA, DOS
+ID: SYN-M7-0002 Sexo: Masculino
+Cardío adulto
+Fecha Exa: 02/09/2026
+Cardiology Ultrasound Report - 3 / 3 Pág.
+Imagen ecografía
