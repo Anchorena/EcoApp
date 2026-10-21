@@ -1,10 +1,11 @@
-const CACHE_NAME = 'ecoapp-v2-web-full-1';
+const CACHE_NAME = 'ecoapp-v3-web-full-1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './styles.css',
   './config.js',
   './app.js',
+  './pwa-register.js',
   './logo.png',
   './firma.png',
   './segmentacion_referencia.jpg',
@@ -17,12 +18,33 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(key => key === CACHE_NAME ? null : caches.delete(key)))));
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.map(key => key === CACHE_NAME ? null : caches.delete(key))))
+  );
   self.clients.claim();
 });
 
+function isCriticalRequest(request) {
+  if (request.mode === 'navigate') return true;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return false;
+  return /\/(?:index\.html|app\.js|config\.js|pwa-register\.js)$/.test(url.pathname);
+}
+
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+
+  if (isCriticalRequest(event.request)) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' }).then(response => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => null);
+        return response;
+      }).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
       const copy = response.clone();

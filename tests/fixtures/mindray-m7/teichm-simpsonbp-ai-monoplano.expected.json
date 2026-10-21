@@ -30,7 +30,8 @@
     "vmaxPulm": 1,
     "gradPulmPico": 4,
     "gradPulm": 2.1,
-    "vmaxTric": 0.5
+    "vmaxTric": 0.5,
+    "studyId": "SYN-M7-0001"
   },
   "absent": [
     "dni",
@@ -49,7 +50,6 @@
     "TR Vmax 0,60 m/s: baja confiabilidad para estimar PSAP (salvaguarda del parser, no criterio diagnóstico)"
   ],
   "reviewInclude": [
-    "ID",
     "VFD(A4C)",
     "VFD(A2C)",
     "AI Vol(A4C)",
