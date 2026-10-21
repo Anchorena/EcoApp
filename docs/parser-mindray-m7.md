@@ -100,3 +100,22 @@ gradientes derivados de velocidades, ángulos θ, longitudes de Simpson). Todos 
 - ESAOTE: `parseEsaotePdfText()` sigue usando `Math.max(BP, A4C, A2C)` para `volAI` (el snapshot de regresión
   fija el comportamiento actual).
 - `interpretDiastolic()` clasifica sólo con E/A y E/e′.
+
+## Pendientes detectados en PDFs reales (61 informes M7, octubre 2026)
+
+Quedan visibles en el workspace como `PDF · secundario` o `REVISAR`; ninguno se mapea por intuición.
+
+- **`Diám VA`** (aparece en 55/61): probablemente diámetro de la válvula/anillo aórtico, pero ni el código,
+  ni los fixtures, ni el manual del operador del M7 disponible definen la medición, y `dvao` ("Anillo /
+  diámetro aórtico") no distingue anillo de otros niveles. **No se mapea a `dvao`** hasta confirmar con la
+  referencia de mediciones del equipo o con el médico.
+- **`DVDd`** (9/61): el parser M8/M9 lo envía a `vdBasal`, pero en el M7 no está confirmado que sea el
+  diámetro basal del VD (podría ser una medición M-Mode). Sin mapear.
+- **Bloques `AR`, `PISA RA`, `RP`/`PR`** (insuficiencia aórtica y pulmonar: `Vmáx RA`, `RA PHT`, `EROA RA`,
+  `Fluj AR`…; ~10/61): hoy son "bloque no reconocido" → `REVISAR`. Ojo: en estos bloques "RA" significa
+  *regurgitación aórtica*, no aurícula derecha. Candidatos futuros: `aoPht`, `aoEroa` (requiere validar).
+- **`Diám TSVD`**, `Vmáx/Vmed TSVD`, `TSVD VTI`: tracto de salida del VD, sin campo en el modelo.
+- **`Diám Asc/Des Aórt`, `VD Mayor/Menor`, `ACS`, `SIVs`, `PPVIs`, `Qp/Qs`**: sin campo en el modelo común.
+- **Ángulos `θ`**: el filtro de derivados del parser usa `\bθ`, que no coincide porque `θ` no es carácter
+  de palabra en JavaScript; por eso llegan a `review`. El workspace los oculta; corregir el regex del
+  parser queda para un cambio de parser.
