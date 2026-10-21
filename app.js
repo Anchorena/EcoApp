@@ -914,7 +914,7 @@
 
   function formatImportedDisplay(value, field) {
     if (!hasValue(value)) return "NR";
-    if (["paciente", "sexo", "fecha", "dni", "pericardio"].includes(field)) return String(value);
+    if (["paciente", "sexo", "fecha", "dni", "studyId", "pericardio"].includes(field)) return String(value);
     const decimals = field === "edad" || field === "fc" ? 0 : field === "peso" || field === "talla" ? 1 : 2;
     return formatNumber(value, decimals);
   }
@@ -924,7 +924,7 @@
     const missing = [];
     Object.keys(fieldLabels).forEach((field) => {
       const value = values[field];
-      const isText = ["paciente", "sexo", "fecha", "dni", "pericardio"].includes(field);
+      const isText = ["paciente", "sexo", "fecha", "dni", "studyId", "pericardio"].includes(field);
       if (isText ? cleanText(value) : hasValue(value)) {
         found.push({ field, label: fieldLabels[field], value });
       } else {
@@ -1005,7 +1005,8 @@
   function getImportFieldLabels() {
     return {
       paciente: "Paciente",
-      dni: "DNI / ID",
+      dni: "DNI",
+      studyId: "ID estudio/ecógrafo",
       sexo: "Sexo",
       edad: "Edad",
       fecha: "Fecha del estudio",
@@ -1376,9 +1377,7 @@
     values.talla = findNumberByPatterns(headerText, /Altura:\s*([\d.,]+)\s*cm/i);
     values.peso = findNumberByPatterns(headerText, /(?:Weight|Peso):\s*([\d.,]+)\s*kg/i);
     const equipmentId = findTextByPatterns(headerText, /^ID:\s*(\S+)/im);
-    if (equipmentId) {
-      review.push({ label: "ID", value: equipmentId, section: "encabezado", reason: "ID interno del equipo; no se usa como DNI." });
-    }
+    if (equipmentId) values.studyId = normalizeImportedId(equipmentId);
 
     // Pares numéricos del encabezado (HR, Pres RA) en la línea de datos clínicos.
     const headerEntries = [];
@@ -1675,8 +1674,10 @@
     wrap.style.display = "block";
   }
 
-  function applyImportedMeasurements() {
+  function applyImportedMeasurements(options = {}) {
     const report = annexState.importCandidate;
+    const onlyEmpty = !!(options && options.onlyEmpty);
+    const silent = !!(options && options.silent);
     if (!report || !report.values || !Object.keys(report.values).length) {
       setAnnexImportStatus("No hay mediciones listas para importar desde el adjunto actual.", "warning");
       return;
@@ -1686,7 +1687,7 @@
     let preservedCount = 0;
 
     const labelMap = Object.fromEntries((report.found || []).map((item) => [item.field, item.label]));
-    const textFields = new Set(["sexo", "paciente", "dni", "fecha", "pericardio"]);
+    const textFields = new Set(["sexo", "paciente", "dni", "studyId", "fecha", "pericardio"]);
     const decimalMap = { edad: 0, fc: 0, peso: 1, talla: 1, vciColapso: 0 };
 
     Object.entries(report.values).forEach(([field, value]) => {
@@ -1694,7 +1695,12 @@
       if (!el) return;
       const isText = textFields.has(field);
       const currentValue = el.value;
-      if (valuesDiffer(currentValue, value, isText)) {
+      const currentHasValue = isText ? !!cleanText(currentValue) : hasValue(safeNumber(currentValue));
+      if (onlyEmpty && currentHasValue) {
+        preservedCount += 1;
+        return;
+      }
+      if (!onlyEmpty && valuesDiffer(currentValue, value, isText)) {
         const incomingText = isText ? String(value) : formatInputNumber(value, decimalMap[field] ?? 2);
         const currentText = cleanText(currentValue) || "(vacío)";
         const label = labelMap[field] || field;
@@ -1715,10 +1721,13 @@ El PDF propone: ${incomingText}.
       importedCount += 1;
     });
 
-    const detail = preservedCount ? ` Se conservaron ${preservedCount} campo(s) por decisión manual.` : "";
-    setAnnexImportStatus(`Se importaron ${importedCount} campo(s) desde el PDF adjunto.${detail}`, "success");
+    const detail = preservedCount ? ` Se preservaron ${preservedCount} campo(s) que ya tenían datos.` : "";
+    if (!silent) {
+      setAnnexImportStatus(`Se importaron ${importedCount} campo(s) desde el PDF adjunto.${detail}`, "success");
+      showToast("Mediciones importadas");
+    }
     updateAll(false);
-    showToast("Mediciones importadas");
+    return { importedCount, preservedCount };
   }
 
   function getNormalText(key, sex) {
@@ -2059,6 +2068,7 @@ El PDF propone: ${incomingText}.
       fecha: getValue("fecha", ""),
       paciente: getValue("paciente", ""),
       dni: getValue("dni", ""),
+      studyId: getValue("studyId", ""),
       sexo: getValue("sexo", ""),
       edad: safeNumber(getValue("edad", "")),
       obraSocial: getSelectedCoverage(),
@@ -4081,9 +4091,20 @@ El PDF propone: ${incomingText}.
       }
 
       annexState.items = items;
+      let autoImportResult = null;
+      const autoImportAllowed = isPdf && annexState.importCandidate && ["Mindray M7", "Sonoscape"].includes(annexState.importCandidate.equipment);
+      if (autoImportAllowed && annexState.importCandidate.found.length) {
+        autoImportResult = applyImportedMeasurements({ onlyEmpty: true, silent: true });
+      }
       renderAnnexImportSummary();
       renderAllAnnexOutputs();
-      showToast("Anexo cargado");
+      if (autoImportResult) {
+        const preserved = autoImportResult.preservedCount ? ` Se preservaron ${autoImportResult.preservedCount} campo(s) ya cargados.` : "";
+        setAnnexImportStatus(`Importación automática: ${autoImportResult.importedCount} campo(s) cargados desde ${annexState.importCandidate.equipment}.${preserved} Revisá sólo las advertencias o datos dudosos.`, "success");
+        showToast(`PDF importado: ${autoImportResult.importedCount} campos`);
+      } else {
+        showToast("Anexo cargado");
+      }
     } catch (error) {
       annexState.items = [];
       annexState.pdfText = "";
