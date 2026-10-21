@@ -135,6 +135,18 @@
       </div>
     </section>
 
+    <section id="reviewWorkspace" class="card review-workspace no-print" aria-labelledby="reviewWorkspaceTitle">
+      <div class="ws-header">
+        <div>
+          <h2 id="reviewWorkspaceTitle">Revisión del PDF del equipo</h2>
+          <div id="deviceStatus" class="device-status"></div>
+        </div>
+        <button id="btnWorkspaceAdjuntar" type="button" class="ws-attach">Cargar PDF del ecógrafo</button>
+      </div>
+      <div id="deviceSelector" class="device-selector" role="group" aria-label="Equipo / parser"></div>
+      <div id="reviewWorkspaceBody" class="ws-body"></div>
+    </section>
+
     <main class="layout">
       <section class="left-column no-print">
         <article class="card">
@@ -262,12 +274,12 @@
             <div class="field field-span-2"><label for="notasAdicionales">Notas adicionales</label><textarea id="notasAdicionales" rows="5" placeholder="Campo libre para agregar observaciones, aclaraciones o comentarios puntuales."></textarea></div>
           </div>
         </article>
-        <article class="card">
+        <article class="card" id="annexCard">
           <h2>Anexo / imágenes adjuntas</h2>
-          <p class="hint">La selección del archivo se hace desde la botonera principal. Acá podés importar mediciones del adjunto cargado, revisar el estado y quitarlo si hace falta.</p>
+          <p class="hint">Al cargar el PDF del ecógrafo las mediciones se importan automáticamente (sólo en campos vacíos). Acá quedan la vista previa, las páginas incluidas en el informe y el botón para quitar el anexo.</p>
           <input id="anexoPdfInput" type="file" accept=".pdf,image/*" hidden />
           <div class="annex-actions annex-actions-compact">
-            <button id="btnImportarAnexo" type="button" disabled>Importar mediciones del adjunto / parser multi-equipo</button>
+            <button id="btnImportarAnexo" type="button" disabled>Reimportar mediciones del adjunto (fallback)</button>
             <button id="btnAnexoLimpiar" type="button">Quitar anexo</button>
           </div>
           <div id="annexStatus" class="status-banner info" style="display:none;"></div>
@@ -367,8 +379,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/legacy/build/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-  <script src="config.js?v=20261021-1"></script>
-  <script src="app.js?v=20261021-1"></script>
-  <script src="pwa-register.js?v=20261021-1"></script>
+  <script src="config.js?v=20261021-2"></script>
+  <script src="device-profiles.js?v=20261021-2"></script>
+  <script src="app.js?v=20261021-2"></script>
+  <script src="pwa-register.js?v=20261021-2"></script>
 </body>
 </html>
