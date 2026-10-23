@@ -82,3 +82,9 @@ test('new requester and coverage options persist locally, not remotely',()=>{
   assert.match(js,/storedCustomOptions\("solicitantes"\)/);
   assert.match(js,/function saveCustomFromInputs\(\)/);
 });
+
+test('valve narrative does not assert preserved closure with regurgitation',()=>{
+  assert.match(js,/morphologyText = insufficiency !== "No" \|\| stenosis !== "No"/);
+  assert.match(js,/morphologyText = data\.miIns !== "No" \|\| data\.miEst !== "No"/);
+  assert.match(js,/replace\(\/,\?\\s\*apertura y cierre conservados\/gi/);
+});
