@@ -96,3 +96,12 @@ test('Sonoscape S6 renders the same normalized editable workspace as M7',()=>{
   assert.match(js,/profile\.workspace === "s6" \? S6_REVIEW_SECTIONS : M7_REVIEW_SECTIONS/);
   assert.match(js,/buildReviewWorkspaceModel\(report, data, calc, reviewSections\)/);
 });
+
+test('S6 imports study ID and report date, without confusing patient DOB',()=>{
+  assert.match(js,/const studyIdMatch = normalized\.match/);
+  assert.match(js,/const datedFooter = normalized\.match/);
+  assert.match(js,/studyId: studyIdMatch \? normalizeImportedId/);
+  assert.match(js,/fecha: studyDate/);
+  assert.match(profiles,/TV PG \(gradiente transvalvular\)/);
+  assert.doesNotMatch(profiles,/field: "tvPg", label: "Gradiente TR"/);
+});
