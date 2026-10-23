@@ -3203,3 +3203,41 @@ body.dark-mode .ws-attach{ color:#04221f; }
 .legacy-measurements > summary{ cursor:pointer; font-weight:800; color:var(--title); padding:8px 10px; }
 .legacy-measurements-grid{ display:grid; gap:18px; margin-top:10px; }
 .legacy-measurements-grid .card{ min-width:0; }
+
+/* Annex page-height guard: A4 source images must fit on ONE output page.
+   Applied to html2pdf's screen-media clone as well as browser print. */
+#printAnexoPages,
+#summaryAnexoPages{
+  display:block;
+}
+#printAnexoPages .annex-print-page,
+#summaryAnexoPages .annex-print-page{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  margin:0 0 12px;
+  padding:6px;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+#printAnexoPages .annex-print-page img,
+#summaryAnexoPages .annex-print-page img{
+  display:block;
+  width:auto;
+  max-width:100%;
+  max-height:850px;
+  height:auto;
+  margin:0 auto;
+  object-fit:contain;
+}
+#printAnexoPages .annex-print-page figcaption,
+#summaryAnexoPages .annex-print-page figcaption{
+  margin:4px 0 0;
+  line-height:1.1;
+}
+@media print{
+  #printAnexoPages .annex-print-page img,
+  #summaryAnexoPages .annex-print-page img{
+    max-height:245mm;
+  }
+}
