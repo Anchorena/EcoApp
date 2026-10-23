@@ -11,7 +11,7 @@ const DEVICE_PROFILES = [
   { id: "auto", label: "Auto", status: "auto" },
   { id: "mindray-m7", label: "Mindray M7", status: "validated", parser: "mindrayM7", equipment: ["Mindray M7"], autoImport: true, workspace: "m7" },
   { id: "mindray-m8m9", label: "Mindray M8/M9", status: "unvalidated", parser: "mindrayM8M9", equipment: ["Mindray M8/M9"], autoImport: false },
-  { id: "sonoscape-s6", label: "Sonoscape S6", status: "validated", parser: "sonoscape", equipment: ["Sonoscape"], autoImport: true },
+  { id: "sonoscape-s6", label: "Sonoscape S6", status: "validated", parser: "sonoscape", equipment: ["Sonoscape"], autoImport: true, workspace: "s6" },
   { id: "esaote", label: "Esaote", status: "unvalidated", parser: "esaote", equipment: ["ESAOTE MyLab"], autoImport: false },
   { id: "philips", label: "Philips", status: "future" },
   { id: "otro", label: "Otro", status: "future" }
@@ -159,3 +159,11 @@ const M7_REVIEW_SECTIONS = [
     secondary: [/./]
   }
 ];
+
+// S6 comparte el modelo ecocardiográfico y los mismos controles editables.
+// Se excluyen etiquetas y valores secundarios exclusivos del reporte M7.
+const S6_REVIEW_SECTIONS = M7_REVIEW_SECTIONS.map((section) => ({
+  id: section.id,
+  title: section.title,
+  items: section.items.filter((item) => !item.raw).map(({ reviewFor, ...item }) => item)
+}));
