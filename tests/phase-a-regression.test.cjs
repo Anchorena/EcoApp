@@ -12,7 +12,7 @@ const profiles=fs.readFileSync(path.join(root,'device-profiles.js'),'utf8');
 test('zero E velocity does not produce diastolic grade',()=>{
   assert.match(js,/data\.ondaE > 0 && data\.ondaA !== null && data\.ondaA > 0/);
   assert.match(js,/const ondaEcm = data\.ondaE !== null && data\.ondaE > 0/);
-  const match=js.match(/  function interpretDiastolic\\(calc, data = null\\) \{[\s\S]*?\n  \}/);
+  const match=js.match(/  function interpretDiastolic\(calc, data = null\) \{[\s\S]*?\n  \}/);
   assert.ok(match);
   const interpret=vm.runInNewContext('('+match[0].trim()+')');
   assert.match(interpret({ea:null,eSobreEprima:null}),/No es posible definir/);
@@ -20,7 +20,7 @@ test('zero E velocity does not produce diastolic grade',()=>{
   assert.match(interpret({ea:0.75,eSobreEprima:null}),/relajación prolongada/);
 });
 test('isolated E is described as monophasic without diagnosing atrial fibrillation',()=>{
-  const jsFunction=js.match(/  function interpretDiastolic\\(calc, data = null\\) \\{[\\s\\S]*?\\n  \\}/);
+  const jsFunction=js.match(/  function interpretDiastolic\(calc, data = null\) \{[\s\S]*?\n  \}/);
   assert.ok(jsFunction);
   const interpret=vm.runInNewContext('('+jsFunction[0].trim()+')');
   const message=interpret({ea:null,eSobreEprima:null},{ondaE:0.81,ondaA:null});
