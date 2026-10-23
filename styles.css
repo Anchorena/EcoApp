@@ -3131,7 +3131,10 @@ body.dark-mode{
 .ws-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .ws-header h2{ margin-bottom:4px; }
 .device-status{ color:var(--muted); font-size:13px; }
+.ws-header-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .ws-attach{ background:var(--accent); color:#fff; border:0; border-radius:14px; padding:10px 16px; font-weight:800; font-size:14px; cursor:pointer; }
+.ws-jump{ display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--border-strong); background:var(--soft); color:var(--title); border-radius:14px; padding:9px 14px; font-weight:800; font-size:14px; text-decoration:none; }
+.ws-jump:hover{ border-color:var(--accent); color:var(--accent); }
 body.dark-mode .ws-attach{ color:#04221f; }
 .device-status strong{ color:var(--title); }
 .device-selector{ display:flex; flex-wrap:wrap; gap:6px; margin:12px 0 14px; }
@@ -3177,7 +3180,8 @@ body.dark-mode .ws-attach{ color:#04221f; }
 @media (max-width: 720px){
   .ws-grid{ columns:1; }
   .ws-header{ flex-direction:column; }
-  .ws-attach{ width:100%; }
+  .ws-header-actions{ width:100%; display:grid; grid-template-columns:1fr; }
+  .ws-attach, .ws-jump{ width:100%; box-sizing:border-box; }
   .device-option{ padding:6px 10px; }
   .ws-row{ grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto; }
   .ws-input{ font-size:16px; } /* evita el zoom automático de iOS al enfocar */
