@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ecoapp-v3-web-full-3';
+const CACHE_NAME = 'ecoapp-v3-web-full-4';
 const CORE_ASSETS = [
   './',
   './index.html',
