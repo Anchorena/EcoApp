@@ -964,6 +964,10 @@
     const patientMatch = normalized.match(/NOMBRE:\s*(.*?)\s+SEXO:\s*([mf])/i);
     const ageMatch = normalized.match(/EDAD:\s*(\d+)/i);
     const fcMatch = normalized.match(/FRECUENCIA CARD[ÍI]ACA:\s*([\d.,]+)/i);
+    const studyIdMatch = normalized.match(/\bID\s*:\s*(\d{8,})\b/i);
+    // Fecha impresa al pie del informe de mediciones; no confundir con FN (nacimiento).
+    const datedFooter = normalized.match(/\b(\d{2})\/(\d{2})\/(\d{4})\s+\d{1,2}:\d{2}\b/);
+    const studyDate = datedFooter ? `${datedFooter[3]}-${datedFooter[2]}-${datedFooter[1]}` : "";
 
     const teich = extractSection(normalized, /M[ée]todo de TEICHHOLZ/i, /(Cardiac Report--GENERAL 2D STUDY|ESTUDIO EN Modo M|1\.2\.1)/i);
     const general2D = extractSection(normalized, /(Cardiac Report--GENERAL 2D STUDY|1\.2\.1 Cardiac Report--GENERAL 2D STUDY)/i, /ESTUDIO DOPPLER DE LA V[ÁA]LVULA A[ÓO]RTICA/i);
@@ -975,6 +979,8 @@
 
     const values = {
       paciente: patientMatch ? normalizeImportedPatientName(patientMatch[1]) : "",
+      studyId: studyIdMatch ? normalizeImportedId(studyIdMatch[1]) : "",
+      fecha: studyDate,
       sexo: patientMatch ? normalizeImportedSex(patientMatch[2]) : "",
       edad: ageMatch ? safeNumber(ageMatch[1]) : null,
       fc: fcMatch ? safeNumber(fcMatch[1]) : null,
