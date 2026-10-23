@@ -2793,7 +2793,11 @@ El PDF propone: ${incomingText}.
     };
   }
 
-  function interpretDiastolic(calc) {
+  function interpretDiastolic(calc, data = null) {
+    // E aislada: patrón monofásico, sin diagnosticar FA ni graduar diastólica.
+    if (data && data.ondaE !== null && data.ondaE > 0 && (data.ondaA === null || data.ondaA === undefined)) {
+      return "Doppler transmitral con patrón monofásico (onda E sin onda A registrada); hallazgo que puede observarse en contexto de fibrilación auricular. Correlacionar con el ritmo electrocardiográfico. No es posible graduar la función diastólica mediante E/A.";
+    }
     // No inferir un grado diastólico sólo a partir de un E/e' manual sin onda E válida.
     if (calc.ea === null) {
       return "No es posible definir adecuadamente la función diastólica con los datos cargados.";
@@ -4620,7 +4624,7 @@ El PDF propone: ${incomingText}.
   function renderPrintBlocks(data, calc, description, conclusion, notes, segmentText, interp) {
     const printMed = `${data.medicoInformante} | ${data.matriculaInformante}`;
     const printEsp = `${data.especialidadInformante || ""}`;
-    const diastolicText = interpretDiastolic(calc);
+    const diastolicText = interpretDiastolic(calc, data);
 
     setText("printMedico", printMed);
     setText("printEspecialidad", printEsp);
@@ -4693,7 +4697,7 @@ El PDF propone: ${incomingText}.
       psap: interpretPSAP(calc.psap)
     };
 
-    const diastolicText = interpretDiastolic(calc);
+    const diastolicText = interpretDiastolic(calc, data);
     const glsText = interpretGLS(data.gls);
     const segmentText = segmentSummary();
 
