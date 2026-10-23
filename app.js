@@ -1968,13 +1968,12 @@
       return;
     }
 
-    const compact = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
     const warningsHtml = model.warnings.length
       ? `<details class="ws-warnings-wrap"${model.warnings.length <= 3 ? " open" : ""}><summary>Avisos del parser (${model.warnings.length})</summary><ul class="ws-warnings">${model.warnings.map((w) => `<li>${escapeHtml(w)}</li>`).join("")}</ul></details>`
       : "";
     const legend = `<div class="ws-legend">${["pdf", "calc", "manual", "revisar", "secundario", "no-informado"].map((key) => `<span class="ws-legend-item ws-status-${key}"><span class="ws-badge">${WORKSPACE_STATUS_LABELS[key]}</span></span>`).join("")}</div>`;
     body.innerHTML = `${legend}${warningsHtml}<div class="ws-grid">${model.sections.map((section) => {
-      const open = !compact || section.id === "paciente" || section.counts.revisar;
+      const open = section.id === "paciente" || section.id === "simpson" || !!section.counts.revisar;
       return `<details class="ws-section" data-ws-section="${section.id}"${open ? " open" : ""}>
         <summary><span class="ws-section-title">${escapeHtml(section.title)}</span><span class="ws-section-counts">${workspaceSectionCounts(section)}</span></summary>
         <div class="ws-rows">${section.rows.map(buildWorkspaceRowHtml).join("")}</div>
