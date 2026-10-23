@@ -2105,10 +2105,49 @@ El PDF propone: ${incomingText}.
     });
   }
 
+  // Opciones añadidas localmente; no se sincronizan ni exponen datos clínicos.
+  function storedCustomOptions(key) {
+    try {
+      const values = JSON.parse(localStorage.getItem("ecoapp-options-" + key) || "[]");
+      return Array.isArray(values) ? values.filter((item) => typeof item === "string" && item.trim()) : [];
+    } catch (_) { return []; }
+  }
+  function rememberCustomOption(key, value) {
+    const name = cleanText(value);
+    if (!name || name.length > 140) return;
+    const existing = storedCustomOptions(key);
+    if (existing.some((item) => item.toLocaleLowerCase() === name.toLocaleLowerCase())) return;
+    try { localStorage.setItem("ecoapp-options-" + key, JSON.stringify([...existing, name].slice(-100))); } catch (_) {}
+  }
+  function customMorphology(id) {
+    return getValue(id, "") === "Descripción personalizada…" ? cleanText(getValue(id + "Otro", "")) : getValue(id, "");
+  }
+  function refreshCustomLists() {
+    const coverage = getValue("obraSocial", "");
+    const doctor = getValue("medicoSolicitante", "");
+    fillCoverageOptions();
+    fillSolicitanteOptions();
+    if (qs("obraSocial")) qs("obraSocial").value = coverage;
+    if (qs("medicoSolicitante")) qs("medicoSolicitante").value = doctor;
+  }
+  function saveCustomFromInputs() {
+    const coverage = getValue("obraSocial", "");
+    const doctor = getValue("medicoSolicitante", "");
+    if (coverage === "__OTRA__") {
+      const name = cleanText(getValue("obraSocialOtro", ""));
+      if (name) { rememberCustomOption("coberturas", name); refreshCustomLists(); if (qs("obraSocial")) qs("obraSocial").value = name; }
+    }
+    if (doctor === "__OTRO__") {
+      const name = cleanText(getValue("medicoSolicitanteOtro", ""));
+      if (name) { rememberCustomOption("solicitantes", name); refreshCustomLists(); if (qs("medicoSolicitante")) qs("medicoSolicitante").value = name; }
+    }
+    toggleConditionalInputs();
+  }
+
   function fillCoverageOptions() {
     const select = qs("obraSocial");
     if (!select) return;
-    const options = OBRAS_SOCIALES.map((item) => `<option value="${item.nombre}">${item.nombre}</option>`).join("");
+    const options = [...OBRAS_SOCIALES.map((item) => item.nombre), ...storedCustomOptions("coberturas")].filter((v, i, a) => a.indexOf(v) === i).map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("");
     select.innerHTML = `<option value="">Seleccionar</option>${options}<option value="__OTRA__">Otra / no listada</option>`;
   }
 
@@ -2274,6 +2313,7 @@ El PDF propone: ${incomingText}.
       '<optgroup label="Especialidades / genéricos">',
       ...SOLICITANTES_GENERICOS.map((name) => `<option value="${name}">${name}</option>`),
       '</optgroup>',
+      ...storedCustomOptions("solicitantes").map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`),
       '<option value="__OTRO__">Otro / no listado</option>'
     ];
 
@@ -2362,6 +2402,7 @@ El PDF propone: ${incomingText}.
     setDisplay("medicoInformanteOtroWrap", informanteValue === "__OTRO__" ? "block" : "none");
     setDisplay("obraSocialOtroWrap", coverageValue === "__OTRA__" ? "block" : "none");
     setDisplay("medicoSolicitanteOtroWrap", solicitanteValue === "__OTRO__" ? "block" : "none");
+    ["aoMorf", "miMorf", "puMorf", "trMorf"].forEach((id) => setDisplay(id + "OtroWrap", getValue(id, "") === "Descripción personalizada…" ? "block" : "none"));
     setDisplay("motivoOtroWrap", motivoValue === "__OTRO__" ? "block" : "none");
 
     const resolvedCoverage = getSelectedCoverage();
@@ -2445,7 +2486,7 @@ El PDF propone: ${incomingText}.
       trombosMasas: getValue("trombosMasas", "Sin trombos ni masas intracavitarias"),
       vegetaciones: getValue("vegetaciones", "Aparatos valvulares libres"),
 
-      aoMorf: getValue("aoMorf", ""),
+      aoMorf: customMorphology("aoMorf"),
       aoIns: getValue("aoIns", "No"),
       aoEst: getValue("aoEst", "No"),
       aoJet: getValue("aoJet", "No evaluado"),
@@ -2455,7 +2496,7 @@ El PDF propone: ${incomingText}.
       aoRVol: safeNumber(getValue("aoRVol", "")),
       aoFlowRev: getValue("aoFlowRev", "No evaluado"),
 
-      miMorf: getValue("miMorf", ""),
+      miMorf: customMorphology("miMorf"),
       miIns: getValue("miIns", "No"),
       miEst: getValue("miEst", "No"),
       miJet: getValue("miJet", "No evaluado"),
@@ -2464,11 +2505,11 @@ El PDF propone: ${incomingText}.
       miRVol: safeNumber(getValue("miRVol", "")),
       miPisa: getValue("miPisa", "No evaluado"),
 
-      puMorf: getValue("puMorf", ""),
+      puMorf: customMorphology("puMorf"),
       puIns: getValue("puIns", "No"),
       puEst: getValue("puEst", "No"),
 
-      trMorf: getValue("trMorf", ""),
+      trMorf: customMorphology("trMorf"),
       trIns: getValue("trIns", "No"),
       trEst: getValue("trEst", "No"),
 
@@ -5022,6 +5063,11 @@ El PDF propone: ${incomingText}.
       if (e.target.matches("input, select, textarea") && !e.target.matches(".annex-include-toggle") && e.target.id !== "anexoPdfInput") {
         updateAll(false);
       }
+    });
+
+    ["obraSocialOtro", "medicoSolicitanteOtro"].forEach((id) => {
+      const el = qs(id);
+      if (el) el.addEventListener("change", saveCustomFromInputs);
     });
 
     document.body.addEventListener("change", (e) => {
