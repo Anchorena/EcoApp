@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EcoApp EchoReport v1.0</title>
-  <link rel="stylesheet" href="styles.css?v=20261023-3" />
+  <link rel="stylesheet" href="styles.css?v=20261023-4" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
 </head>
@@ -209,7 +209,7 @@
 
           <h3>Válvula aórtica</h3>
           <div class="form-grid">
-            <div class="field"><label for="aoMorf">Morfología</label><select id="aoMorf"></select></div>
+            <div class="field"><label for="aoMorf">Morfología</label><select id="aoMorf"></select></div><div class="field" id="aoMorfOtroWrap" style="display:none;"><label for="aoMorfOtro">Descripción personalizada</label><input id="aoMorfOtro" type="text" placeholder="Describir anatomía y coaptación" /></div>
             <div class="field"><label for="aoIns">Insuficiencia</label><select id="aoIns"></select></div>
             <div class="field"><label for="aoEst">Estenosis</label><select id="aoEst"></select></div>
           </div>
@@ -226,7 +226,7 @@
 
           <h3>Válvula mitral</h3>
           <div class="form-grid">
-            <div class="field"><label for="miMorf">Morfología</label><select id="miMorf"></select></div>
+            <div class="field"><label for="miMorf">Morfología</label><select id="miMorf"></select></div><div class="field" id="miMorfOtroWrap" style="display:none;"><label for="miMorfOtro">Descripción personalizada</label><input id="miMorfOtro" type="text" placeholder="Describir anatomía y coaptación" /></div>
             <div class="field"><label for="miIns">Insuficiencia</label><select id="miIns"></select></div>
             <div class="field"><label for="miEst">Estenosis</label><select id="miEst"></select></div>
           </div>
@@ -242,14 +242,14 @@
 
           <h3>Válvula pulmonar</h3>
           <div class="form-grid">
-            <div class="field"><label for="puMorf">Morfología</label><select id="puMorf"></select></div>
+            <div class="field"><label for="puMorf">Morfología</label><select id="puMorf"></select></div><div class="field" id="puMorfOtroWrap" style="display:none;"><label for="puMorfOtro">Descripción personalizada</label><input id="puMorfOtro" type="text" placeholder="Describir anatomía y coaptación" /></div>
             <div class="field"><label for="puIns">Insuficiencia</label><select id="puIns"></select></div>
             <div class="field"><label for="puEst">Estenosis</label><select id="puEst"></select></div>
           </div>
 
           <h3>Válvula tricuspídea</h3>
           <div class="form-grid">
-            <div class="field"><label for="trMorf">Morfología</label><select id="trMorf"></select></div>
+            <div class="field"><label for="trMorf">Morfología</label><select id="trMorf"></select></div><div class="field" id="trMorfOtroWrap" style="display:none;"><label for="trMorfOtro">Descripción personalizada</label><input id="trMorfOtro" type="text" placeholder="Describir anatomía y coaptación" /></div>
             <div class="field"><label for="trIns">Insuficiencia</label><select id="trIns"></select></div>
             <div class="field"><label for="trEst">Estenosis</label><select id="trEst"></select></div>
           </div>
@@ -386,9 +386,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/legacy/build/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-  <script src="config.js?v=20261021-2"></script>
+  <script src="config.js?v=20261023-4"></script>
   <script src="device-profiles.js?v=20261021-2"></script>
-  <script src="app.js?v=20261021-2"></script>
+  <script src="app.js?v=20261023-4"></script>
   <script src="pwa-register.js?v=20261023-1"></script>
 </body>
 </html>
