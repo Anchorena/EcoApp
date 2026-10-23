@@ -1938,7 +1938,7 @@
     const modeText = report.deviceMode === "auto" ? "Auto" : "Forzado";
     status.innerHTML = `<span class="device-status-label"><strong>${escapeHtml(profile.label)}</strong> · ${escapeHtml(DEVICE_STATUS_LABELS[profile.status] || "")} · ${modeText}${annexState.sourceName ? ` · ${escapeHtml(annexState.sourceName)}` : ""}</span>`;
 
-    if (profile.workspace !== "m7") {
+    if (profile.workspace !== "m7" && profile.workspace !== "s6") {
       const note = profile.status === "validated"
         ? `${report.found.length} campo(s) leídos. La lectura detallada sigue en <a href="#annexCard">Anexo / imágenes adjuntas</a>.`
         : profile.status === "future"
@@ -1951,8 +1951,9 @@
 
     const data = context && context.data ? context.data : getFormData();
     const calc = context && context.calc ? context.calc : calculateDerived(data);
-    const model = buildReviewWorkspaceModel(report, data, calc);
-    const signature = `${annexState.sourceName}|${report.deviceMode}|${model.sections.map((s) => s.rows.map((r) => r.key).join(",")).join("/")}`;
+    const reviewSections = profile.workspace === "s6" ? S6_REVIEW_SECTIONS : M7_REVIEW_SECTIONS;
+    const model = buildReviewWorkspaceModel(report, data, calc, reviewSections);
+    const signature = `${annexState.sourceName}|${profile.id}|${report.deviceMode}|${model.sections.map((s) => s.rows.map((r) => r.key).join(",")).join("/")}`;
 
     if (body.dataset.wsSignature === signature) {
       // Mismo estudio: sólo se actualizan valores y estados (no se pierde el foco ni las secciones abiertas).
