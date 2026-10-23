@@ -16,7 +16,7 @@
     "pericardio"
   ]);
   const segmentStates = {};
-  const annexState = { items: [], sourceName: "", fileType: "", statusMessage: "", statusType: "info", pdfText: "", importCandidate: null, importStatusMessage: "", importStatusType: "info" };
+  const annexState = { items: [], sourceName: "", fileType: "", statusMessage: "", statusType: "info", pdfText: "", importCandidate: null, importStatusMessage: "", importStatusType: "info", deviceMode: "auto" };
   const STUDY_STORAGE_KEY = "ecoapp_saved_studies_v1";
   const THEME_STORAGE_KEY = "ecoapp_theme_v1";
   const SAVED_STUDY_STATUS_KEYS = {
@@ -1608,6 +1608,166 @@
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // Perfiles de equipo y workspace de revisión (datos en device-profiles.js)
+  // ---------------------------------------------------------------------------
+
+  function getDeviceProfile(id) {
+    return DEVICE_PROFILES.find((profile) => profile.id === id) || DEVICE_PROFILES[0];
+  }
+
+  function getDeviceProfileForEquipment(equipment) {
+    return DEVICE_PROFILES.find((profile) => (profile.equipment || []).includes(equipment)) || getDeviceProfile("otro");
+  }
+
+  // Ejecuta el parser del modo elegido. Forzar un equipo sólo cambia qué parser corre:
+  // el texto del PDF nunca se modifica.
+  function parseEchoPdfTextForDevice(pdfText, mode = "auto") {
+    if (typeof DEVICE_PROFILES === "undefined") {
+      // device-profiles.js no cargó (p. ej. caché vieja): comportamiento previo, sin selector.
+      const report = parseEchoPdfText(pdfText);
+      return Object.assign(report, { deviceMode: "auto", autoImport: ["Mindray M7", "Sonoscape"].includes(report.equipment) });
+    }
+    const requested = getDeviceProfile(mode);
+    const normalized = normalizeEchoPdfText(pdfText);
+    const parsers = {
+      mindrayM7: parseMindrayM7PdfText,
+      mindrayM8M9: parseMindrayPdfText,
+      sonoscape: parseSonoscapePdfText,
+      esaote: parseEsaotePdfText
+    };
+    let report;
+    if (requested.id === "auto") {
+      report = parseEchoPdfText(normalized);
+    } else if (parsers[requested.parser]) {
+      report = parsers[requested.parser](normalized);
+    } else {
+      report = buildImportReport({
+        equipment: requested.label,
+        values: {},
+        fieldLabels: getImportFieldLabels(),
+        warnings: [`${requested.label}: sin parser (soporte futuro). El PDF se adjunta, pero no se importan mediciones.`],
+        rawText: normalized
+      });
+    }
+    const profile = requested.id === "auto" ? getDeviceProfileForEquipment(report.equipment) : requested;
+    const declared = getDeclaredEquipment(normalized);
+    // Forzado contra lo que el propio PDF declara: se permite, pero sin importación automática.
+    const forcedMismatch = requested.id !== "auto" && !!declared
+      && getDeviceProfileForEquipment(parseEchoPdfText(normalized).equipment).id !== requested.id;
+    const warnings = Array.isArray(report.warnings) ? report.warnings.slice() : [];
+    if (forcedMismatch) {
+      warnings.unshift(`Equipo forzado manualmente (${requested.label}); el PDF declara "${declared}". No se importa automáticamente: verificar cada valor.`);
+    }
+    if (profile.status === "unvalidated" || profile.status === "future") {
+      warnings.unshift(`${profile.label}: ${DEVICE_STATUS_LABELS[profile.status]}. Las mediciones no se importan automáticamente.`);
+    }
+    return Object.assign(report, {
+      warnings: [...new Set(warnings)],
+      deviceMode: requested.id,
+      deviceProfileId: profile.id,
+      deviceStatus: profile.status,
+      autoImport: !!profile.autoImport && !forcedMismatch,
+      declaredEquipment: declared
+    });
+  }
+
+  // "revisar": conflicto, baja confianza o semántica dudosa. "secundario": el PDF lo trae pero
+  // no alimenta el modelo principal (monoplano, menor prioridad, sin campo en el modelo…).
+  function classifyReviewItem(item) {
+    const reason = String((item && item.reason) || "");
+    if (/Valores distintos|baja confiabilidad|Unidad inesperada|Bloque no reconocido|semántica no está validada|distinta de la FC clínica/i.test(reason)) return "revisar";
+    return "secundario";
+  }
+
+  const WORKSPACE_STATUS_LABELS = {
+    pdf: "PDF",
+    calc: "CALC",
+    manual: "MANUAL",
+    revisar: "REVISAR",
+    secundario: "PDF · secundario",
+    "no-informado": "No informado"
+  };
+
+  function formatWorkspaceValue(value, unit, decimals) {
+    if (!hasValue(value) && !cleanText(value)) return "";
+    const text = typeof value === "number" ? formatNumber(value, decimals ?? 2) : String(value);
+    return unit ? `${text} ${unit}` : text;
+  }
+
+  // Modelo puro del workspace: qué mostrar en cada sección y con qué procedencia.
+  // `data` es getFormData() (fuente real), `calc` es calculateDerived(data), `report` el del parser.
+  function buildReviewWorkspaceModel(report, data, calc, sections = M7_REVIEW_SECTIONS) {
+    const imported = (report && report.values) || {};
+    // Los ángulos de insonación ("VA θ", "TSVI θ"…) son datos técnicos del equipo: quedan en
+    // report.rawEntries pero no se listan para revisión clínica.
+    const review = (Array.isArray(report && report.review) ? report.review : []).filter((item) => !/θ\s*$/.test(item.label));
+    const rawEntries = Array.isArray(report && report.rawEntries) ? report.rawEntries : [];
+    const textFields = new Set(["paciente", "dni", "studyId", "sexo", "fecha", "pericardio"]);
+    const decimalMap = { edad: 0, fc: 0, peso: 1, talla: 1, vciColapso: 0 };
+    const sameAsImported = (field, current) => {
+      if (!(field in imported)) return false;
+      if (textFields.has(field)) return cleanText(current) === cleanText(imported[field]);
+      const want = safeNumber(formatInputNumber(imported[field], decimalMap[field] ?? 2));
+      return want !== null && hasValue(current) && Math.abs(Number(current) - want) < 0.005;
+    };
+    const reviewByLabel = (labels) => review.filter((item) => (labels || []).includes(item.label));
+
+    const sectionForReview = (item) => {
+      const byField = sections.find((section) => section.items.some((entry) => (entry.reviewFor || []).includes(item.label)));
+      if (byField) return byField.id;
+      const byPattern = sections.find((section) => (section.secondary || []).some((pattern) => pattern.test(item.label)));
+      return byPattern ? byPattern.id : "otros";
+    };
+
+    const result = sections.map((section) => {
+      const rows = [];
+      section.items.forEach((entry) => {
+        const key = entry.field || entry.calc || entry.raw;
+        if (entry.raw) {
+          const raw = rawEntries.find((rawEntry) => rawEntry.label === entry.raw);
+          if (raw) rows.push({ key: `raw:${key}`, kind: "raw", label: entry.label, display: formatWorkspaceValue(raw.value, raw.unitText || raw.unit, 1), status: "secundario", note: "Valor del equipo; EcoApp calcula su propia FEVI con VTD/VTS." });
+          return;
+        }
+        if (entry.field) {
+          const current = data ? data[entry.field] : null;
+          const hasCurrent = textFields.has(entry.field) ? !!cleanText(current) : hasValue(current);
+          if (hasCurrent) {
+            rows.push({ key, kind: "field", field: entry.field, label: entry.label, unit: entry.unit, value: current, status: sameAsImported(entry.field, current) ? "pdf" : "manual", note: "" });
+            return;
+          }
+          if (entry.calc && calc && hasValue(calc[entry.calc])) {
+            rows.push({ key, kind: "field", field: entry.field, label: entry.label, unit: entry.unit, value: "", calcValue: calc[entry.calc], display: formatWorkspaceValue(calc[entry.calc], entry.unit, entry.decimals), status: "calc", note: "Calculado por EcoApp; podés escribir un valor informado para reemplazarlo." });
+            return;
+          }
+          const related = reviewByLabel(entry.reviewFor);
+          const blocking = related.filter((item) => classifyReviewItem(item) === "revisar");
+          if (blocking.length) {
+            rows.push({ key, kind: "field", field: entry.field, label: entry.label, unit: entry.unit, value: "", status: "revisar", note: blocking[0].reason });
+            return;
+          }
+          const secondaryNote = related.length ? related[0].reason : "";
+          rows.push({ key, kind: "field", field: entry.field, label: entry.label, unit: entry.unit, value: "", status: "no-informado", note: entry.note || secondaryNote || "No informado en el PDF." });
+          return;
+        }
+        const value = calc ? calc[entry.calc] : null;
+        rows.push({
+          key, kind: "calc", label: entry.label, unit: entry.unit,
+          display: hasValue(value) ? formatWorkspaceValue(value, entry.unit, entry.decimals) : "",
+          status: hasValue(value) ? "calc" : "no-informado",
+          note: hasValue(value) ? (entry.secondary ? "Estimación secundaria; no es la FEVI principal." : "Calculado por EcoApp.") : "No calculable con los datos cargados."
+        });
+      });
+      review.filter((item) => sectionForReview(item) === section.id).forEach((item, index) => {
+        rows.push({ key: `review:${item.label}:${item.value}:${index}`, kind: "review", label: item.label, display: item.value, status: classifyReviewItem(item), note: `${item.section} — ${item.reason}` });
+      });
+      const counts = rows.reduce((acc, row) => { acc[row.status] = (acc[row.status] || 0) + 1; return acc; }, {});
+      return { id: section.id, title: section.title, rows, counts };
+    }).filter((section) => section.rows.length);
+
+    return { sections: result, warnings: (report && report.warnings) || [] };
+  }
+
   function setAnnexImportStatus(message = "", type = "info") {
     annexState.importStatusMessage = message;
     annexState.importStatusType = type;
@@ -1633,6 +1793,14 @@
     if (!report || (!report.found.length && !report.warnings.length)) {
       wrap.style.display = "none";
       wrap.innerHTML = "";
+      return;
+    }
+
+    if (report.deviceProfileId && typeof DEVICE_PROFILES !== "undefined" && getDeviceProfile(report.deviceProfileId).workspace) {
+      // El equipo tiene workspace propio: la revisión organizada está arriba.
+      wrap.innerHTML = `<div class="annex-import-title-row"><h3>Lectura del PDF</h3><span class="annex-import-equipment">${escapeHtml(report.equipment)}</span></div>
+        <div class="annex-import-muted">${report.found.length} campo(s) leídos. La revisión por secciones está en <a href="#reviewWorkspace">Revisión del PDF del equipo</a>.</div>`;
+      wrap.style.display = "block";
       return;
     }
 
@@ -1674,6 +1842,157 @@
     wrap.style.display = "block";
   }
 
+  // --- Selector de equipo y workspace de revisión (DOM) ---
+
+  function renderDeviceSelector() {
+    const wrap = qs("deviceSelector");
+    if (!wrap) return;
+    const report = annexState.importCandidate;
+    const detectedId = report && report.deviceProfileId;
+    wrap.innerHTML = DEVICE_PROFILES.map((profile) => {
+      const active = annexState.deviceMode === profile.id;
+      const detected = annexState.deviceMode === "auto" && detectedId === profile.id;
+      const futureTag = profile.status === "unvalidated" || profile.status === "future" ? `<span class="device-tag">no validado</span>` : "";
+      return `<button type="button" class="device-option${active ? " is-active" : ""}${detected ? " is-detected" : ""}" data-device-mode="${profile.id}" aria-pressed="${active}">${escapeHtml(profile.label)}${futureTag}</button>`;
+    }).join("");
+  }
+
+  function setDeviceMode(mode) {
+    annexState.deviceMode = getDeviceProfile(mode).id;
+    if (annexState.pdfText) {
+      annexState.importCandidate = parseEchoPdfTextForDevice(annexState.pdfText, annexState.deviceMode);
+      const report = annexState.importCandidate;
+      const parserName = getDeviceProfile(report.deviceProfileId).label;
+      if (report.autoImport && report.found.length) {
+        const result = applyImportedMeasurements({ onlyEmpty: true, silent: true });
+        if (result) setAnnexImportStatus(`Parser ${parserName}: ${result.importedCount} campo(s) cargados.${result.preservedCount ? ` Se preservaron ${result.preservedCount} campo(s) ya cargados.` : ""}`, "success");
+      } else {
+        setAnnexImportStatus(`Parser ${parserName}: sin importación automática. Revisá la lectura antes de importar manualmente.`, "warning");
+      }
+      renderAnnexImportSummary();
+    }
+    renderReviewWorkspace();
+  }
+
+  function buildWorkspaceControl(row) {
+    const original = qs(row.field);
+    if (!original) return `<span class="ws-value">${escapeHtml(row.display || formatWorkspaceValue(row.value, row.unit))}</span>`;
+    const common = `class="ws-input" data-ws-field="${row.field}" aria-label="${escapeHtml(row.label)}"${original.readOnly ? " readonly" : ""}`;
+    if (original.tagName === "SELECT") {
+      return `<select ${common}>${original.innerHTML}</select>`;
+    }
+    const type = original.type === "date" ? "date" : original.type === "number" || original.dataset.decimal === "1" ? "text" : "text";
+    const inputmode = original.type === "number" || original.dataset.decimal === "1" ? ` inputmode="decimal"` : "";
+    const placeholder = row.status === "calc" && row.display ? ` placeholder="${escapeHtml(row.display)}"` : "";
+    return `<input type="${type}"${inputmode} ${common}${placeholder} value="${escapeHtml(original.value)}" />`;
+  }
+
+  function buildWorkspaceRowHtml(row) {
+    const valueHtml = row.kind === "field"
+      ? buildWorkspaceControl(row)
+      : `<span class="ws-value">${escapeHtml(row.display || "—")}</span>`;
+    const unit = row.kind === "field" && row.unit ? `<span class="ws-unit">${escapeHtml(row.unit)}</span>` : "";
+    return `<div class="ws-row ws-status-${row.status}" data-ws-key="${escapeHtml(row.key)}">
+      <div class="ws-row-label">${escapeHtml(row.label)}</div>
+      <div class="ws-row-value">${valueHtml}${unit}</div>
+      <span class="ws-badge">${escapeHtml(WORKSPACE_STATUS_LABELS[row.status] || row.status)}</span>
+      <div class="ws-row-note">${escapeHtml(row.note || "")}</div>
+    </div>`;
+  }
+
+  function workspaceSectionCounts(section) {
+    const parts = [];
+    if (section.counts.revisar) parts.push(`<span class="ws-count ws-count-revisar">${section.counts.revisar} revisar</span>`);
+    if (section.counts["no-informado"]) parts.push(`<span class="ws-count">${section.counts["no-informado"]} no informado</span>`);
+    if (section.counts.secundario) parts.push(`<span class="ws-count">${section.counts.secundario} secundario</span>`);
+    return parts.join("");
+  }
+
+  function renderReviewWorkspace(context = null) {
+    const body = qs("reviewWorkspaceBody");
+    const status = qs("deviceStatus");
+    if (!body || !status || typeof DEVICE_PROFILES === "undefined") return;
+    renderDeviceSelector();
+    const report = annexState.importCandidate;
+    const modeProfile = getDeviceProfile(annexState.deviceMode);
+
+    if (!report) {
+      status.innerHTML = `<span class="device-status-label">${escapeHtml(modeProfile.id === "auto" ? "Auto: se detecta el equipo al cargar el PDF." : `${modeProfile.label}: ${DEVICE_STATUS_LABELS[modeProfile.status]}.`)}</span>`;
+      body.innerHTML = `<div class="ws-empty">Cargá el PDF del ecógrafo: EcoApp detecta el equipo, completa los campos seguros y organiza aquí lo que hay que revisar.</div>`;
+      body.dataset.wsSignature = "";
+      return;
+    }
+
+    const profile = getDeviceProfile(report.deviceProfileId);
+    const modeText = report.deviceMode === "auto" ? "Auto" : "Forzado";
+    status.innerHTML = `<span class="device-status-label"><strong>${escapeHtml(profile.label)}</strong> · ${escapeHtml(DEVICE_STATUS_LABELS[profile.status] || "")} · ${modeText}${annexState.sourceName ? ` · ${escapeHtml(annexState.sourceName)}` : ""}</span>`;
+
+    if (profile.workspace !== "m7") {
+      const note = profile.status === "validated"
+        ? `${report.found.length} campo(s) leídos. La lectura detallada sigue en <a href="#annexCard">Anexo / imágenes adjuntas</a>.`
+        : profile.status === "future"
+          ? `Sin parser para este equipo: el PDF sólo se adjunta. Cargá las mediciones manualmente.`
+          : `Parser no validado: no se importa automáticamente. Ver la lectura en <a href="#annexCard">Anexo / imágenes adjuntas</a>.`;
+      body.innerHTML = `<div class="ws-empty">${note}</div>${report.warnings.length ? `<ul class="ws-warnings">${report.warnings.map((w) => `<li>${escapeHtml(w)}</li>`).join("")}</ul>` : ""}`;
+      body.dataset.wsSignature = "";
+      return;
+    }
+
+    const data = context && context.data ? context.data : getFormData();
+    const calc = context && context.calc ? context.calc : calculateDerived(data);
+    const model = buildReviewWorkspaceModel(report, data, calc);
+    const signature = `${annexState.sourceName}|${report.deviceMode}|${model.sections.map((s) => s.rows.map((r) => r.key).join(",")).join("/")}`;
+
+    if (body.dataset.wsSignature === signature) {
+      // Mismo estudio: sólo se actualizan valores y estados (no se pierde el foco ni las secciones abiertas).
+      model.sections.forEach((section) => {
+        const sectionEl = body.querySelector(`[data-ws-section="${section.id}"]`);
+        const countsEl = sectionEl && sectionEl.querySelector(".ws-section-counts");
+        if (countsEl) countsEl.innerHTML = workspaceSectionCounts(section);
+        section.rows.forEach((row) => {
+          const rowEl = body.querySelector(`[data-ws-key="${CSS.escape(row.key)}"]`);
+          if (!rowEl) return;
+          rowEl.className = `ws-row ws-status-${row.status}`;
+          rowEl.querySelector(".ws-badge").textContent = WORKSPACE_STATUS_LABELS[row.status] || row.status;
+          rowEl.querySelector(".ws-row-note").textContent = row.note || "";
+          const control = rowEl.querySelector(".ws-input");
+          if (control && control !== document.activeElement) {
+            const original = qs(row.field);
+            if (original) control.value = original.value;
+            if (control.tagName === "INPUT") control.placeholder = row.status === "calc" && row.display ? row.display : "";
+          }
+          const valueEl = rowEl.querySelector(".ws-value");
+          if (valueEl && !control) valueEl.textContent = row.display || "—";
+        });
+      });
+      return;
+    }
+
+    const compact = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+    const warningsHtml = model.warnings.length
+      ? `<details class="ws-warnings-wrap"${model.warnings.length <= 3 ? " open" : ""}><summary>Avisos del parser (${model.warnings.length})</summary><ul class="ws-warnings">${model.warnings.map((w) => `<li>${escapeHtml(w)}</li>`).join("")}</ul></details>`
+      : "";
+    const legend = `<div class="ws-legend">${["pdf", "calc", "manual", "revisar", "secundario", "no-informado"].map((key) => `<span class="ws-legend-item ws-status-${key}"><span class="ws-badge">${WORKSPACE_STATUS_LABELS[key]}</span></span>`).join("")}</div>`;
+    body.innerHTML = `${legend}${warningsHtml}<div class="ws-grid">${model.sections.map((section) => {
+      const open = !compact || section.id === "paciente" || section.counts.revisar;
+      return `<details class="ws-section" data-ws-section="${section.id}"${open ? " open" : ""}>
+        <summary><span class="ws-section-title">${escapeHtml(section.title)}</span><span class="ws-section-counts">${workspaceSectionCounts(section)}</span></summary>
+        <div class="ws-rows">${section.rows.map(buildWorkspaceRowHtml).join("")}</div>
+      </details>`;
+    }).join("")}</div>`;
+    body.dataset.wsSignature = signature;
+  }
+
+  // Un cambio en el workspace escribe en el mismo input que lee getFormData();
+  // el listener global de input/change ejecuta luego updateAll().
+  function handleWorkspaceInput(event) {
+    const control = event.target;
+    if (!control || !control.dataset || !control.dataset.wsField) return;
+    const original = qs(control.dataset.wsField);
+    if (!original || original.readOnly) return;
+    original.value = control.value;
+  }
+
   function applyImportedMeasurements(options = {}) {
     const report = annexState.importCandidate;
     const onlyEmpty = !!(options && options.onlyEmpty);
@@ -1695,7 +2014,9 @@
       if (!el) return;
       const isText = textFields.has(field);
       const currentValue = el.value;
-      const currentHasValue = isText ? !!cleanText(currentValue) : hasValue(safeNumber(currentValue));
+      // La fecha de hoy que pone clearAll() por defecto no es un dato del médico: el PDF la reemplaza.
+      const isDefaultDate = field === "fecha" && currentValue === new Date().toISOString().slice(0, 10);
+      const currentHasValue = isDefaultDate ? false : isText ? !!cleanText(currentValue) : hasValue(safeNumber(currentValue));
       if (onlyEmpty && currentHasValue) {
         preservedCount += 1;
         return;
@@ -3994,6 +4315,7 @@ El PDF propone: ${incomingText}.
 
     renderAnnexImportSummary();
     renderAllAnnexOutputs();
+    renderReviewWorkspace();
     if (!silent) showToast("Anexo eliminado");
   }
 
@@ -4074,7 +4396,7 @@ El PDF propone: ${incomingText}.
         const payload = await buildPdfAnnexPayload(file);
         items = payload.items;
         annexState.pdfText = payload.text || "";
-        annexState.importCandidate = parseEchoPdfText(annexState.pdfText);
+        annexState.importCandidate = parseEchoPdfTextForDevice(annexState.pdfText, annexState.deviceMode);
         setAnnexStatus(`PDF cargado: ${file.name}. Se anexarán ${items.length} página(s).`, "info");
         if (annexState.importCandidate && annexState.importCandidate.found.length) {
           setAnnexImportStatus(`Se detectaron ${annexState.importCandidate.found.length} campo(s) potencialmente importables desde este PDF.`, "info");
@@ -4092,12 +4414,15 @@ El PDF propone: ${incomingText}.
 
       annexState.items = items;
       let autoImportResult = null;
-      const autoImportAllowed = isPdf && annexState.importCandidate && ["Mindray M7", "Sonoscape"].includes(annexState.importCandidate.equipment);
+      const autoImportAllowed = isPdf && annexState.importCandidate && annexState.importCandidate.autoImport;
       if (autoImportAllowed && annexState.importCandidate.found.length) {
         autoImportResult = applyImportedMeasurements({ onlyEmpty: true, silent: true });
       }
       renderAnnexImportSummary();
       renderAllAnnexOutputs();
+      renderReviewWorkspace();
+      const workspaceEl = qs("reviewWorkspace");
+      if (workspaceEl && isPdf && workspaceEl.getBoundingClientRect().top < 0) workspaceEl.scrollIntoView({ behavior: "smooth", block: "start" });
       if (autoImportResult) {
         const preserved = autoImportResult.preservedCount ? ` Se preservaron ${autoImportResult.preservedCount} campo(s) ya cargados.` : "";
         setAnnexImportStatus(`Importación automática: ${autoImportResult.importedCount} campo(s) cargados desde ${annexState.importCandidate.equipment}.${preserved} Revisá sólo las advertencias o datos dudosos.`, "success");
@@ -4384,6 +4709,7 @@ El PDF propone: ${incomingText}.
     drawBullseye("bull17", true);
     drawSegmentViews(true);
     renderAllAnnexOutputs();
+    renderReviewWorkspace({ data, calc });
 
     if (showMessage) showToast("Informe actualizado");
   }
@@ -4670,6 +4996,18 @@ El PDF propone: ${incomingText}.
     if (btnImportarAnexo) btnImportarAnexo.addEventListener("click", applyImportedMeasurements);
     if (btnAnexoLimpiar) btnAnexoLimpiar.addEventListener("click", () => clearAnnex(true));
     if (anexoPdfInput) anexoPdfInput.addEventListener("change", handleAnnexFileChange);
+    const btnWorkspaceAdjuntar = qs("btnWorkspaceAdjuntar");
+    if (btnWorkspaceAdjuntar && anexoPdfInput) btnWorkspaceAdjuntar.addEventListener("click", () => anexoPdfInput.click());
+    const deviceSelector = qs("deviceSelector");
+    if (deviceSelector) deviceSelector.addEventListener("click", (e) => {
+      const button = e.target.closest("[data-device-mode]");
+      if (button) setDeviceMode(button.dataset.deviceMode);
+    });
+    const workspace = qs("reviewWorkspace");
+    if (workspace) {
+      workspace.addEventListener("input", handleWorkspaceInput);
+      workspace.addEventListener("change", handleWorkspaceInput);
+    }
 
     document.body.addEventListener("input", (e) => {
       normalizeDecimalInput(e.target);

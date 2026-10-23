@@ -1,9 +1,10 @@
-const CACHE_NAME = 'ecoapp-v3-web-full-1';
+const CACHE_NAME = 'ecoapp-v3-web-full-2';
 const CORE_ASSETS = [
   './',
   './index.html',
   './styles.css',
   './config.js',
+  './device-profiles.js',
   './app.js',
   './pwa-register.js',
   './logo.png',
@@ -28,7 +29,7 @@ function isCriticalRequest(request) {
   if (request.mode === 'navigate') return true;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return false;
-  return /\/(?:index\.html|app\.js|config\.js|pwa-register\.js)$/.test(url.pathname);
+  return /\/(?:index\.html|app\.js|config\.js|device-profiles\.js|pwa-register\.js)$/.test(url.pathname);
 }
 
 self.addEventListener('fetch', event => {
