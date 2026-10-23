@@ -3401,25 +3401,17 @@ El PDF propone: ${incomingText}.
     if (!svg) return;
     svg.innerHTML = "";
 
-    const xBands = [
-      [46, 92],
-      [92, 142],
-      [142, 196]
-    ];
-
+    // Eje largo paraesternal: el ápex queda fuera de la ventana.
+    // Se representan los segmentos anteroseptales 2/8 e inferolaterales 5/11.
+    const xBands = [[52, 122], [122, 196]];
     const topOuter = { p1: { x: 42, y: 92 }, p2: { x: 198, y: 62 } };
     const topInner = { p1: { x: 52, y: 96 }, p2: { x: 190, y: 80 } };
     const bottomOuter = { p1: { x: 42, y: 106 }, p2: { x: 198, y: 126 } };
     const bottomInner = { p1: { x: 52, y: 100 }, p2: { x: 190, y: 112 } };
 
-    const cap = createSvgNode("path", { d: "M 20 100 L 28 90 L 42 90 L 48 100 L 42 110 L 28 110 Z" });
-    bindSegmentShape(cap, 17, interactive);
-    svg.appendChild(cap);
-    addSvgText(svg, 34, 100, "17", "segment-number");
-
     [
-      { ids: [14, 8, 2], outer: topOuter, inner: topInner },
-      { ids: [16, 11, 5], outer: bottomOuter, inner: bottomInner }
+      { ids: [8, 2], outer: topOuter, inner: topInner },
+      { ids: [11, 5], outer: bottomOuter, inner: bottomInner }
     ].forEach((side) => {
       side.ids.forEach((segmentId, index) => {
         const [x0, x1] = xBands[index];
@@ -3438,13 +3430,13 @@ El PDF propone: ${incomingText}.
     });
 
     svg.appendChild(createSvgNode("ellipse", { cx: 124, cy: 98, rx: 60, ry: 28, class: "segment-chamber" }));
-    addSvgText(svg, 124, 100, "LV", "segment-cap-label");
+    addSvgText(svg, 124, 100, "VI", "segment-cap-label");
     svg.appendChild(createSvgNode("ellipse", { cx: 210, cy: 100, rx: 17, ry: 24, class: "segment-chamber" }));
-    addSvgText(svg, 210, 102, "LA", "segment-small-label");
+    addSvgText(svg, 210, 102, "AI", "segment-small-label");
     svg.appendChild(createSvgNode("path", { d: "M 158 54 Q 174 32 198 34 Q 214 34 226 46", class: "segment-outline" }));
     addSvgText(svg, 205, 36, "Ao", "segment-small-label");
+    addSvgText(svg, 30, 146, "Ápex fuera de ventana", "segment-small-label", "start");
   }
-
   function drawShortAxisView(svgId, segments, interactive) {
     const svg = qs(svgId);
     if (!svg) return;
@@ -3504,37 +3496,55 @@ El PDF propone: ${incomingText}.
     addSvgText(svg, 80, 102, "17", "segment-number");
   }
 
-  function drawSegmentViews(interactive) {
-    drawVerticalSegmentView(
-      "viewA4C",
-      {
-        leftIds: [14, 9, 3],
-        rightIds: [16, 12, 6],
-        baseChambers: [
-          { path: "M 18 182 Q 42 170 66 186 L 66 222 Q 42 230 18 216 Z", label: { x: 42, y: 204, text: "RA" } },
-          { path: "M 154 182 Q 178 170 202 186 L 202 222 Q 178 230 154 216 Z", label: { x: 178, y: 204, text: "LA" } }
-        ]
-      },
-      interactive
-    );
+  function drawApicalSegmentViews(ids, interactive) {
+    drawVerticalSegmentView(ids.a4c, {
+      leftIds: [14, 9, 3],
+      rightIds: [16, 12, 6],
+      baseChambers: [
+        { path: "M 18 182 Q 42 170 66 186 L 66 222 Q 42 230 18 216 Z", label: { x: 42, y: 204, text: "AD" } },
+        { path: "M 154 182 Q 178 170 202 186 L 202 222 Q 178 230 154 216 Z", label: { x: 178, y: 204, text: "AI" } }
+      ]
+    }, interactive);
 
-    drawVerticalSegmentView(
-      "viewA2C",
-      {
-        leftIds: [15, 10, 4],
-        rightIds: [13, 7, 1],
-        baseChambers: [{ path: "M 48 184 Q 110 164 172 184 L 172 222 Q 110 230 48 222 Z", label: { x: 110, y: 204, text: "LA" } }]
-      },
-      interactive
-    );
+    drawVerticalSegmentView(ids.a2c, {
+      leftIds: [15, 10, 4],
+      rightIds: [13, 7, 1],
+      baseChambers: [{ path: "M 48 184 Q 110 164 172 184 L 172 222 Q 110 230 48 222 Z", label: { x: 110, y: 204, text: "AI" } }]
+    }, interactive);
 
-    drawPLAXView("viewPLAX", interactive);
-    drawShortAxisView("viewSAXBasal", SEGMENT_VIEW_MAPS.saxBasal.segments, interactive);
-    drawShortAxisView("viewSAXMid", SEGMENT_VIEW_MAPS.saxMid.segments, interactive);
-    drawShortAxisView("viewSAXApical", SEGMENT_VIEW_MAPS.saxApical.segments, interactive);
-    drawApicalCapView("viewApicalCap", interactive);
+    drawVerticalSegmentView(ids.a3c, {
+      leftIds: [16, 11, 5],
+      rightIds: [14, 8, 2],
+      baseChambers: [
+        { path: "M 38 184 Q 70 170 102 188 L 102 222 Q 70 230 38 218 Z", label: { x: 70, y: 204, text: "AI" } },
+        { path: "M 136 184 L 178 178 L 188 222 L 144 224 Z", label: { x: 162, y: 204, text: "Ao" } }
+      ]
+    }, interactive);
+
+    drawVerticalSegmentView(ids.a5c, {
+      leftIds: [14, 8, 2],
+      rightIds: [16, 12, 6],
+      baseChambers: [
+        { path: "M 18 182 Q 42 170 66 186 L 66 222 Q 42 230 18 216 Z", label: { x: 42, y: 204, text: "AD" } },
+        { path: "M 126 184 Q 150 172 170 186 L 170 222 Q 150 230 126 216 Z", label: { x: 148, y: 204, text: "AI" } },
+        { path: "M 174 178 L 202 176 L 210 220 L 182 222 Z", label: { x: 192, y: 202, text: "Ao" } }
+      ]
+    }, interactive);
   }
 
+  function drawSegmentViews(interactive) {
+    drawApicalSegmentViews({
+      a4c: "viewA4C", a2c: "viewA2C", a3c: "viewA3C", a5c: "viewA5C"
+    }, interactive);
+    drawPLAXView("viewPLAX", interactive);
+  }
+
+  function drawPrintSegmentViews() {
+    drawApicalSegmentViews({
+      a4c: "printViewA4C", a2c: "printViewA2C", a3c: "printViewA3C", a5c: "printViewA5C"
+    }, false);
+    drawPLAXView("printViewPLAX", false);
+  }
   function atlasBindShape(node, segmentId, interactive) {
     node.setAttribute("fill", colorForState(segmentStates[segmentId]));
     node.setAttribute("class", "atlas-seg");
@@ -4653,6 +4663,7 @@ El PDF propone: ${incomingText}.
     }
     renderSummaryOS(data, calc, conclusion);
     drawBullseye("printBull17", false);
+    drawPrintSegmentViews();
     renderPrintAnnex();
   }
 
