@@ -146,7 +146,7 @@ const M7_REVIEW_SECTIONS = [
     items: [
       { field: "vmaxTric", label: "Vmáx transvalvular tricuspídea", unit: "m/s", reviewFor: ["TV Vmax"] },
       { field: "trVmax", label: "TR Vmax", unit: "m/s", reviewFor: ["TR Vmax"] },
-      { field: "tvPg", label: "Gradiente TR", unit: "mmHg", reviewFor: ["TR PGmax"] },
+      { field: "tvPg", label: "TV PG (gradiente transvalvular)", unit: "mmHg", reviewFor: ["TV PG"] },
       { field: "prADmanual", label: "RAP / Pres RA", unit: "mmHg", reviewFor: ["RAP", "Pres RA"] },
       { field: "psapManual", label: "PSVD informada", unit: "mmHg", reviewFor: ["PSVD"] },
       { calc: "psap", label: "PSAP usada por EcoApp", unit: "mmHg", decimals: 0 }
