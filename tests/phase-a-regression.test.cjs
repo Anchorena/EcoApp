@@ -65,3 +65,20 @@ test('legacy manual inputs are not removed',()=>{
   assert.match(html,/id="camposEco"/);
   assert.match(html,/id="camposDoppler"/);
 });
+
+test('custom valvular morphology is available for all valves',()=>{
+  const config=fs.readFileSync(path.join(root,'config.js'),'utf8');
+  for(const id of ['aoMorf','miMorf','puMorf','trMorf']){
+    assert.match(config,new RegExp(id+': \\['));
+    assert.match(html,new RegExp('id="'+id+'Otro"'));
+    assert.match(js,new RegExp(id+': customMorphology\\("'+id+'"\\)'));
+  }
+  assert.equal((config.match(/Descripción personalizada…/g)||[]).length,4);
+});
+test('new requester and coverage options persist locally, not remotely',()=>{
+  assert.match(js,/function rememberCustomOption\(key, value\)/);
+  assert.match(js,/localStorage\.setItem\("ecoapp-options-" \+ key/);
+  assert.match(js,/storedCustomOptions\("coberturas"\)/);
+  assert.match(js,/storedCustomOptions\("solicitantes"\)/);
+  assert.match(js,/function saveCustomFromInputs\(\)/);
+});
