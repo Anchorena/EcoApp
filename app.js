@@ -580,6 +580,17 @@
       const value = data[key];
       el.value = value === null || value === undefined ? "" : value;
     });
+    // Recuperar una descripción personalizada al abrir un estudio guardado.
+    ["aoMorf", "miMorf", "puMorf", "trMorf"].forEach((id) => {
+      const select = qs(id);
+      const raw = data[id];
+      if (!select || !raw) return;
+      if (!Array.from(select.options).some((option) => option.value === raw)) {
+        select.value = "Descripción personalizada…";
+        const custom = qs(id + "Otro");
+        if (custom) custom.value = raw;
+      }
+    });
     setSelectValueOrOther("obraSocial", "obraSocialOtro", "obraSocial", "__OTRA__", data.obraSocial);
     setInformanteValueFromData(data);
     setLogoValueFromData(data);
@@ -953,6 +964,10 @@
     const patientMatch = normalized.match(/NOMBRE:\s*(.*?)\s+SEXO:\s*([mf])/i);
     const ageMatch = normalized.match(/EDAD:\s*(\d+)/i);
     const fcMatch = normalized.match(/FRECUENCIA CARD[ÍI]ACA:\s*([\d.,]+)/i);
+    const studyIdMatch = normalized.match(/\bID\s*:\s*(\d{8,})\b/i);
+    // Fecha impresa al pie del informe de mediciones; no confundir con FN (nacimiento).
+    const datedFooter = normalized.match(/\b(\d{2})\/(\d{2})\/(\d{4})\s+\d{1,2}:\d{2}\b/);
+    const studyDate = datedFooter ? `${datedFooter[3]}-${datedFooter[2]}-${datedFooter[1]}` : "";
 
     const teich = extractSection(normalized, /M[ée]todo de TEICHHOLZ/i, /(Cardiac Report--GENERAL 2D STUDY|ESTUDIO EN Modo M|1\.2\.1)/i);
     const general2D = extractSection(normalized, /(Cardiac Report--GENERAL 2D STUDY|1\.2\.1 Cardiac Report--GENERAL 2D STUDY)/i, /ESTUDIO DOPPLER DE LA V[ÁA]LVULA A[ÓO]RTICA/i);
@@ -964,6 +979,8 @@
 
     const values = {
       paciente: patientMatch ? normalizeImportedPatientName(patientMatch[1]) : "",
+      studyId: studyIdMatch ? normalizeImportedId(studyIdMatch[1]) : "",
+      fecha: studyDate,
       sexo: patientMatch ? normalizeImportedSex(patientMatch[2]) : "",
       edad: ageMatch ? safeNumber(ageMatch[1]) : null,
       fc: fcMatch ? safeNumber(fcMatch[1]) : null,
@@ -1927,7 +1944,7 @@
     const modeText = report.deviceMode === "auto" ? "Auto" : "Forzado";
     status.innerHTML = `<span class="device-status-label"><strong>${escapeHtml(profile.label)}</strong> · ${escapeHtml(DEVICE_STATUS_LABELS[profile.status] || "")} · ${modeText}${annexState.sourceName ? ` · ${escapeHtml(annexState.sourceName)}` : ""}</span>`;
 
-    if (profile.workspace !== "m7") {
+    if (profile.workspace !== "m7" && profile.workspace !== "s6") {
       const note = profile.status === "validated"
         ? `${report.found.length} campo(s) leídos. La lectura detallada sigue en <a href="#annexCard">Anexo / imágenes adjuntas</a>.`
         : profile.status === "future"
@@ -1940,8 +1957,9 @@
 
     const data = context && context.data ? context.data : getFormData();
     const calc = context && context.calc ? context.calc : calculateDerived(data);
-    const model = buildReviewWorkspaceModel(report, data, calc);
-    const signature = `${annexState.sourceName}|${report.deviceMode}|${model.sections.map((s) => s.rows.map((r) => r.key).join(",")).join("/")}`;
+    const reviewSections = profile.workspace === "s6" ? S6_REVIEW_SECTIONS : M7_REVIEW_SECTIONS;
+    const model = buildReviewWorkspaceModel(report, data, calc, reviewSections);
+    const signature = `${annexState.sourceName}|${profile.id}|${report.deviceMode}|${model.sections.map((s) => s.rows.map((r) => r.key).join(",")).join("/")}`;
 
     if (body.dataset.wsSignature === signature) {
       // Mismo estudio: sólo se actualizan valores y estados (no se pierde el foco ni las secciones abiertas).
@@ -2105,10 +2123,49 @@ El PDF propone: ${incomingText}.
     });
   }
 
+  // Opciones añadidas localmente; no se sincronizan ni exponen datos clínicos.
+  function storedCustomOptions(key) {
+    try {
+      const values = JSON.parse(localStorage.getItem("ecoapp-options-" + key) || "[]");
+      return Array.isArray(values) ? values.filter((item) => typeof item === "string" && item.trim()) : [];
+    } catch (_) { return []; }
+  }
+  function rememberCustomOption(key, value) {
+    const name = cleanText(value);
+    if (!name || name.length > 140) return;
+    const existing = storedCustomOptions(key);
+    if (existing.some((item) => item.toLocaleLowerCase() === name.toLocaleLowerCase())) return;
+    try { localStorage.setItem("ecoapp-options-" + key, JSON.stringify([...existing, name].slice(-100))); } catch (_) {}
+  }
+  function customMorphology(id) {
+    return getValue(id, "") === "Descripción personalizada…" ? cleanText(getValue(id + "Otro", "")) : getValue(id, "");
+  }
+  function refreshCustomLists() {
+    const coverage = getValue("obraSocial", "");
+    const doctor = getValue("medicoSolicitante", "");
+    fillCoverageOptions();
+    fillSolicitanteOptions();
+    if (qs("obraSocial")) qs("obraSocial").value = coverage;
+    if (qs("medicoSolicitante")) qs("medicoSolicitante").value = doctor;
+  }
+  function saveCustomFromInputs() {
+    const coverage = getValue("obraSocial", "");
+    const doctor = getValue("medicoSolicitante", "");
+    if (coverage === "__OTRA__") {
+      const name = cleanText(getValue("obraSocialOtro", ""));
+      if (name) { rememberCustomOption("coberturas", name); refreshCustomLists(); if (qs("obraSocial")) qs("obraSocial").value = name; }
+    }
+    if (doctor === "__OTRO__") {
+      const name = cleanText(getValue("medicoSolicitanteOtro", ""));
+      if (name) { rememberCustomOption("solicitantes", name); refreshCustomLists(); if (qs("medicoSolicitante")) qs("medicoSolicitante").value = name; }
+    }
+    toggleConditionalInputs();
+  }
+
   function fillCoverageOptions() {
     const select = qs("obraSocial");
     if (!select) return;
-    const options = OBRAS_SOCIALES.map((item) => `<option value="${item.nombre}">${item.nombre}</option>`).join("");
+    const options = [...OBRAS_SOCIALES.map((item) => item.nombre), ...storedCustomOptions("coberturas")].filter((v, i, a) => a.indexOf(v) === i).map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("");
     select.innerHTML = `<option value="">Seleccionar</option>${options}<option value="__OTRA__">Otra / no listada</option>`;
   }
 
@@ -2274,6 +2331,7 @@ El PDF propone: ${incomingText}.
       '<optgroup label="Especialidades / genéricos">',
       ...SOLICITANTES_GENERICOS.map((name) => `<option value="${name}">${name}</option>`),
       '</optgroup>',
+      ...storedCustomOptions("solicitantes").map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`),
       '<option value="__OTRO__">Otro / no listado</option>'
     ];
 
@@ -2362,6 +2420,7 @@ El PDF propone: ${incomingText}.
     setDisplay("medicoInformanteOtroWrap", informanteValue === "__OTRO__" ? "block" : "none");
     setDisplay("obraSocialOtroWrap", coverageValue === "__OTRA__" ? "block" : "none");
     setDisplay("medicoSolicitanteOtroWrap", solicitanteValue === "__OTRO__" ? "block" : "none");
+    ["aoMorf", "miMorf", "puMorf", "trMorf"].forEach((id) => setDisplay(id + "OtroWrap", getValue(id, "") === "Descripción personalizada…" ? "block" : "none"));
     setDisplay("motivoOtroWrap", motivoValue === "__OTRO__" ? "block" : "none");
 
     const resolvedCoverage = getSelectedCoverage();
@@ -2445,7 +2504,7 @@ El PDF propone: ${incomingText}.
       trombosMasas: getValue("trombosMasas", "Sin trombos ni masas intracavitarias"),
       vegetaciones: getValue("vegetaciones", "Aparatos valvulares libres"),
 
-      aoMorf: getValue("aoMorf", ""),
+      aoMorf: customMorphology("aoMorf"),
       aoIns: getValue("aoIns", "No"),
       aoEst: getValue("aoEst", "No"),
       aoJet: getValue("aoJet", "No evaluado"),
@@ -2455,7 +2514,7 @@ El PDF propone: ${incomingText}.
       aoRVol: safeNumber(getValue("aoRVol", "")),
       aoFlowRev: getValue("aoFlowRev", "No evaluado"),
 
-      miMorf: getValue("miMorf", ""),
+      miMorf: customMorphology("miMorf"),
       miIns: getValue("miIns", "No"),
       miEst: getValue("miEst", "No"),
       miJet: getValue("miJet", "No evaluado"),
@@ -2464,11 +2523,11 @@ El PDF propone: ${incomingText}.
       miRVol: safeNumber(getValue("miRVol", "")),
       miPisa: getValue("miPisa", "No evaluado"),
 
-      puMorf: getValue("puMorf", ""),
+      puMorf: customMorphology("puMorf"),
       puIns: getValue("puIns", "No"),
       puEst: getValue("puEst", "No"),
 
-      trMorf: getValue("trMorf", ""),
+      trMorf: customMorphology("trMorf"),
       trIns: getValue("trIns", "No"),
       trEst: getValue("trEst", "No"),
 
@@ -2523,8 +2582,9 @@ El PDF propone: ${incomingText}.
         ? data.aiDiam / data.raizAo
         : null;
 
+    // Un valor cero no es una onda transmitral válida: evitar E/A = 0 e inferencias clínicas.
     const ea =
-      data.ondaE !== null && data.ondaA !== null && data.ondaA !== 0
+      data.ondaE !== null && data.ondaE > 0 && data.ondaA !== null && data.ondaA > 0
         ? data.ondaE / data.ondaA
         : null;
 
@@ -2533,7 +2593,7 @@ El PDF propone: ${incomingText}.
         ? (data.eSeptal + data.eLateral) / 2
         : null;
 
-    const ondaEcm = data.ondaE !== null ? (data.ondaE < 5 ? data.ondaE * 100 : data.ondaE) : null;
+    const ondaEcm = data.ondaE !== null && data.ondaE > 0 ? (data.ondaE < 5 ? data.ondaE * 100 : data.ondaE) : null;
 
     const eSobreESeptal = data.eeSeptal !== null
       ? data.eeSeptal
@@ -2792,7 +2852,15 @@ El PDF propone: ${incomingText}.
     };
   }
 
-  function interpretDiastolic(calc) {
+  function interpretDiastolic(calc, data = null) {
+    // E aislada: patrón monofásico, sin diagnosticar FA ni graduar diastólica.
+    if (data && data.ondaE !== null && data.ondaE > 0 && (data.ondaA === null || data.ondaA === undefined)) {
+      return "Doppler transmitral con patrón monofásico (onda E sin onda A registrada); hallazgo que puede observarse en contexto de fibrilación auricular. Correlacionar con el ritmo electrocardiográfico. No es posible graduar la función diastólica mediante E/A.";
+    }
+    // No inferir un grado diastólico sólo a partir de un E/e' manual sin onda E válida.
+    if (calc.ea === null) {
+      return "No es posible definir adecuadamente la función diastólica con los datos cargados.";
+    }
     if (calc.ea === null && calc.eSobreEprima === null) {
       return "No es posible definir adecuadamente la función diastólica con los datos cargados.";
     }
@@ -3916,7 +3984,11 @@ El PDF propone: ${incomingText}.
     const arr = [];
 
     if (morph && cleanText(morph) !== "" && !isDefaultNormalMorph(name, morph)) {
-      arr.push(`Válvula ${name.toLowerCase()} ${String(morph).toLowerCase()}.`);
+      // Una anatomía aparentemente normal no implica cierre competente.
+      const morphologyText = insufficiency !== "No" || stenosis !== "No"
+        ? String(morph).replace(/,?\s*apertura y cierre conservados/gi, "").trim()
+        : String(morph);
+      if (morphologyText) arr.push(`Válvula ${name.toLowerCase()} ${morphologyText.toLowerCase()}.`);
     }
 
     if (insufficiency !== "No") {
@@ -3934,7 +4006,10 @@ El PDF propone: ${incomingText}.
     const arr = [];
 
     if (data.miMorf && cleanText(data.miMorf) !== "" && !isDefaultNormalMorph("mitral", data.miMorf)) {
-      arr.push(`Válvula mitral ${String(data.miMorf).toLowerCase()}.`);
+      const morphologyText = data.miIns !== "No" || data.miEst !== "No"
+        ? String(data.miMorf).replace(/,?\s*apertura y cierre conservados/gi, "").trim()
+        : String(data.miMorf);
+      if (morphologyText) arr.push(`Válvula mitral ${morphologyText.toLowerCase()}.`);
     }
 
     const mr = interpretMitralRegurgitation(data);
@@ -4615,7 +4690,7 @@ El PDF propone: ${incomingText}.
   function renderPrintBlocks(data, calc, description, conclusion, notes, segmentText, interp) {
     const printMed = `${data.medicoInformante} | ${data.matriculaInformante}`;
     const printEsp = `${data.especialidadInformante || ""}`;
-    const diastolicText = interpretDiastolic(calc);
+    const diastolicText = interpretDiastolic(calc, data);
 
     setText("printMedico", printMed);
     setText("printEspecialidad", printEsp);
@@ -4688,7 +4763,7 @@ El PDF propone: ${incomingText}.
       psap: interpretPSAP(calc.psap)
     };
 
-    const diastolicText = interpretDiastolic(calc);
+    const diastolicText = interpretDiastolic(calc, data);
     const glsText = interpretGLS(data.gls);
     const segmentText = segmentSummary();
 
@@ -5013,6 +5088,11 @@ El PDF propone: ${incomingText}.
       if (e.target.matches("input, select, textarea") && !e.target.matches(".annex-include-toggle") && e.target.id !== "anexoPdfInput") {
         updateAll(false);
       }
+    });
+
+    ["obraSocialOtro", "medicoSolicitanteOtro"].forEach((id) => {
+      const el = qs(id);
+      if (el) el.addEventListener("change", saveCustomFromInputs);
     });
 
     document.body.addEventListener("change", (e) => {

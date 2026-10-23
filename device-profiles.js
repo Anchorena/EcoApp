@@ -11,7 +11,7 @@ const DEVICE_PROFILES = [
   { id: "auto", label: "Auto", status: "auto" },
   { id: "mindray-m7", label: "Mindray M7", status: "validated", parser: "mindrayM7", equipment: ["Mindray M7"], autoImport: true, workspace: "m7" },
   { id: "mindray-m8m9", label: "Mindray M8/M9", status: "unvalidated", parser: "mindrayM8M9", equipment: ["Mindray M8/M9"], autoImport: false },
-  { id: "sonoscape-s6", label: "Sonoscape S6", status: "validated", parser: "sonoscape", equipment: ["Sonoscape"], autoImport: true },
+  { id: "sonoscape-s6", label: "Sonoscape S6", status: "validated", parser: "sonoscape", equipment: ["Sonoscape"], autoImport: true, workspace: "s6" },
   { id: "esaote", label: "Esaote", status: "unvalidated", parser: "esaote", equipment: ["ESAOTE MyLab"], autoImport: false },
   { id: "philips", label: "Philips", status: "future" },
   { id: "otro", label: "Otro", status: "future" }
@@ -58,8 +58,7 @@ const M7_REVIEW_SECTIONS = [
       { field: "aiDiam", label: "Diámetro AI", unit: "mm", reviewFor: ["Diám AI"] },
       { field: "raizAo", label: "Raíz aórtica", unit: "mm", reviewFor: ["Diám ao"] },
       { calc: "relAiAo", label: "AI/Ao", decimals: 2 },
-      { field: "diamTsvi", label: "Diámetro TSVI", unit: "mm", reviewFor: ["Diám TSVI"] },
-      { field: "vdBasal", label: "VD basal", unit: "mm" }
+      { field: "diamTsvi", label: "Diámetro TSVI", unit: "mm", reviewFor: ["Diám TSVI"] }
     ],
     secondary: [/^Diám VA$/, /^Diám (Asc|Des) Aórt$/, /^VD (Mayor|Menor)$/]
   },
@@ -133,11 +132,21 @@ const M7_REVIEW_SECTIONS = [
     secondary: [/^(VTI VP|Vmed VP)$/]
   },
   {
+    id: "vd", title: "VD / función derecha",
+    items: [
+      { field: "vdBasal", label: "Diámetro basal VD", unit: "mm" },
+      { field: "tapse", label: "TAPSE", unit: "mm" },
+      { field: "vci", label: "Diámetro VCI", unit: "mm" },
+      { field: "vciColapso", label: "Colapso VCI", unit: "%" }
+    ],
+    secondary: [/^VD (Mayor|Menor)$/]
+  },
+  {
     id: "tricuspide", title: "Tricúspide / PSAP",
     items: [
       { field: "vmaxTric", label: "Vmáx transvalvular tricuspídea", unit: "m/s", reviewFor: ["TV Vmax"] },
       { field: "trVmax", label: "TR Vmax", unit: "m/s", reviewFor: ["TR Vmax"] },
-      { field: "tvPg", label: "Gradiente TR", unit: "mmHg", reviewFor: ["TR PGmax"] },
+      { field: "tvPg", label: "TV PG (gradiente transvalvular)", unit: "mmHg", reviewFor: ["TV PG"] },
       { field: "prADmanual", label: "RAP / Pres RA", unit: "mmHg", reviewFor: ["RAP", "Pres RA"] },
       { field: "psapManual", label: "PSVD informada", unit: "mmHg", reviewFor: ["PSVD"] },
       { calc: "psap", label: "PSAP usada por EcoApp", unit: "mmHg", decimals: 0 }
@@ -150,3 +159,11 @@ const M7_REVIEW_SECTIONS = [
     secondary: [/./]
   }
 ];
+
+// S6 comparte el modelo ecocardiográfico y los mismos controles editables.
+// Se excluyen etiquetas y valores secundarios exclusivos del reporte M7.
+const S6_REVIEW_SECTIONS = M7_REVIEW_SECTIONS.map((section) => ({
+  id: section.id,
+  title: section.title,
+  items: section.items.filter((item) => !item.raw).map(({ reviewFor, ...item }) => item)
+}));

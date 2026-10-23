@@ -376,7 +376,13 @@ const SELECT_OPTIONS = {
     "Esclerocalcificada",
     "Engrosada",
     "Prótesis biológica",
-    "Prótesis mecánica"
+    "Prótesis mecánica",
+    "Tricúspide, valvas de aspecto conservado",
+    "Tricúspide con coaptación incompleta",
+    "Bicúspide con insuficiencia",
+    "Esclerosis valvular sin estenosis significativa",
+    "Mala coaptación de velos",
+    "Descripción personalizada…"
   ],
   aoIns: ["No", "Leve", "Moderada", "Severa"],
   aoEst: ["No", "Leve", "Moderada", "Severa"],
@@ -389,7 +395,12 @@ const SELECT_OPTIONS = {
     "Calcificación anular",
     "Restricción de velos",
     "Prótesis biológica",
-    "Prótesis mecánica"
+    "Prótesis mecánica",
+    "Valvas de aspecto conservado",
+    "Valvas de aspecto conservado con insuficiencia",
+    "Coaptación incompleta de velos",
+    "Prolapso con insuficiencia",
+    "Descripción personalizada…"
   ],
   miIns: ["No", "Leve", "Moderada", "Severa"],
   miEst: ["No", "Leve", "Moderada", "Severa"],
@@ -399,7 +410,11 @@ const SELECT_OPTIONS = {
     "Engrosada",
     "Displásica",
     "Postquirúrgica",
-    "Prótesis biológica"
+    "Prótesis biológica",
+    "Valvas de aspecto conservado",
+    "Valvas de aspecto conservado con insuficiencia",
+    "Coaptación incompleta",
+    "Descripción personalizada…"
   ],
   puIns: ["No", "Leve", "Moderada", "Severa"],
   puEst: ["No", "Leve", "Moderada", "Severa"],
@@ -411,7 +426,11 @@ const SELECT_OPTIONS = {
     "Restricción de velos",
     "Anomalía de Ebstein",
     "Prótesis biológica",
-    "Prótesis mecánica"
+    "Prótesis mecánica",
+    "Valvas de aspecto conservado",
+    "Valvas de aspecto conservado con insuficiencia",
+    "Dilatación anular y coaptación incompleta",
+    "Descripción personalizada…"
   ],
   trIns: [
     "No",

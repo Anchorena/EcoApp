@@ -1,0 +1,26 @@
+name: EcoApp Phase A regression
+on:
+  push:
+    branches: [feature/echo-clinical-layout]
+  pull_request:
+    paths: ['app.js', 'config.js', 'index.html', 'device-profiles.js', 'tests/**', '.github/workflows/phase-a-regression.yml']
+  workflow_dispatch:
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax validation
+        run: |
+          node --check app.js
+          node --check config.js
+          node --check device-profiles.js
+          node --check tests/phase-a-regression.test.cjs
+          node --check tests/parser-smoke.test.cjs
+      - name: Synthetic regression tests
+        run: node --test tests/*.test.cjs
