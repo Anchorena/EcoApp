@@ -580,6 +580,17 @@
       const value = data[key];
       el.value = value === null || value === undefined ? "" : value;
     });
+    // Recuperar una descripción personalizada al abrir un estudio guardado.
+    ["aoMorf", "miMorf", "puMorf", "trMorf"].forEach((id) => {
+      const select = qs(id);
+      const raw = data[id];
+      if (!select || !raw) return;
+      if (!Array.from(select.options).some((option) => option.value === raw)) {
+        select.value = "Descripción personalizada…";
+        const custom = qs(id + "Otro");
+        if (custom) custom.value = raw;
+      }
+    });
     setSelectValueOrOther("obraSocial", "obraSocialOtro", "obraSocial", "__OTRA__", data.obraSocial);
     setInformanteValueFromData(data);
     setLogoValueFromData(data);
