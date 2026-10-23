@@ -2,7 +2,7 @@
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
       navigator.serviceWorker
-        .register('./service-worker.js?v=20261023-1', { updateViaCache: 'none' })
+        .register('./service-worker.js?v=20261023-2', { updateViaCache: 'none' })
         .then(function (registration) {
           registration.update().catch(function () {});
         })
