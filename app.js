@@ -2523,8 +2523,9 @@ El PDF propone: ${incomingText}.
         ? data.aiDiam / data.raizAo
         : null;
 
+    // Un valor cero no es una onda transmitral válida: evitar E/A = 0 e inferencias clínicas.
     const ea =
-      data.ondaE !== null && data.ondaA !== null && data.ondaA !== 0
+      data.ondaE !== null && data.ondaE > 0 && data.ondaA !== null && data.ondaA > 0
         ? data.ondaE / data.ondaA
         : null;
 
@@ -2533,7 +2534,7 @@ El PDF propone: ${incomingText}.
         ? (data.eSeptal + data.eLateral) / 2
         : null;
 
-    const ondaEcm = data.ondaE !== null ? (data.ondaE < 5 ? data.ondaE * 100 : data.ondaE) : null;
+    const ondaEcm = data.ondaE !== null && data.ondaE > 0 ? (data.ondaE < 5 ? data.ondaE * 100 : data.ondaE) : null;
 
     const eSobreESeptal = data.eeSeptal !== null
       ? data.eeSeptal
@@ -2793,6 +2794,10 @@ El PDF propone: ${incomingText}.
   }
 
   function interpretDiastolic(calc) {
+    // No inferir un grado diastólico sólo a partir de un E/e' manual sin onda E válida.
+    if (calc.ea === null) {
+      return "No es posible definir adecuadamente la función diastólica con los datos cargados.";
+    }
     if (calc.ea === null && calc.eSobreEprima === null) {
       return "No es posible definir adecuadamente la función diastólica con los datos cargados.";
     }
