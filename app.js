@@ -3977,7 +3977,11 @@ El PDF propone: ${incomingText}.
     const arr = [];
 
     if (morph && cleanText(morph) !== "" && !isDefaultNormalMorph(name, morph)) {
-      arr.push(`Válvula ${name.toLowerCase()} ${String(morph).toLowerCase()}.`);
+      // Una anatomía aparentemente normal no implica cierre competente.
+      const morphologyText = insufficiency !== "No" || stenosis !== "No"
+        ? String(morph).replace(/,?\s*apertura y cierre conservados/gi, "").trim()
+        : String(morph);
+      if (morphologyText) arr.push(`Válvula ${name.toLowerCase()} ${morphologyText.toLowerCase()}.`);
     }
 
     if (insufficiency !== "No") {
@@ -3995,7 +3999,10 @@ El PDF propone: ${incomingText}.
     const arr = [];
 
     if (data.miMorf && cleanText(data.miMorf) !== "" && !isDefaultNormalMorph("mitral", data.miMorf)) {
-      arr.push(`Válvula mitral ${String(data.miMorf).toLowerCase()}.`);
+      const morphologyText = data.miIns !== "No" || data.miEst !== "No"
+        ? String(data.miMorf).replace(/,?\s*apertura y cierre conservados/gi, "").trim()
+        : String(data.miMorf);
+      if (morphologyText) arr.push(`Válvula mitral ${morphologyText.toLowerCase()}.`);
     }
 
     const mr = interpretMitralRegurgitation(data);
