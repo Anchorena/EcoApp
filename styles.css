@@ -3197,3 +3197,9 @@ body.dark-mode .ws-attach{ color:#04221f; }
 @media (max-width:950px){ .clinical-admin-grid{ grid-template-columns:1fr; } }
 @media (max-width:620px){ .clinical-admin-grid .form-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:420px){ .clinical-admin-grid .form-grid{ grid-template-columns:1fr; } }
+
+/* Keep legacy measurement inputs accessible for manual/S6 studies; collapse optionally. */
+.legacy-measurements{ border:1px solid var(--border); background:var(--card); border-radius:var(--radius); padding:12px; min-width:0; }
+.legacy-measurements > summary{ cursor:pointer; font-weight:800; color:var(--title); padding:8px 10px; }
+.legacy-measurements-grid{ display:grid; gap:18px; margin-top:10px; }
+.legacy-measurements-grid .card{ min-width:0; }
