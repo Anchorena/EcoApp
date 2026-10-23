@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EcoApp EchoReport v1.0</title>
-  <link rel="stylesheet" href="styles.css?v=20261023-1" />
+  <link rel="stylesheet" href="styles.css?v=20261023-2" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
 </head>
@@ -135,20 +135,9 @@
       </div>
     </section>
 
-    <section id="reviewWorkspace" class="card review-workspace no-print" aria-labelledby="reviewWorkspaceTitle">
-      <div class="ws-header">
-        <div>
-          <h2 id="reviewWorkspaceTitle">Revisión del PDF del equipo</h2>
-          <div id="deviceStatus" class="device-status"></div>
-        </div>
-        <div class="ws-header-actions"><a href="#annexCard" class="ws-jump">Ver PDF / imágenes</a><button id="btnWorkspaceAdjuntar" type="button" class="ws-attach">Cargar PDF del ecógrafo</button></div>
-      </div>
-      <div id="deviceSelector" class="device-selector" role="group" aria-label="Equipo / parser"></div>
-      <div id="reviewWorkspaceBody" class="ws-body"></div>
-    </section>
-
-    <main class="layout">
-      <section class="left-column no-print">
+    <section class="clinical-admin no-print" aria-label="Datos del estudio y del paciente">
+      <h2 class="clinical-admin-title">Datos del estudio / paciente</h2>
+      <div class="clinical-admin-grid">
         <article class="card">
           <h2>Médico / Solicitud</h2>
           <div class="form-grid">
@@ -183,6 +172,23 @@
           <div id="coverageAlert" class="status-banner warning" style="display:none;">Esta cobertura requiere resumen breve para impresión. Usá el botón <strong>Imprimir resumen corto</strong>.</div>
         </article>
 
+      </div>
+    </section>
+
+    <section id="reviewWorkspace" class="card review-workspace no-print" aria-labelledby="reviewWorkspaceTitle">
+      <div class="ws-header">
+        <div>
+          <h2 id="reviewWorkspaceTitle">Revisión del PDF del equipo</h2>
+          <div id="deviceStatus" class="device-status"></div>
+        </div>
+        <div class="ws-header-actions"><a href="#annexCard" class="ws-jump">Ver PDF / imágenes</a><button id="btnWorkspaceAdjuntar" type="button" class="ws-attach">Cargar PDF del ecógrafo</button></div>
+      </div>
+      <div id="deviceSelector" class="device-selector" role="group" aria-label="Equipo / parser"></div>
+      <div id="reviewWorkspaceBody" class="ws-body"></div>
+    </section>
+
+    <main class="layout">
+      <section class="left-column no-print">
         <article class="card"><h2>Eco bidimensional</h2><div id="camposEco" class="form-grid"></div></article>
         <article class="card"><h2>Doppler</h2><div id="camposDoppler" class="form-grid"></div></article>
 
