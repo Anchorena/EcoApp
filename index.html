@@ -31,6 +31,7 @@
             <button id="btnActualizar" type="button">Actualizar interpretación</button>
             <button id="btnVerInforme" type="button">Ver informe limpio</button>
             <button id="btnAdjuntarAnexo" type="button">Adjuntar PDF / imágenes</button>
+            <button id="btnAnexoLimpiar" type="button" class="secondary" title="Quita el PDF adjunto sin borrar las mediciones importadas">Quitar anexo</button>
           </div>
         </section>
         <section class="toolbar-group toolbar-group-pdf">
@@ -287,11 +288,11 @@
         </article>
         <article class="card" id="annexCard">
           <h2>Anexo / imágenes adjuntas</h2>
-          <p class="hint">Al cargar el PDF del ecógrafo las mediciones se importan automáticamente (sólo en campos vacíos). Acá quedan la vista previa, las páginas incluidas en el informe y el botón para quitar el anexo.</p>
+          <p class="hint">Al cargar el PDF del ecógrafo las mediciones se importan automáticamente (sólo en campos vacíos). Acá quedan la vista previa y las páginas que se incluirán únicamente en el PDF largo. El PDF corto siempre se exporta sin anexo.</p>
           <input id="anexoPdfInput" type="file" accept=".pdf,image/*" hidden />
           <div class="annex-actions annex-actions-compact">
             <button id="btnImportarAnexo" type="button" disabled>Reimportar mediciones del adjunto (fallback)</button>
-            <button id="btnAnexoLimpiar" type="button">Quitar anexo</button>
+            
           </div>
           <div id="annexStatus" class="status-banner info" style="display:none;"></div>
           <div id="annexImportStatus" class="status-banner info" style="display:none;"></div>
@@ -378,11 +379,6 @@
         <p id="summaryFirmaEspecialidad">Medicina Intensiva y Cardiología</p>
       </div>
       <div class="print-footer" aria-hidden="true"><span class="print-footer-left">EcoApp EchoReport v1.0 by Matias Anchorena</span><span class="print-footer-right"></span></div>
-      <div id="summaryAnexoWrap" class="summary-block" style="display:none;">
-        <h2>Anexo / imágenes adjuntas</h2>
-        <div id="summaryAnexoMeta" class="annex-meta"></div>
-        <div id="summaryAnexoPages" class="annex-print-pages"></div>
-      </div>
     </section>
 
     <div id="toast" class="toast hidden"></div>
