@@ -3187,3 +3187,45 @@ body.dark-mode .ws-attach{ color:#04221f; }
   .ws-input{ font-size:16px; } /* evita el zoom automático de iOS al enfocar */
 }
 @media print{ .review-workspace{ display:none !important; } }
+
+
+/* ===== Motilidad miocárdica sincronizada ===== */
+.wall-motion-layout{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(0,1.65fr);gap:14px;align-items:start;}
+.wall-motion-bullseye-card{min-width:0;}
+.segment-view-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.segment-view-card{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--soft);padding:9px;min-width:0;}
+.segment-view-card-wide{grid-column:1 / -1;}
+.segment-view-title{font-weight:800;color:var(--title);font-size:13px;margin-bottom:4px;}
+.segment-view-card svg{width:100%;height:190px;display:block;overflow:visible;}
+.segment-view-card-wide svg{height:150px;}
+.segment-view-note{color:var(--muted);font-size:10.5px;line-height:1.25;margin-top:2px;}
+.segment-shape.interactive{cursor:pointer;transition:filter .12s ease,opacity .12s ease;}
+.segment-shape.interactive:hover{filter:brightness(.96);opacity:.9;}
+.segment-reference-details{margin-top:10px;border-top:1px solid var(--border);padding-top:8px;}
+.segment-reference-details summary{cursor:pointer;color:var(--muted);font-weight:700;font-size:12px;}
+.print-segment-view-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:8px 0 4px;}
+.print-segment-view{border:1px solid #dbe3ec;border-radius:8px;padding:5px;text-align:center;break-inside:avoid;}
+.print-segment-view strong{font-size:8pt;}
+.print-segment-view svg{width:100%;height:105px;display:block;margin:auto;}
+.print-segment-footnote{color:#64748b;font-size:7pt;margin:3px 0 7px;}
+@media (max-width:1180px){
+  .wall-motion-layout{grid-template-columns:1fr;}
+  .wall-motion-bullseye-card{max-width:520px;}
+  .segment-view-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .segment-view-card-wide{grid-column:auto;}
+}
+@media (max-width:760px){
+  .segment-view-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .segment-view-card-wide{grid-column:1 / -1;}
+  .segment-view-card svg{height:165px;}
+}
+@media (max-width:520px){
+  .segment-view-grid{grid-template-columns:1fr;}
+  .segment-view-card-wide{grid-column:auto;}
+  .segment-view-card svg,.segment-view-card-wide svg{height:185px;}
+}
+@media print{
+  #print-report-moderno .print-segment-view-grid{display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:4mm !important;}
+  #print-report-moderno .print-segment-view svg{height:27mm !important;}
+  #print-report-moderno .segments-print-block{break-inside:avoid-page !important;page-break-inside:avoid !important;}
+}
