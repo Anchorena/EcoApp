@@ -88,3 +88,11 @@ test('valve narrative does not assert preserved closure with regurgitation',()=>
   assert.match(js,/morphologyText = data\.miIns !== "No" \|\| data\.miEst !== "No"/);
   assert.match(js,/replace\(\/,\?\\s\*apertura y cierre conservados\/gi/);
 });
+
+test('Sonoscape S6 renders the same normalized editable workspace as M7',()=>{
+  assert.match(profiles,/id: "sonoscape-s6"[\s\S]*?workspace: "s6"/);
+  assert.match(profiles,/const S6_REVIEW_SECTIONS = M7_REVIEW_SECTIONS\.map/);
+  assert.match(js,/profile\.workspace !== "m7" && profile\.workspace !== "s6"/);
+  assert.match(js,/profile\.workspace === "s6" \? S6_REVIEW_SECTIONS : M7_REVIEW_SECTIONS/);
+  assert.match(js,/buildReviewWorkspaceModel\(report, data, calc, reviewSections\)/);
+});
