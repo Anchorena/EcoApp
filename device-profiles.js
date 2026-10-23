@@ -58,8 +58,7 @@ const M7_REVIEW_SECTIONS = [
       { field: "aiDiam", label: "Diámetro AI", unit: "mm", reviewFor: ["Diám AI"] },
       { field: "raizAo", label: "Raíz aórtica", unit: "mm", reviewFor: ["Diám ao"] },
       { calc: "relAiAo", label: "AI/Ao", decimals: 2 },
-      { field: "diamTsvi", label: "Diámetro TSVI", unit: "mm", reviewFor: ["Diám TSVI"] },
-      { field: "vdBasal", label: "VD basal", unit: "mm" }
+      { field: "diamTsvi", label: "Diámetro TSVI", unit: "mm", reviewFor: ["Diám TSVI"] }
     ],
     secondary: [/^Diám VA$/, /^Diám (Asc|Des) Aórt$/, /^VD (Mayor|Menor)$/]
   },
@@ -131,6 +130,16 @@ const M7_REVIEW_SECTIONS = [
       { field: "gradPulm", label: "Gradiente medio pulmonar", unit: "mmHg", reviewFor: ["PGmed VP"] }
     ],
     secondary: [/^(VTI VP|Vmed VP)$/]
+  },
+  {
+    id: "vd", title: "VD / función derecha",
+    items: [
+      { field: "vdBasal", label: "Diámetro basal VD", unit: "mm" },
+      { field: "tapse", label: "TAPSE", unit: "mm" },
+      { field: "vci", label: "Diámetro VCI", unit: "mm" },
+      { field: "vciColapso", label: "Colapso VCI", unit: "%" }
+    ],
+    secondary: [/^VD (Mayor|Menor)$/]
   },
   {
     id: "tricuspide", title: "Tricúspide / PSAP",
