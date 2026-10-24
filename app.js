@@ -3451,6 +3451,13 @@ El PDF propone: ${incomingText}.
     const rightOuter = { p1: { x: 111, y: 34 }, p2: { x: 138, y: 190 } };
     const rightInner = { p1: { x: 111, y: 52 }, p2: { x: 120, y: 186 } };
 
+    // Dibujar cavidades accesorias primero: nunca deben tapar segmentos basales.
+    const lowerShapes = spec.baseChambers || [];
+    lowerShapes.forEach((item) => {
+      svg.appendChild(createSvgNode("path", { d: item.path, class: "segment-chamber" }));
+      addSvgText(svg, item.label.x, item.label.y, item.label.text, "segment-small-label");
+    });
+
     // Cavidad esquemática central: se mantiene dentro del borde endocárdico de los seis sectores.
     // Se dibuja primero para que jamás tape los polígonos clicables ni su numeración.
     svg.appendChild(createSvgNode("path", {
@@ -3483,11 +3490,6 @@ El PDF propone: ${incomingText}.
     svg.appendChild(cap);
     addSvgText(svg, 110, 25, "17", "segment-number");
 
-    const lowerShapes = spec.baseChambers || [];
-    lowerShapes.forEach((item) => {
-      svg.appendChild(createSvgNode("path", { d: item.path, class: "segment-chamber" }));
-      addSvgText(svg, item.label.x, item.label.y, item.label.text, "segment-small-label");
-    });
     // Las vistas apicales se presentan con ápice arriba y base abajo.
     addSvgText(svg, 173, 22, "ÁPEX", "segment-orientation-label");
     addSvgText(svg, 110, 236, "BASE", "segment-orientation-label");
