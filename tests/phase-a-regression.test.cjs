@@ -105,3 +105,16 @@ test('S6 imports study ID and report date, without confusing patient DOB',()=>{
   assert.match(profiles,/TV PG \(gradiente transvalvular\)/);
   assert.doesNotMatch(profiles,/field: "tvPg", label: "Gradiente TR"/);
 });
+
+test('Fase B six views share the same 17 segment state and remain keyboard accessible',()=>{
+  const config=fs.readFileSync(path.join(root,'config.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  for(const id of ['viewA4C','viewA2C','viewA3C','viewSAXBasal','viewSAXMid','viewSAXApical']){
+    assert.match(html,new RegExp('id="'+id+'"'));
+    assert.match(js,new RegExp('\\\\?"'+id+'\\\\?"'));
+  }
+  assert.match(config,/a3c:\s*\{ title: "A3C", segments: \[2, 8, 14, 5, 11, 16, 17\]/);
+  assert.match(js,/segmentStates\[segmentId\] = nextState\(segmentStates\[segmentId\]\)/);
+  assert.match(js,/event\.key === "Enter" \|\| event\.key === " "/);
+  assert.match(css,/\.segment-views-grid\s*\{\s*display:grid/);
+});
