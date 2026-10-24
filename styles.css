@@ -3282,3 +3282,25 @@ body.dark-mode .ws-attach{ color:#04221f; }
 @media(prefers-reduced-motion:reduce){
   .segment-shape.interactive{transition:none;}
 }
+
+
+/* Fase B: legibilidad e interacción táctil sin modificar la anatomía ni el estado. */
+.segment-view-card svg{
+  aspect-ratio:11 / 12;
+  flex-shrink:0;
+}
+.segment-view-card svg text{
+  pointer-events:none; /* Las etiquetas no bloquean el segmento SVG debajo. */
+  user-select:none;
+}
+.segment-view-card svg .segment-shape.interactive{
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.segment-view-card svg .segment-shape.interactive:focus{
+  stroke-width:3;
+}
+@media (pointer:coarse){
+  .segment-view-card{padding:14px;}
+  .segment-view-card svg{max-width:280px;}
+}
