@@ -3634,6 +3634,12 @@ El PDF propone: ${incomingText}.
     );
 
     drawPLAXView("viewPLAX", interactive);
+    for (const [viewId, expectedCount] of [["saxBasal", 6], ["saxMid", 6], ["saxApical", 4]]) {
+      const ids = SEGMENT_VIEW_MAPS[viewId].segments;
+      if (ids.length !== expectedCount || new Set(ids).size !== expectedCount || ids.some((id) => !Number.isInteger(id) || id < 1 || id > 16)) {
+        throw new Error(`Mapa de eje corto inconsistente: ${viewId}`);
+      }
+    }
     drawShortAxisView("viewSAXBasal", SEGMENT_VIEW_MAPS.saxBasal.segments, interactive);
     drawShortAxisView("viewSAXMid", SEGMENT_VIEW_MAPS.saxMid.segments, interactive);
     drawShortAxisView("viewSAXApical", SEGMENT_VIEW_MAPS.saxApical.segments, interactive);
