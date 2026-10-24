@@ -3270,3 +3270,15 @@ body.dark-mode .ws-attach{ color:#04221f; }
 .segment-orientation-label{fill:#64748b;font-size:10px;font-weight:700;text-anchor:middle;pointer-events:none;letter-spacing:.5px;}
 .segment-view-card svg .segment-shape.interactive{touch-action:manipulation;}
 @media(hover:hover){.segment-view-card svg .segment-shape.interactive:hover{filter:brightness(.93);}}
+
+/* Coordinación visual de un mismo segmento entre esquemas y bullseye. */
+.segment-shape.segment-linked-highlight{
+  stroke:#0f172a !important;
+  stroke-width:3.5 !important;
+  filter:drop-shadow(0 0 3px rgba(15,23,42,.35));
+}
+.segment-view-card{box-shadow:0 2px 9px rgba(15,23,42,.045);}
+.segment-view-card svg{overflow:visible;}
+@media(prefers-reduced-motion:reduce){
+  .segment-shape.interactive{transition:none;}
+}
