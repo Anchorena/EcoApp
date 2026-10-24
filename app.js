@@ -3348,10 +3348,21 @@ El PDF propone: ${incomingText}.
     node.setAttribute("stroke", "#475569");
     node.setAttribute("stroke-width", "1.4");
     node.setAttribute("class", `segment-shape${interactive ? " interactive" : ""}`);
+    // El estado clínico es único: bullseye y todas las vistas se actualizan juntos.
     if (interactive) {
-      node.addEventListener("click", () => {
+      node.setAttribute("role", "button");
+      node.setAttribute("tabindex", "0");
+      node.setAttribute("aria-label", `Segmento ${segmentId}: ${SEGMENT_NAMES[segmentId] || "miocardio"}, ${segmentStates[segmentId]}. Activar para cambiar estado`);
+      const advance = () => {
         segmentStates[segmentId] = nextState(segmentStates[segmentId]);
         updateAll();
+      };
+      node.addEventListener("click", advance);
+      node.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          advance();
+        }
       });
     }
     return node;
