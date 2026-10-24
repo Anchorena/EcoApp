@@ -71,7 +71,7 @@ test('custom valvular morphology is available for all valves',()=>{
   for(const id of ['aoMorf','miMorf','puMorf','trMorf']){
     assert.match(config,new RegExp(id+': \\['));
     assert.match(html,new RegExp('id="'+id+'Otro"'));
-    assert.ok(js.includes('"'+id+'"'), `Missing SVG draw call for ${id}`);
+    assert.match(js,new RegExp(id+': customMorphology\\\\("'+id+'"\\\\)'));
   }
   assert.equal((config.match(/Descripción personalizada…/g)||[]).length,4);
 });
@@ -111,7 +111,7 @@ test('Fase B six views share the same 17 segment state and remain keyboard acces
   const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
   for(const id of ['viewA4C','viewA2C','viewA3C','viewSAXBasal','viewSAXMid','viewSAXApical']){
     assert.match(html,new RegExp('id="'+id+'"'));
-    assert.match(js,new RegExp('\\\\?"'+id+'\\\\?"'));
+    assert.ok(js.includes('"'+id+'"'), `Missing SVG draw call for ${id}`);
   }
   assert.match(config,/a3c:\s*\{ title: "A3C", segments: \[2, 8, 14, 5, 11, 16, 17\]/);
   assert.match(js,/segmentStates\[segmentId\] = nextState\(segmentStates\[segmentId\]\)/);
