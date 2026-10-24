@@ -3343,6 +3343,13 @@ El PDF propone: ${incomingText}.
             Q ${leftX} ${cy - 4}, ${leftX + 8} ${cy - height / 2} Z`;
   }
 
+  // Resalta en todas las vistas la misma región anatómica sin modificar el dato.
+  function highlightLinkedSegment(segmentId, active) {
+    document.querySelectorAll('.segment-shape[data-segment-id="' + segmentId + '"]').forEach((shape) => {
+      shape.classList.toggle("segment-linked-highlight", active);
+    });
+  }
+
   function bindSegmentShape(node, segmentId, interactive) {
     node.setAttribute("fill", colorForState(segmentStates[segmentId]));
     node.setAttribute("stroke", "#475569");
@@ -3356,9 +3363,22 @@ El PDF propone: ${incomingText}.
       node.setAttribute("tabindex", "0");
       node.setAttribute("aria-label", `Segmento ${segmentId}: ${SEGMENT_NAMES[segmentId] || "miocardio"}, ${segmentStates[segmentId]}. Activar para cambiar estado`);
       const advance = () => {
+        const parentId = node.ownerSVGElement && node.ownerSVGElement.id;
         segmentStates[segmentId] = nextState(segmentStates[segmentId]);
         updateAll();
+        // Al regenerarse los SVG, conservamos el foco para uso por teclado.
+        if (parentId) {
+          const svg = qs(parentId);
+          const replacement = svg && [...svg.querySelectorAll(".segment-shape")].find((el) => el.getAttribute("data-segment-id") === String(segmentId));
+          if (replacement && document.activeElement !== document.body) {
+            try { replacement.focus({ preventScroll: true }); } catch (_) { replacement.focus(); }
+          }
+        }
       };
+      node.addEventListener("mouseenter", () => highlightLinkedSegment(segmentId, true));
+      node.addEventListener("mouseleave", () => highlightLinkedSegment(segmentId, false));
+      node.addEventListener("focus", () => highlightLinkedSegment(segmentId, true));
+      node.addEventListener("blur", () => highlightLinkedSegment(segmentId, false));
       node.addEventListener("click", advance);
       node.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
