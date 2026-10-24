@@ -135,3 +135,11 @@ test('Fase B follows ASE 17-segment apical wall assignments without duplicated I
   }
   assert.match(js,/data-segment-id/);
 });
+
+test('Fase B apical and SAX orientation annotations remain visible and noninteractive',()=>{
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  assert.match(js,/addSvgText\(svg, 173, 22, "ÁPEX", "segment-orientation-label"\)/);
+  assert.match(js,/addSvgText\(svg, 110, 236, "BASE", "segment-orientation-label"\)/);
+  assert.match(js,/addSvgText\(svg, cx, cy \+ 4, "VI", "segment-small-label"\)/);
+  assert.match(css,/\.segment-orientation-label\s*\{[^}]*pointer-events:none/);
+});
