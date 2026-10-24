@@ -3364,13 +3364,14 @@ El PDF propone: ${incomingText}.
       node.setAttribute("aria-label", `Segmento ${segmentId}: ${SEGMENT_NAMES[segmentId] || "miocardio"}, ${segmentStates[segmentId]}. Activar para cambiar estado`);
       const advance = () => {
         const parentId = node.ownerSVGElement && node.ownerSVGElement.id;
+        const keepFocus = document.activeElement === node;
         segmentStates[segmentId] = nextState(segmentStates[segmentId]);
         updateAll();
         // Al regenerarse los SVG, conservamos el foco para uso por teclado.
         if (parentId) {
           const svg = qs(parentId);
           const replacement = svg && [...svg.querySelectorAll(".segment-shape")].find((el) => el.getAttribute("data-segment-id") === String(segmentId));
-          if (replacement && document.activeElement !== document.body) {
+          if (replacement && keepFocus) {
             try { replacement.focus({ preventScroll: true }); } catch (_) { replacement.focus(); }
           }
         }
