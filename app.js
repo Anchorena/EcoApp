@@ -3582,8 +3582,7 @@ El PDF propone: ${incomingText}.
       ];
     }
 
-    svg.appendChild(createSvgNode("path", { d: `M ${cx - 54} ${cy - 52} Q ${cx - 92} ${cy - 70} ${cx - 102} ${cy - 16} Q ${cx - 108} ${cy + 30} ${cx - 76} ${cy + 64}`, class: "segment-outline" }));
-
+    // Corte transversal esquemático: evitar contornos extracavitarios sin identificación.
     defs.forEach(([id, a1, a2]) => {
       const path = createSvgNode("path", { d: ringSectorPath(cx, cy, outer, inner, a1, a2) });
       bindSegmentShape(path, id, interactive);
@@ -3594,9 +3593,8 @@ El PDF propone: ${incomingText}.
       addSvgText(svg, pt.x, pt.y + 1, String(id), "segment-number");
     });
 
-    const cavity = svgId === "viewSAXBasal"
-      ? createSvgNode("path", { d: `M ${cx - 8} ${cy - 18} Q ${cx + 22} ${cy - 6} ${cx + 18} ${cy + 16} Q ${cx} ${cy + 26} ${cx - 14} ${cy + 8} Q ${cx - 20} ${cy - 6} ${cx - 8} ${cy - 18} Z`, class: "segment-chamber" })
-      : createSvgNode("path", { d: `M ${cx - 18} ${cy - 8} Q ${cx} ${cy - 26} ${cx + 18} ${cy - 8} Q ${cx + 22} ${cy + 10} ${cx} ${cy + 20} Q ${cx - 22} ${cy + 10} ${cx - 18} ${cy - 8} Z`, class: "segment-chamber" });
+    // La luz central debe ser concéntrica a los sectores; no simula hallazgos patológicos.
+    const cavity = createSvgNode("circle", { cx, cy, r: inner - 2, class: "segment-chamber" });
     svg.appendChild(cavity);
     // Etiquetas orientativas, por fuera de las regiones segmentarias clicables.
     addSvgText(svg, cx, cy + 4, "VI", "segment-small-label");
