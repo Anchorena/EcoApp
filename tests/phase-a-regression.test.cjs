@@ -143,3 +143,13 @@ test('Fase B apical and SAX orientation annotations remain visible and nonintera
   assert.match(js,/addSvgText\(svg, cx, cy \+ 4, "VI", "segment-small-label"\)/);
   assert.match(css,/\.segment-orientation-label\s*\{[^}]*pointer-events:none/);
 });
+
+test('Fase B links the same segment visually across SVG views without changing parser data',()=>{
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  assert.match(js,/function highlightLinkedSegment\(segmentId, active\)/);
+  assert.match(js,/shape\.classList\.toggle\("segment-linked-highlight", active\)/);
+  assert.match(js,/node\.addEventListener\("mouseenter"/);
+  assert.match(js,/node\.addEventListener\("focus"/);
+  assert.match(js,/const keepFocus = document\.activeElement === node/);
+  assert.match(css,/\.segment-shape\.segment-linked-highlight/);
+});
