@@ -198,3 +198,16 @@ test('Fase B apical cavity is drawn behind selectable myocardial sectors',()=>{
   assert.doesNotMatch(view,/M 70 26 Q 46 20/);
   assert.match(view,/bindSegmentShape\(cap, 17, interactive\)/);
 });
+
+
+test('Fase B atrial silhouettes cannot cover selectable basal segments',()=>{
+  const source=fs.readFileSync(path.join(root,'app.js'),'utf8');
+  const from=source.indexOf('function drawVerticalSegmentView(');
+  const to=source.indexOf('function drawPLAXView(',from);
+  const view=source.slice(from,to);
+  assert.ok(from>=0 && to>from);
+  const atria=view.indexOf('const lowerShapes = spec.baseChambers || []');
+  const sectors=view.indexOf('bindSegmentShape(shape, segmentId, interactive)');
+  const apex=view.indexOf('bindSegmentShape(cap, 17, interactive)');
+  assert.ok(atria>=0 && atria<sectors && sectors<apex,'Atria must be behind myocardium and apex');
+});
