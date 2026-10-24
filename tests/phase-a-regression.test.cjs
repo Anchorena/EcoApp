@@ -162,3 +162,11 @@ test('Fase B centers short-axis drawings within the 220x240 viewBox',()=>{
   assert.match(draw,/const cy = 114;/);
   assert.match(draw,/addSvgText\(svg, cx, cy \+ outer \+ 27,/);
 });
+
+
+test('Fase B keeps SVG labels transparent to pointer events and touch targets selectable',()=>{
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  assert.match(css,/\.segment-view-card svg text\s*\{[^}]*pointer-events:none/s);
+  assert.match(css,/\.segment-view-card svg \.segment-shape\.interactive\s*\{[^}]*cursor:pointer/s);
+  assert.match(css,/@media \(pointer:coarse\)/);
+});
