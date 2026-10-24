@@ -3555,8 +3555,9 @@ El PDF propone: ${incomingText}.
     if (!svg) return;
     svg.innerHTML = "";
 
-    const cx = 132;
-    const cy = 84;
+    // Centrado dentro del viewBox 220 × 240; evita cortes laterales y espacio vacío inferior.
+    const cx = 110;
+    const cy = 114;
     let outer = 56;
     let inner = 28;
     let defs = [];
@@ -3599,7 +3600,7 @@ El PDF propone: ${incomingText}.
     svg.appendChild(cavity);
     // Etiquetas orientativas, por fuera de las regiones segmentarias clicables.
     addSvgText(svg, cx, cy + 4, "VI", "segment-small-label");
-    addSvgText(svg, 132, 163, svgId === "viewSAXBasal" ? "BASAL" : svgId === "viewSAXMid" ? "MEDIO" : "APICAL", "segment-orientation-label");
+    addSvgText(svg, cx, cy + outer + 27, svgId === "viewSAXBasal" ? "BASAL" : svgId === "viewSAXMid" ? "MEDIO" : "APICAL", "segment-orientation-label");
   }
 
   function drawApicalCapView(svgId, interactive) {
