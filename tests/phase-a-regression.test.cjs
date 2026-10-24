@@ -118,3 +118,20 @@ test('Fase B six views share the same 17 segment state and remain keyboard acces
   assert.match(js,/event\.key === "Enter" \|\| event\.key === " "/);
   assert.match(css,/\.segment-views-grid\s*\{\s*display:grid/);
 });
+
+test('Fase B follows ASE 17-segment apical wall assignments without duplicated IDs',()=>{
+  const cfg=fs.readFileSync(path.join(root,'config.js'),'utf8');
+  const expected={
+    a4c:[3,9,14,6,12,16,17],
+    a2c:[4,10,15,1,7,13,17],
+    a3c:[2,8,14,5,11,16,17]
+  };
+  for(const [view,ids] of Object.entries(expected)){
+    const match=cfg.match(new RegExp(view+': \\{ title: "[^"]+", segments: \\[([^\\]]+)\\]'));
+    assert.ok(match,'Missing anatomy map: '+view);
+    assert.deepEqual(match[1].split(',').map(x=>Number(x.trim())),ids);
+    assert.equal(new Set(ids).size,7,'Duplicated segment: '+view);
+    assert.match(js,new RegExp('assertSegmentViewMapping\\("'+view+'"'));
+  }
+  assert.match(js,/data-segment-id/);
+});
