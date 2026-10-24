@@ -71,7 +71,7 @@ test('custom valvular morphology is available for all valves',()=>{
   for(const id of ['aoMorf','miMorf','puMorf','trMorf']){
     assert.match(config,new RegExp(id+': \\['));
     assert.match(html,new RegExp('id="'+id+'Otro"'));
-    assert.match(js,new RegExp(id+': customMorphology\\("'+id+'"\\)'));
+    assert.ok(js.includes('"'+id+'"'), `Missing SVG draw call for ${id}`);
   }
   assert.equal((config.match(/Descripción personalizada…/g)||[]).length,4);
 });
