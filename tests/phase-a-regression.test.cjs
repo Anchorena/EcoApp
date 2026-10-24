@@ -183,3 +183,18 @@ test('Fase B SAX has concentric ventricular cavity without unlabelled peripheral
   assert.match(sax,/bindSegmentShape\(path, id, interactive\)/);
   assert.match(sax,/ringSectorPath\(cx, cy, outer, inner, a1, a2\)/);
 });
+
+
+test('Fase B apical cavity is drawn behind selectable myocardial sectors',()=>{
+  const source=fs.readFileSync(path.join(root,'app.js'),'utf8');
+  const from=source.indexOf('function drawVerticalSegmentView(');
+  const to=source.indexOf('function drawPLAXView(',from);
+  assert.ok(from>=0 && to>from);
+  const view=source.slice(from,to);
+  const cavity=view.indexOf('class: "segment-chamber"');
+  const myocardium=view.indexOf('bindSegmentShape(shape, segmentId, interactive)');
+  assert.ok(cavity>=0 && cavity<myocardium,'Cavity must not obscure clickable segments');
+  assert.match(view,/M 110 52 C 106 75 104 110 103 136/);
+  assert.doesNotMatch(view,/M 70 26 Q 46 20/);
+  assert.match(view,/bindSegmentShape\(cap, 17, interactive\)/);
+});
