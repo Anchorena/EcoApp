@@ -3241,3 +3241,27 @@ body.dark-mode .ws-attach{ color:#04221f; }
     max-height:245mm;
   }
 }
+
+/* Fase B: vistas de motilidad de un único modelo de 17 segmentos. */
+.segment-views-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin:16px 0;
+}
+.segment-view-card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  padding:12px;
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+  background:var(--card-bg,#fff);
+}
+.segment-view-card strong{font-size:13px;text-align:center;}
+.segment-view-card svg{display:block;width:100%;max-width:240px;height:auto;}
+.segment-shape.interactive:focus-visible{outline:3px solid #2563eb;outline-offset:2px;}
+@media(max-width:860px){.segment-views-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:640px){.segment-views-grid{grid-template-columns:1fr;}}
