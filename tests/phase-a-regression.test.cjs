@@ -153,3 +153,12 @@ test('Fase B links the same segment visually across SVG views without changing p
   assert.match(js,/const keepFocus = document\.activeElement === node/);
   assert.match(css,/\.segment-shape\.segment-linked-highlight/);
 });
+
+test('Fase B centers short-axis drawings within the 220x240 viewBox',()=>{
+  const start=js.indexOf('function drawShortAxisView(');
+  const end=js.indexOf('function drawApicalCapView(',start);
+  const draw=js.slice(start,end);
+  assert.match(draw,/const cx = 110;/);
+  assert.match(draw,/const cy = 114;/);
+  assert.match(draw,/addSvgText\(svg, cx, cy \+ outer \+ 27,/);
+});
