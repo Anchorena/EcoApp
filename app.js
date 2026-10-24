@@ -3451,9 +3451,11 @@ El PDF propone: ${incomingText}.
     const rightOuter = { p1: { x: 111, y: 34 }, p2: { x: 138, y: 190 } };
     const rightInner = { p1: { x: 111, y: 52 }, p2: { x: 120, y: 186 } };
 
+    // Cavidad esquemática central: se mantiene dentro del borde endocárdico de los seis sectores.
+    // Se dibuja primero para que jamás tape los polígonos clicables ni su numeración.
     svg.appendChild(createSvgNode("path", {
-      d: "M 70 26 Q 46 20 34 48 Q 22 86 26 142 Q 30 184 48 214",
-      class: "segment-outline"
+      d: "M 110 52 C 106 75 104 110 103 136 C 102 154 101 172 100 184 L 120 184 C 119 172 118 154 117 136 C 116 110 114 75 110 52 Z",
+      class: "segment-chamber"
     }));
 
     [
@@ -3480,16 +3482,6 @@ El PDF propone: ${incomingText}.
     bindSegmentShape(cap, 17, interactive);
     svg.appendChild(cap);
     addSvgText(svg, 110, 25, "17", "segment-number");
-
-    svg.appendChild(createSvgNode("path", {
-      d: "M 110 48 C 92 64 84 96 84 132 C 84 158 92 182 102 194 L 110 188 L 118 194 C 128 182 136 158 136 132 C 136 96 128 64 110 48 Z",
-      class: "segment-outline"
-    }));
-
-    svg.appendChild(createSvgNode("path", {
-      d: "M 106 190 Q 94 203 86 226 M 114 190 Q 126 203 134 226",
-      class: "segment-outline"
-    }));
 
     const lowerShapes = spec.baseChambers || [];
     lowerShapes.forEach((item) => {
