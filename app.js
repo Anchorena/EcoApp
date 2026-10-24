@@ -3576,6 +3576,9 @@ El PDF propone: ${incomingText}.
       ? createSvgNode("path", { d: `M ${cx - 8} ${cy - 18} Q ${cx + 22} ${cy - 6} ${cx + 18} ${cy + 16} Q ${cx} ${cy + 26} ${cx - 14} ${cy + 8} Q ${cx - 20} ${cy - 6} ${cx - 8} ${cy - 18} Z`, class: "segment-chamber" })
       : createSvgNode("path", { d: `M ${cx - 18} ${cy - 8} Q ${cx} ${cy - 26} ${cx + 18} ${cy - 8} Q ${cx + 22} ${cy + 10} ${cx} ${cy + 20} Q ${cx - 22} ${cy + 10} ${cx - 18} ${cy - 8} Z`, class: "segment-chamber" });
     svg.appendChild(cavity);
+    // Etiquetas orientativas, por fuera de las regiones segmentarias clicables.
+    addSvgText(svg, cx, cy + 4, "VI", "segment-small-label");
+    addSvgText(svg, 132, 163, svgId === "viewSAXBasal" ? "BASAL" : svgId === "viewSAXMid" ? "MEDIO" : "APICAL", "segment-orientation-label");
   }
 
   function drawApicalCapView(svgId, interactive) {
