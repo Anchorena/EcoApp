@@ -3348,6 +3348,8 @@ El PDF propone: ${incomingText}.
     node.setAttribute("stroke", "#475569");
     node.setAttribute("stroke-width", "1.4");
     node.setAttribute("class", `segment-shape${interactive ? " interactive" : ""}`);
+    node.setAttribute("data-segment-id", String(segmentId));
+    node.setAttribute("aria-description", "Vista anatómica esquemática; estado compartido con el ojo de buey");
     // El estado clínico es único: bullseye y todas las vistas se actualizan juntos.
     if (interactive) {
       node.setAttribute("role", "button");
@@ -3583,7 +3585,18 @@ El PDF propone: ${incomingText}.
     addSvgText(svg, 80, 102, "17", "segment-number");
   }
 
+  // Correspondencia fija con el modelo ASE/EACVI de 17 segmentos.
+  // En los esquemas apicales el ápice se muestra arriba y la base abajo.
+  function assertSegmentViewMapping(view, sideA, sideB) {
+    const expected = SEGMENT_VIEW_MAPS[view].segments;
+    const actual = [...sideA, ...sideB, 17];
+    if (expected.length !== 7 || expected.some((id) => !actual.includes(id)) || new Set(actual).size !== 7) {
+      throw new Error(`Mapa anatómico inconsistente: ${view}`);
+    }
+  }
+
   function drawSegmentViews(interactive) {
+    assertSegmentViewMapping("a4c", [14, 9, 3], [16, 12, 6]);
     drawVerticalSegmentView(
       "viewA4C",
       {
@@ -3597,6 +3610,7 @@ El PDF propone: ${incomingText}.
       interactive
     );
 
+    assertSegmentViewMapping("a2c", [15, 10, 4], [13, 7, 1]);
     drawVerticalSegmentView(
       "viewA2C",
       {
@@ -3607,6 +3621,7 @@ El PDF propone: ${incomingText}.
       interactive
     );
 
+    assertSegmentViewMapping("a3c", [14, 8, 2], [16, 11, 5]);
     drawVerticalSegmentView(
       "viewA3C",
       {
