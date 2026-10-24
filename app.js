@@ -3475,6 +3475,9 @@ El PDF propone: ${incomingText}.
       svg.appendChild(createSvgNode("path", { d: item.path, class: "segment-chamber" }));
       addSvgText(svg, item.label.x, item.label.y, item.label.text, "segment-small-label");
     });
+    // Las vistas apicales se presentan con ápice arriba y base abajo.
+    addSvgText(svg, 173, 22, "ÁPEX", "segment-orientation-label");
+    addSvgText(svg, 110, 236, "BASE", "segment-orientation-label");
   }
 
   function drawPLAXView(svgId, interactive) {
