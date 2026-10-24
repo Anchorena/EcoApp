@@ -3596,6 +3596,17 @@ El PDF propone: ${incomingText}.
       interactive
     );
 
+    drawVerticalSegmentView(
+      "viewA3C",
+      {
+        // Segmentación A3C: anteroseptal e inferolateral, del ápice a la base.
+        leftIds: [14, 8, 2],
+        rightIds: [16, 11, 5],
+        baseChambers: [{ path: "M 48 184 Q 110 164 172 184 L 172 222 Q 110 230 48 222 Z", label: { x: 110, y: 204, text: "LA" } }]
+      },
+      interactive
+    );
+
     drawPLAXView("viewPLAX", interactive);
     drawShortAxisView("viewSAXBasal", SEGMENT_VIEW_MAPS.saxBasal.segments, interactive);
     drawShortAxisView("viewSAXMid", SEGMENT_VIEW_MAPS.saxMid.segments, interactive);
