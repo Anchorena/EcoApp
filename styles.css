@@ -3265,3 +3265,8 @@ body.dark-mode .ws-attach{ color:#04221f; }
 .segment-shape.interactive:focus-visible{outline:3px solid #2563eb;outline-offset:2px;}
 @media(max-width:860px){.segment-views-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:640px){.segment-views-grid{grid-template-columns:1fr;}}
+
+/* Orientación anatómica esquemática para vistas multivista. */
+.segment-orientation-label{fill:#64748b;font-size:10px;font-weight:700;text-anchor:middle;pointer-events:none;letter-spacing:.5px;}
+.segment-view-card svg .segment-shape.interactive{touch-action:manipulation;}
+@media(hover:hover){.segment-view-card svg .segment-shape.interactive:hover{filter:brightness(.93);}}
