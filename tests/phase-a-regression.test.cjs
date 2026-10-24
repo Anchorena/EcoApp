@@ -170,3 +170,16 @@ test('Fase B keeps SVG labels transparent to pointer events and touch targets se
   assert.match(css,/\.segment-view-card svg \.segment-shape\.interactive\s*\{[^}]*cursor:pointer/s);
   assert.match(css,/@media \(pointer:coarse\)/);
 });
+
+
+test('Fase B SAX has concentric ventricular cavity without unlabelled peripheral contour',()=>{
+  const source=fs.readFileSync(path.join(root,'app.js'),'utf8');
+  const start=source.indexOf('function drawShortAxisView(');
+  const end=source.indexOf('function drawApicalCapView(',start);
+  assert.ok(start >= 0 && end > start);
+  const sax=source.slice(start,end);
+  assert.match(sax,/createSvgNode\("circle", \{ cx, cy, r: inner - 2, class: "segment-chamber" \}\)/);
+  assert.doesNotMatch(sax,/cx - 102/);
+  assert.match(sax,/bindSegmentShape\(path, id, interactive\)/);
+  assert.match(sax,/ringSectorPath\(cx, cy, outer, inner, a1, a2\)/);
+});
