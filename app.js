@@ -3441,15 +3441,15 @@ El PDF propone: ${incomingText}.
     svg.innerHTML = "";
 
     const yBands = [
-      [48, 92],
-      [92, 136],
-      [136, 184]
+      [60, 104],
+      [104, 146],
+      [146, 184]
     ];
 
-    const leftOuter = { p1: { x: 109, y: 34 }, p2: { x: 82, y: 190 } };
-    const leftInner = { p1: { x: 109, y: 52 }, p2: { x: 100, y: 186 } };
-    const rightOuter = { p1: { x: 111, y: 34 }, p2: { x: 138, y: 190 } };
-    const rightInner = { p1: { x: 111, y: 52 }, p2: { x: 120, y: 186 } };
+    const leftOuter = { p1: { x: 101, y: 48 }, p2: { x: 68, y: 190 } };
+    const leftInner = { p1: { x: 106, y: 52 }, p2: { x: 96, y: 186 } };
+    const rightOuter = { p1: { x: 119, y: 48 }, p2: { x: 152, y: 190 } };
+    const rightInner = { p1: { x: 114, y: 52 }, p2: { x: 124, y: 186 } };
 
     // Dibujar cavidades accesorias primero: nunca deben tapar segmentos basales.
     const lowerShapes = spec.baseChambers || [];
