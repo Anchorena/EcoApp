@@ -211,3 +211,17 @@ test('Fase B atrial silhouettes cannot cover selectable basal segments',()=>{
   const apex=view.indexOf('bindSegmentShape(cap, 17, interactive)');
   assert.ok(atria>=0 && atria<sectors && sectors<apex,'Atria must be behind myocardium and apex');
 });
+
+
+test('Fase B highlights identical segment IDs in bullseye, multiview and atlas',()=>{
+  const source=fs.readFileSync(path.join(root,'app.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  const from=source.indexOf('function highlightLinkedSegment(');
+  const to=source.indexOf('function bindSegmentShape(',from);
+  const highlight=source.slice(from,to);
+  assert.match(highlight,/\.segment-shape, \[data-segment-id=/);
+  assert.match(highlight,/\.atlas-seg/);
+  const atlas=source.slice(source.indexOf('function atlasBindShape('),source.indexOf('function drawAtlasRing('));
+  assert.match(atlas,/node\.setAttribute\("data-segment-id", String\(segmentId\)\)/);
+  assert.match(css,/\.atlas-seg\.segment-linked-highlight/);
+});
