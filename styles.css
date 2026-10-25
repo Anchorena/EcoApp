@@ -3304,3 +3304,10 @@ body.dark-mode .ws-attach{ color:#04221f; }
   .segment-view-card{padding:14px;}
   .segment-view-card svg{max-width:280px;}
 }
+
+/* Resaltado coordinado también en el atlas anatómico complementario. */
+.atlas-seg.segment-linked-highlight{
+  stroke:#0f172a !important;
+  stroke-width:3 !important;
+  filter:drop-shadow(0 0 3px rgba(15,23,42,.35));
+}
