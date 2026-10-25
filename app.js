@@ -3345,7 +3345,7 @@ El PDF propone: ${incomingText}.
 
   // Resalta en todas las vistas la misma región anatómica sin modificar el dato.
   function highlightLinkedSegment(segmentId, active) {
-    document.querySelectorAll('.segment-shape[data-segment-id="' + segmentId + '"]').forEach((shape) => {
+    document.querySelectorAll('[data-segment-id="' + segmentId + '"].segment-shape, [data-segment-id="' + segmentId + '"].atlas-seg').forEach((shape) => {
       shape.classList.toggle("segment-linked-highlight", active);
     });
   }
@@ -3669,6 +3669,7 @@ El PDF propone: ${incomingText}.
   function atlasBindShape(node, segmentId, interactive) {
     node.setAttribute("fill", colorForState(segmentStates[segmentId]));
     node.setAttribute("class", "atlas-seg");
+    node.setAttribute("data-segment-id", String(segmentId));
     if (interactive) {
       node.addEventListener("click", () => {
         segmentStates[segmentId] = nextState(segmentStates[segmentId]);
