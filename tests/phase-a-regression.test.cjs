@@ -225,3 +225,15 @@ test('Fase B highlights identical segment IDs in bullseye, multiview and atlas',
   assert.match(atlas,/node\.setAttribute\("data-segment-id", String\(segmentId\)\)/);
   assert.match(css,/\.atlas-seg\.segment-linked-highlight/);
 });
+
+
+test('Fase B apical sectors have separated label bands and wider walls',()=>{
+  const source=fs.readFileSync(path.join(root,'app.js'),'utf8');
+  const start=source.indexOf('function drawVerticalSegmentView(');
+  const end=source.indexOf('function drawPLAXView(',start);
+  const view=source.slice(start,end);
+  assert.match(view,/\[60, 104\],\s*\[104, 146\],\s*\[146, 184\]/);
+  assert.match(view,/const leftOuter = \{ p1: \{ x: 101, y: 48 \}, p2: \{ x: 68, y: 190 \} \}/);
+  assert.match(view,/const rightOuter = \{ p1: \{ x: 119, y: 48 \}, p2: \{ x: 152, y: 190 \} \}/);
+  assert.match(view,/bindSegmentShape\(shape, segmentId, interactive\)/);
+});
