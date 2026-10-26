@@ -3615,55 +3615,62 @@ El PDF propone: ${incomingText}.
     }
   }
 
+  // Solo las paredes segmentarias visibles: mismo estado, colores y eventos que el ojo de buey.
+  function drawApicalWallOnly(svgId, leftIds, rightIds, interactive) {
+    const svg = qs(svgId);
+    if (!svg) return;
+    svg.innerHTML = "";
+    const top = [40, 82, 132, 182];
+    const createWall = (ids, left) => {
+      ids.forEach((segmentId, i) => {
+        const y0 = top[i], y1 = top[i + 1];
+        const outerX = (y) => left ? 92 - 0.24 * (y - 40) : 128 + 0.24 * (y - 40);
+        const innerX = (y) => left ? 102 - 0.10 * (y - 40) : 118 + 0.10 * (y - 40);
+        const d = `M ${outerX(y0)} ${y0} L ${outerX(y1)} ${y1} L ${innerX(y1)} ${y1} L ${innerX(y0)} ${y0} Z`;
+        const shape = createSvgNode("path", { d });
+        bindSegmentShape(shape, segmentId, interactive);
+        svg.appendChild(shape);
+        addSvgText(svg, (outerX((y0+y1)/2)+innerX((y0+y1)/2))/2, (y0+y1)/2 + 4, String(segmentId), "segment-number");
+      });
+    };
+    createWall(leftIds, true);
+    createWall(rightIds, false);
+    const cap = createSvgNode("path", { d: "M 92 40 Q 110 3 128 40 L 118 49 Q 110 30 102 49 Z" });
+    bindSegmentShape(cap, 17, interactive);
+    svg.appendChild(cap);
+    addSvgText(svg, 110, 33, "17", "segment-number");
+    addSvgText(svg, 174, 24, "ÁPEX", "segment-orientation-label");
+  }
+
+  // ELPEI paraesternal: solo anteroseptal 8/2 e inferolateral 11/5.
+  // El ápex NO está representado ni es seleccionable en este plano.
+  function drawELPEIWallOnly(interactive) {
+    const svg = qs("viewELPEI");
+    if (!svg) return;
+    svg.innerHTML = "";
+    const wallSegments = [
+      { id: 8, d: "M 27 93 Q 58 57 108 70 L 108 94 Q 62 83 36 117 Z", x: 72, y: 85 },
+      { id: 2, d: "M 108 70 Q 152 76 196 96 L 196 119 Q 148 101 108 94 Z", x: 153, y: 95 },
+      { id: 11, d: "M 27 150 Q 66 165 108 164 L 108 186 Q 60 185 27 170 Z", x: 73, y: 174 },
+      { id: 5, d: "M 108 164 Q 150 163 196 142 L 196 161 Q 159 186 108 186 Z", x: 154, y: 171 }
+    ];
+    wallSegments.forEach(({ id, d, x, y }) => {
+      const shape = createSvgNode("path", { d });
+      bindSegmentShape(shape, id, interactive);
+      svg.appendChild(shape);
+      addSvgText(svg, x, y, String(id), "segment-number");
+    });
+    addSvgText(svg, 110, 32, "ELPEI · esquema de paredes", "segment-orientation-label");
+  }
+
   function drawSegmentViews(interactive) {
     assertSegmentViewMapping("a4c", [14, 9, 3], [16, 12, 6]);
-    drawVerticalSegmentView(
-      "viewA4C",
-      {
-        leftIds: [14, 9, 3],
-        rightIds: [16, 12, 6],
-        baseChambers: [
-          { path: "M 18 182 Q 42 170 66 186 L 66 222 Q 42 230 18 216 Z", label: { x: 42, y: 204, text: "RA" } },
-          { path: "M 154 182 Q 178 170 202 186 L 202 222 Q 178 230 154 216 Z", label: { x: 178, y: 204, text: "LA" } }
-        ]
-      },
-      interactive
-    );
-
     assertSegmentViewMapping("a2c", [15, 10, 4], [13, 7, 1]);
-    drawVerticalSegmentView(
-      "viewA2C",
-      {
-        leftIds: [15, 10, 4],
-        rightIds: [13, 7, 1],
-        baseChambers: [{ path: "M 48 184 Q 110 164 172 184 L 172 222 Q 110 230 48 222 Z", label: { x: 110, y: 204, text: "LA" } }]
-      },
-      interactive
-    );
-
-    assertSegmentViewMapping("a3c", [14, 8, 2], [16, 11, 5]);
-    drawVerticalSegmentView(
-      "viewA3C",
-      {
-        // Segmentación A3C: anteroseptal e inferolateral, del ápice a la base.
-        leftIds: [14, 8, 2],
-        rightIds: [16, 11, 5],
-        baseChambers: [{ path: "M 48 184 Q 110 164 172 184 L 172 222 Q 110 230 48 222 Z", label: { x: 110, y: 204, text: "LA" } }]
-      },
-      interactive
-    );
-
-    drawPLAXView("viewPLAX", interactive);
-    for (const [viewId, expectedCount] of [["saxBasal", 6], ["saxMid", 6], ["saxApical", 4]]) {
-      const ids = SEGMENT_VIEW_MAPS[viewId].segments;
-      if (ids.length !== expectedCount || new Set(ids).size !== expectedCount || ids.some((id) => !Number.isInteger(id) || id < 1 || id > 16)) {
-        throw new Error(`Mapa de eje corto inconsistente: ${viewId}`);
-      }
-    }
-    drawShortAxisView("viewSAXBasal", SEGMENT_VIEW_MAPS.saxBasal.segments, interactive);
-    drawShortAxisView("viewSAXMid", SEGMENT_VIEW_MAPS.saxMid.segments, interactive);
-    drawShortAxisView("viewSAXApical", SEGMENT_VIEW_MAPS.saxApical.segments, interactive);
-    drawApicalCapView("viewApicalCap", interactive);
+    assertSegmentViewMapping("a5c", [14, 8, 2], [16, 12, 6]);
+    drawApicalWallOnly("viewA4C", [14, 9, 3], [16, 12, 6], interactive);
+    drawApicalWallOnly("viewA2C", [15, 10, 4], [13, 7, 1], interactive);
+    drawApicalWallOnly("viewA5C", [14, 8, 2], [16, 12, 6], interactive);
+    drawELPEIWallOnly(interactive);
   }
 
   function atlasBindShape(node, segmentId, interactive) {
