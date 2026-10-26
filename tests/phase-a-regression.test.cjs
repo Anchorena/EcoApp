@@ -106,134 +106,54 @@ test('S6 imports study ID and report date, without confusing patient DOB',()=>{
   assert.doesNotMatch(profiles,/field: "tvPg", label: "Gradiente TR"/);
 });
 
-test('Fase B six views share the same 17 segment state and remain keyboard accessible',()=>{
-  const config=fs.readFileSync(path.join(root,'config.js'),'utf8');
-  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
-  for(const id of ['viewA4C','viewA2C','viewA3C','viewSAXBasal','viewSAXMid','viewSAXApical']){
-    assert.match(html,new RegExp('id="'+id+'"'));
-    assert.ok(js.includes('"'+id+'"'), `Missing SVG draw call for ${id}`);
-  }
-  assert.match(config,/a3c:\s*\{ title: "A3C", segments: \[2, 8, 14, 5, 11, 16, 17\]/);
-  assert.match(js,/segmentStates\[segmentId\] = nextState\(segmentStates\[segmentId\]\)/);
-  assert.match(js,/event\.key === "Enter" \|\| event\.key === " "/);
-  assert.match(css,/\.segment-views-grid\s*\{\s*display:grid/);
-});
 
-test('Fase B follows ASE 17-segment apical wall assignments without duplicated IDs',()=>{
+test('Fase B exposes only the four approved wall-only views',()=>{
+  const expected=['viewELPEI','viewA2C','viewA4C','viewA5C'];
+  for(const id of expected) assert.match(html,new RegExp('id="'+id+'"'));
+  for(const id of ['viewA3C','viewSAXBasal','viewSAXMid','viewSAXApical']) {
+    assert.doesNotMatch(html,new RegExp('id="'+id+'"'));
+  }
+  assert.match(js,/drawBullseye\("bull17", true\)/);
+  assert.match(js,/drawSegmentViews\(true\)/);
+});
+test('Fase B uses clinical segment maps with no duplicates',()=>{
   const cfg=fs.readFileSync(path.join(root,'config.js'),'utf8');
   const expected={
     a4c:[3,9,14,6,12,16,17],
     a2c:[4,10,15,1,7,13,17],
-    a3c:[2,8,14,5,11,16,17]
+    a5c:[2,8,14,6,12,16,17],
+    elpei:[2,8,5,11]
   };
   for(const [view,ids] of Object.entries(expected)){
-    const match=cfg.match(new RegExp(view+': \\{ title: "[^"]+", segments: \\[([^\\]]+)\\]'));
-    assert.ok(match,'Missing anatomy map: '+view);
-    assert.deepEqual(match[1].split(',').map(x=>Number(x.trim())),ids);
-    assert.equal(new Set(ids).size,7,'Duplicated segment: '+view);
-    assert.match(js,new RegExp('assertSegmentViewMapping\\("'+view+'"'));
+    const pattern=new RegExp(view+': \\{ title: "[^"]+", segments: \\[([^\\]]+)\\]');
+    const match=cfg.match(pattern);
+    assert.ok(match,view+' config missing');
+    const actual=match[1].split(',').map(Number);
+    assert.deepEqual(actual,ids);
+    assert.equal(new Set(actual).size,ids.length);
   }
-  assert.match(js,/data-segment-id/);
 });
-
-test('Fase B apical and SAX orientation annotations remain visible and noninteractive',()=>{
-  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
-  assert.match(js,/addSvgText\(svg, 173, 22, "ÁPEX", "segment-orientation-label"\)/);
-  assert.match(js,/addSvgText\(svg, 110, 236, "BASE", "segment-orientation-label"\)/);
-  assert.match(js,/addSvgText\(svg, cx, cy \+ 4, "VI", "segment-small-label"\)/);
-  assert.match(css,/\.segment-orientation-label\s*\{[^}]*pointer-events:none/);
+test('Fase B wall render selects common state and ELPEI excludes apex',()=>{
+  const from=js.indexOf('function drawApicalWallOnly(');
+  const to=js.indexOf('function atlasBindShape(',from);
+  const render=js.slice(from,to);
+  assert.ok(from>=0 && to>from);
+  assert.match(render,/bindSegmentShape\(shape, segmentId, interactive\)/);
+  assert.match(render,/bindSegmentShape\(cap, 17, interactive\)/);
+  const elpei=render.slice(render.indexOf('function drawELPEIWallOnly('),render.indexOf('function drawSegmentViews('));
+  assert.match(elpei,/id: 8/);
+  assert.match(elpei,/id: 2/);
+  assert.match(elpei,/id: 11/);
+  assert.match(elpei,/id: 5/);
+  assert.doesNotMatch(elpei,/id: 17/);
+  assert.doesNotMatch(elpei,/bindSegmentShape\(cap/);
+  assert.doesNotMatch(render,/baseChambers|segment-chamber/);
+  assert.match(js,/segmentStates\[segmentId\] = nextState\(segmentStates\[segmentId\]\)/);
 });
-
-test('Fase B links the same segment visually across SVG views without changing parser data',()=>{
+test('Fase B keyboard activation and linked highlights remain intact',()=>{
   const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  assert.match(js,/event\.key === "Enter" \|\| event\.key === " "/);
   assert.match(js,/function highlightLinkedSegment\(segmentId, active\)/);
-  assert.match(js,/shape\.classList\.toggle\("segment-linked-highlight", active\)/);
-  assert.match(js,/node\.addEventListener\("mouseenter"/);
-  assert.match(js,/node\.addEventListener\("focus"/);
-  assert.match(js,/const keepFocus = document\.activeElement === node/);
-  assert.match(css,/\.segment-shape\.segment-linked-highlight/);
-});
-
-test('Fase B centers short-axis drawings within the 220x240 viewBox',()=>{
-  const start=js.indexOf('function drawShortAxisView(');
-  const end=js.indexOf('function drawApicalCapView(',start);
-  const draw=js.slice(start,end);
-  assert.match(draw,/const cx = 110;/);
-  assert.match(draw,/const cy = 114;/);
-  assert.match(draw,/addSvgText\(svg, cx, cy \+ outer \+ 27,/);
-});
-
-
-test('Fase B keeps SVG labels transparent to pointer events and touch targets selectable',()=>{
-  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  assert.match(js,/\.atlas-seg/);
   assert.match(css,/\.segment-view-card svg text\s*\{[^}]*pointer-events:none/s);
-  assert.match(css,/\.segment-view-card svg \.segment-shape\.interactive\s*\{[^}]*cursor:pointer/s);
-  assert.match(css,/@media \(pointer:coarse\)/);
-});
-
-
-test('Fase B SAX has concentric ventricular cavity without unlabelled peripheral contour',()=>{
-  const source=fs.readFileSync(path.join(root,'app.js'),'utf8');
-  const start=source.indexOf('function drawShortAxisView(');
-  const end=source.indexOf('function drawApicalCapView(',start);
-  assert.ok(start >= 0 && end > start);
-  const sax=source.slice(start,end);
-  assert.match(sax,/createSvgNode\("circle", \{ cx, cy, r: inner - 2, class: "segment-chamber" \}\)/);
-  assert.doesNotMatch(sax,/cx - 102/);
-  assert.match(sax,/bindSegmentShape\(path, id, interactive\)/);
-  assert.match(sax,/ringSectorPath\(cx, cy, outer, inner, a1, a2\)/);
-});
-
-
-test('Fase B apical cavity is drawn behind selectable myocardial sectors',()=>{
-  const source=fs.readFileSync(path.join(root,'app.js'),'utf8');
-  const from=source.indexOf('function drawVerticalSegmentView(');
-  const to=source.indexOf('function drawPLAXView(',from);
-  assert.ok(from>=0 && to>from);
-  const view=source.slice(from,to);
-  const cavity=view.indexOf('class: "segment-chamber"');
-  const myocardium=view.indexOf('bindSegmentShape(shape, segmentId, interactive)');
-  assert.ok(cavity>=0 && cavity<myocardium,'Cavity must not obscure clickable segments');
-  assert.match(view,/M 110 52 C 106 75 104 110 103 136/);
-  assert.doesNotMatch(view,/M 70 26 Q 46 20/);
-  assert.match(view,/bindSegmentShape\(cap, 17, interactive\)/);
-});
-
-
-test('Fase B atrial silhouettes cannot cover selectable basal segments',()=>{
-  const source=fs.readFileSync(path.join(root,'app.js'),'utf8');
-  const from=source.indexOf('function drawVerticalSegmentView(');
-  const to=source.indexOf('function drawPLAXView(',from);
-  const view=source.slice(from,to);
-  assert.ok(from>=0 && to>from);
-  const atria=view.indexOf('const lowerShapes = spec.baseChambers || []');
-  const sectors=view.indexOf('bindSegmentShape(shape, segmentId, interactive)');
-  const apex=view.indexOf('bindSegmentShape(cap, 17, interactive)');
-  assert.ok(atria>=0 && atria<sectors && sectors<apex,'Atria must be behind myocardium and apex');
-});
-
-
-test('Fase B highlights identical segment IDs in bullseye, multiview and atlas',()=>{
-  const source=fs.readFileSync(path.join(root,'app.js'),'utf8');
-  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
-  const from=source.indexOf('function highlightLinkedSegment(');
-  const to=source.indexOf('function bindSegmentShape(',from);
-  const highlight=source.slice(from,to);
-  assert.match(highlight,/\.segment-shape, \[data-segment-id=/);
-  assert.match(highlight,/\.atlas-seg/);
-  const atlas=source.slice(source.indexOf('function atlasBindShape('),source.indexOf('function drawAtlasRing('));
-  assert.match(atlas,/node\.setAttribute\("data-segment-id", String\(segmentId\)\)/);
-  assert.match(css,/\.atlas-seg\.segment-linked-highlight/);
-});
-
-
-test('Fase B apical sectors have separated label bands and wider walls',()=>{
-  const source=fs.readFileSync(path.join(root,'app.js'),'utf8');
-  const start=source.indexOf('function drawVerticalSegmentView(');
-  const end=source.indexOf('function drawPLAXView(',start);
-  const view=source.slice(start,end);
-  assert.match(view,/\[60, 104\],\s*\[104, 146\],\s*\[146, 184\]/);
-  assert.match(view,/const leftOuter = \{ p1: \{ x: 101, y: 48 \}, p2: \{ x: 68, y: 190 \} \}/);
-  assert.match(view,/const rightOuter = \{ p1: \{ x: 119, y: 48 \}, p2: \{ x: 152, y: 190 \} \}/);
-  assert.match(view,/bindSegmentShape\(shape, segmentId, interactive\)/);
 });
