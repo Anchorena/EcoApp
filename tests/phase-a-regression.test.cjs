@@ -157,3 +157,24 @@ test('Fase B keyboard activation and linked highlights remain intact',()=>{
   assert.match(js,/\.atlas-seg/);
   assert.match(css,/\.segment-view-card svg text\s*\{[^}]*pointer-events:none/s);
 });
+
+
+test('Fase B preserves synthetic segment states through local study storage',()=>{
+  const from=js.indexOf('function normalizeSavedStudy(');
+  const to=js.indexOf('function setSelectValueOrOther(',from);
+  assert.ok(from>=0 && to>from);
+  const storage=new Map();
+  const localStorage={
+    getItem:key=>storage.get(key)||null,
+    setItem:(key,value)=>storage.set(key,value)
+  };
+  const mockData={paciente:'TEST ONLY',fecha:'2026-10-27',segmentStates:{1:'acinesia',14:'hipocinesia',17:'normal'}};
+  const context={localStorage,STUDY_STORAGE_KEY:'test_studies',getFormData:()=>mockData,buildStudyBaseName:()=> 'synthetic',Date,Math,JSON,Array};
+  const functions=vm.runInNewContext(js.slice(from,to)+';({makeStudyRecord,setSavedStudies,getSavedStudies})',context);
+  const record=functions.makeStudyRecord();
+  functions.setSavedStudies([record]);
+  const restored=functions.getSavedStudies()[0];
+  assert.equal(restored.data.segmentStates[1],'acinesia');
+  assert.equal(restored.data.segmentStates[14],'hipocinesia');
+  assert.equal(restored.data.segmentStates[17],'normal');
+});
