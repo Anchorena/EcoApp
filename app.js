@@ -3620,26 +3620,35 @@ El PDF propone: ${incomingText}.
     const svg = qs(svgId);
     if (!svg) return;
     svg.innerHTML = "";
-    const top = [40, 82, 132, 182];
-    const createWall = (ids, left) => {
+    // Contornos curvos en lugar de bandas rectas. Ápex arriba, base abajo.
+    // Los segmentos se ordenan desde ápex hacia base.
+    const heights = [42, 88, 137, 187];
+    const edges = {
+      left: { outer: [91, 71, 53, 37], inner: [103, 86, 74, 66] },
+      right: { outer: [129, 149, 167, 183], inner: [117, 134, 146, 154] }
+    };
+    const createWall = (ids, side) => {
+      const e = edges[side];
       ids.forEach((segmentId, i) => {
-        const y0 = top[i], y1 = top[i + 1];
-        const outerX = (y) => left ? 92 - 0.24 * (y - 40) : 128 + 0.24 * (y - 40);
-        const innerX = (y) => left ? 102 - 0.10 * (y - 40) : 118 + 0.10 * (y - 40);
-        const d = `M ${outerX(y0)} ${y0} L ${outerX(y1)} ${y1} L ${innerX(y1)} ${y1} L ${innerX(y0)} ${y0} Z`;
+        const y0 = heights[i], y1 = heights[i+1];
+        const mid = (y0+y1)/2;
+        const d = `M ${e.outer[i]} ${y0}
+          Q ${(e.outer[i]+e.outer[i+1])/2} ${mid-3} ${e.outer[i+1]} ${y1}
+          L ${e.inner[i+1]} ${y1}
+          Q ${(e.inner[i]+e.inner[i+1])/2} ${mid-3} ${e.inner[i]} ${y0} Z`;
         const shape = createSvgNode("path", { d });
         bindSegmentShape(shape, segmentId, interactive);
         svg.appendChild(shape);
-        addSvgText(svg, (outerX((y0+y1)/2)+innerX((y0+y1)/2))/2, (y0+y1)/2 + 4, String(segmentId), "segment-number");
+        addSvgText(svg, (e.outer[i]+e.inner[i]+e.outer[i+1]+e.inner[i+1])/4, mid+4, String(segmentId), "segment-number");
       });
     };
-    createWall(leftIds, true);
-    createWall(rightIds, false);
-    const cap = createSvgNode("path", { d: "M 92 40 Q 110 3 128 40 L 118 49 Q 110 30 102 49 Z" });
+    createWall(leftIds, "left");
+    createWall(rightIds, "right");
+    const cap = createSvgNode("path", { d: "M 91 42 Q 110 6 129 42 L 117 50 Q 110 33 103 50 Z" });
     bindSegmentShape(cap, 17, interactive);
     svg.appendChild(cap);
-    addSvgText(svg, 110, 33, "17", "segment-number");
-    addSvgText(svg, 174, 24, "ÁPEX", "segment-orientation-label");
+    addSvgText(svg, 110, 32, "17", "segment-number");
+    addSvgText(svg, 175, 24, "ÁPEX", "segment-orientation-label");
   }
 
   // ELPEI paraesternal: solo anteroseptal 8/2 e inferolateral 11/5.
@@ -4799,6 +4808,10 @@ El PDF propone: ${incomingText}.
     }
     renderSummaryOS(data, calc, conclusion);
     drawBullseye("printBull17", false);
+    drawApicalWallOnly("printViewA2C", [15, 10, 4], [13, 7, 1], false);
+    drawApicalWallOnly("printViewA4C", [14, 9, 3], [16, 12, 6], false);
+    drawApicalWallOnly("printViewA5C", [14, 8, 2], [16, 12, 6], false);
+    drawELPEIWallOnly(false, "printViewELPEI");
     renderPrintAnnex();
   }
 
