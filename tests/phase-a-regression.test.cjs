@@ -178,3 +178,21 @@ test('Fase B preserves synthetic segment states through local study storage',()=
   assert.equal(restored.data.segmentStates[14],'hipocinesia');
   assert.equal(restored.data.segmentStates[17],'normal');
 });
+
+test('Fase B long report includes all four noninteractive segmental wall views',()=>{
+  for(const id of ['A2C','A4C','A5C','ELPEI']){
+    assert.match(html,new RegExp('id="printView'+id+'"'));
+  }
+  assert.match(js,/drawApicalWallOnly\("printViewA2C", \[15, 10, 4\], \[13, 7, 1\], false\)/);
+  assert.match(js,/drawApicalWallOnly\("printViewA4C", \[14, 9, 3\], \[16, 12, 6\], false\)/);
+  assert.match(js,/drawApicalWallOnly\("printViewA5C", \[14, 8, 2\], \[16, 12, 6\], false\)/);
+  assert.match(js,/drawELPEIWallOnly\(false, "printViewELPEI"\)/);
+  const short=html.slice(html.indexOf('id="print-report-resumen-os"'));
+  assert.doesNotMatch(short,/id="printView(?:A2C|A4C|A5C|ELPEI)"/);
+});
+test('Fase B names the corresponding walls on each view',()=>{
+  assert.match(html,/Pared inferoseptal · Pared anterolateral/);
+  assert.match(html,/Pared inferior · Pared anterior/);
+  assert.match(html,/Pared septal · Pared anterolateral/);
+  assert.match(html,/Pared anteroseptal · Pared inferolateral/);
+});
