@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EcoApp EchoReport v1.0</title>
-  <link rel="stylesheet" href="styles.css?v=20261026-1" />
+  <link rel="stylesheet" href="styles.css?v=20261028-1" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
 </head>
@@ -272,10 +272,10 @@
             </div>
           </div>
           <div class="segment-views-grid" aria-label="Vistas de paredes ventriculares interactivas">
-            <div class="segment-view-card"><strong>ELPEI — eje largo paraesternal</strong><svg id="viewELPEI" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en ELPEI"></svg></div>
-            <div class="segment-view-card"><strong>A2C — apical dos cámaras</strong><svg id="viewA2C" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en A2C"></svg></div>
-            <div class="segment-view-card"><strong>A4C — apical cuatro cámaras</strong><svg id="viewA4C" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en A4C"></svg></div>
-            <div class="segment-view-card"><strong>A5C — apical cinco cámaras</strong><svg id="viewA5C" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en A5C"></svg></div>
+            <div class="segment-view-card"><strong>ELPEI — eje largo paraesternal</strong><span class="segment-wall-names">Pared anteroseptal · Pared inferolateral</span><svg id="viewELPEI" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en ELPEI"></svg></div>
+            <div class="segment-view-card"><strong>A2C — apical dos cámaras</strong><span class="segment-wall-names">Pared inferior · Pared anterior</span><svg id="viewA2C" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en A2C"></svg></div>
+            <div class="segment-view-card"><strong>A4C — apical cuatro cámaras</strong><span class="segment-wall-names">Pared inferoseptal · Pared anterolateral</span><svg id="viewA4C" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en A4C"></svg></div>
+            <div class="segment-view-card"><strong>A5C — apical cinco cámaras</strong><span class="segment-wall-names">Pared septal · Pared anterolateral</span><svg id="viewA5C" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en A5C"></svg></div>
           </div>
           <div class="legend"><span><i class="legend-normal"></i> Normal</span><span><i class="legend-hypo"></i> Hipocinesia</span><span><i class="legend-ak"></i> Acinesia</span></div>
           <div id="segmentosTexto" class="segment-summary"></div>
@@ -334,6 +334,15 @@
         <div class="report-bullseye-row">
           <div class="report-bullseye-box"><h3>Segmentación miocárdica</h3><svg id="printBull17" viewBox="0 0 520 520"></svg></div>
           <div class="report-bullseye-text"><h3>Motilidad segmentaria</h3><div id="printSegmentosTexto"></div></div>
+        </div>
+        <div class="print-wall-views" aria-label="Vistas segmentarias del ventrículo izquierdo">
+          <h3>Vistas de paredes ventriculares</h3>
+          <div class="print-wall-views-grid">
+            <div class="print-wall-view"><strong>ELPEI — eje largo paraesternal</strong><span>Pared anteroseptal · Pared inferolateral</span><svg id="printViewELPEI" viewBox="0 0 220 240" role="img" aria-label="ELPEI — eje largo paraesternal"></svg></div>
+            <div class="print-wall-view"><strong>A2C — apical dos cámaras</strong><span>Pared inferior · Pared anterior</span><svg id="printViewA2C" viewBox="0 0 220 240" role="img" aria-label="A2C — apical dos cámaras"></svg></div>
+            <div class="print-wall-view"><strong>A4C — apical cuatro cámaras</strong><span>Pared inferoseptal · Pared anterolateral</span><svg id="printViewA4C" viewBox="0 0 220 240" role="img" aria-label="A4C — apical cuatro cámaras"></svg></div>
+            <div class="print-wall-view"><strong>A5C — apical cinco cámaras</strong><span>Pared septal · Pared anterolateral</span><svg id="printViewA5C" viewBox="0 0 220 240" role="img" aria-label="A5C — apical cinco cámaras"></svg></div>
+          </div>
         </div>
         <div id="printQuickRefs" class="report-quickrefs"></div>
       </div>
@@ -394,7 +403,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
   <script src="config.js?v=20261026-1"></script>
   <script src="device-profiles.js?v=20261023-6"></script>
-  <script src="app.js?v=20261026-1"></script>
+  <script src="app.js?v=20261028-1"></script>
   <script src="pwa-register.js?v=20261023-1"></script>
 </body>
 </html>
