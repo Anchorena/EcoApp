@@ -3648,13 +3648,37 @@ El PDF propone: ${incomingText}.
     bindSegmentShape(cap, 17, interactive);
     svg.appendChild(cap);
     addSvgText(svg, 110, 32, "17", "segment-number");
+    const wallNames = {
+      viewA2C: ["INFERIOR", "ANTERIOR"],
+      printViewA2C: ["INFERIOR", "ANTERIOR"],
+      viewA4C: ["INFEROSEPTAL", "ANTEROLATERAL"],
+      printViewA4C: ["INFEROSEPTAL", "ANTEROLATERAL"],
+      viewA5C: ["SEPTAL", "ANTEROLATERAL"],
+      printViewA5C: ["SEPTAL", "ANTEROLATERAL"]
+    };
+    const names = wallNames[svgId] || [];
+    if (names.length) {
+      addSvgText(svg, 35, 109, names[0], "segment-anatomy-label segment-label-left");
+      addSvgText(svg, 187, 109, names[1], "segment-anatomy-label segment-label-right");
+    }
+    if (/A4C$/.test(svgId)) {
+      addSvgText(svg, 26, 171, "VD", "segment-anatomy-label");
+      addSvgText(svg, 37, 210, "AD", "segment-anatomy-label");
+      addSvgText(svg, 184, 210, "AI", "segment-anatomy-label");
+    } else if (/A5C$/.test(svgId)) {
+      addSvgText(svg, 26, 171, "VD", "segment-anatomy-label");
+      addSvgText(svg, 185, 208, "AI", "segment-anatomy-label");
+      addSvgText(svg, 196, 170, "Ao", "segment-anatomy-label");
+    } else if (/A2C$/.test(svgId)) {
+      addSvgText(svg, 110, 214, "AI", "segment-anatomy-label");
+    }
     addSvgText(svg, 175, 24, "ÁPEX", "segment-orientation-label");
   }
 
   // ELPEI paraesternal: solo anteroseptal 8/2 e inferolateral 11/5.
   // El ápex NO está representado ni es seleccionable en este plano.
-  function drawELPEIWallOnly(interactive) {
-    const svg = qs("viewELPEI");
+  function drawELPEIWallOnly(interactive, svgId = "viewELPEI") {
+    const svg = qs(svgId);
     if (!svg) return;
     svg.innerHTML = "";
     const wallSegments = [
@@ -3669,7 +3693,12 @@ El PDF propone: ${incomingText}.
       svg.appendChild(shape);
       addSvgText(svg, x, y, String(id), "segment-number");
     });
-    addSvgText(svg, 110, 32, "ELPEI · esquema de paredes", "segment-orientation-label");
+    addSvgText(svg, 110, 32, "ELPEI", "segment-orientation-label");
+    addSvgText(svg, 112, 54, "ANTEROSEPTAL", "segment-anatomy-label");
+    addSvgText(svg, 112, 207, "INFEROLATERAL", "segment-anatomy-label");
+    addSvgText(svg, 34, 57, "VD", "segment-anatomy-label");
+    addSvgText(svg, 204, 135, "Ao", "segment-anatomy-label");
+    addSvgText(svg, 188, 218, "AI", "segment-anatomy-label");
   }
 
   function drawSegmentViews(interactive) {
