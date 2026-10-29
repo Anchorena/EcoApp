@@ -218,3 +218,12 @@ test('Eco largo paginates Doppler before segment atlas and removes old print min
   assert.match(css,/#print-report-moderno \.segments-print-block \.report-bullseye-text \{[\s\S]*?min-height:0 !important/);
   assert.match(css,/#print-report-moderno \.print-segment-visuals #printBull17,[\s\S]*?width:132px !important/);
 });
+
+test('Safari Eco largo has no nested forced Doppler page break',()=>{
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  const last=css.slice(css.lastIndexOf('/* QA Safari PDF:'));
+  assert.match(last,/body\.print-moderno #print-report-moderno #printTablaDoppler/);
+  assert.match(last,/body\.print-moderno #print-report-moderno \.doppler-measurement-table/);
+  assert.match(last,/break-before:auto !important/);
+  assert.match(last,/page-break-before:auto !important/);
+});
