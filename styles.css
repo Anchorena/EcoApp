@@ -3443,3 +3443,22 @@ body.dark-mode .ws-attach{ color:#04221f; }
     box-sizing:border-box !important;
   }
 }
+
+/* QA Safari PDF: quitar salto forzado heredado del CONTENIDO Doppler.
+   El anterior override cubria solo su contenedor: la tabla seguia forzando pagina 2. */
+@media print {
+  body.print-moderno #print-report-moderno #printTablaDoppler,
+  body.print-moderno #print-report-moderno .doppler-measurement-table,
+  body.print-moderno #print-report-moderno .doppler-print-block {
+    break-before:auto !important;
+    page-break-before:auto !important;
+    break-after:auto !important;
+    page-break-after:auto !important;
+  }
+  body.print-moderno #print-report-moderno .doppler-print-block,
+  body.print-moderno #print-report-moderno #printTablaDoppler {
+    break-inside:auto !important;
+    page-break-inside:auto !important;
+    margin-top:0 !important;
+  }
+}
