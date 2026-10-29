@@ -206,3 +206,15 @@ test('Fase B print ELPEI targets its own SVG and visual row precedes narrative',
   assert.ok(print.indexOf('id="printViewELPEI"')>print.indexOf('id="printBull17"'));
   assert.ok(print.indexOf('id="printSegmentosTexto"')>print.indexOf('id="printViewA5C"'));
 });
+
+test('Eco largo paginates Doppler before segment atlas and removes old print minimum heights',()=>{
+  const start=html.indexOf('id="print-report-moderno"');
+  const end=html.indexOf('id="print-report-clasico"',start);
+  const long=html.slice(start,end);
+  assert.ok(long.indexOf('class="doppler-print-block"')<long.indexOf('class="segments-print-block"'));
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  assert.match(css,/#print-report-moderno \.doppler-print-block \{\s*break-before:auto !important/);
+  assert.match(css,/#print-report-moderno \.print-segment-visuals \{[\s\S]*?grid-template-columns:150px minmax\(0,1fr\) !important/);
+  assert.match(css,/#print-report-moderno \.segments-print-block \.report-bullseye-text \{[\s\S]*?min-height:0 !important/);
+  assert.match(css,/#print-report-moderno \.print-segment-visuals #printBull17,[\s\S]*?width:132px !important/);
+});
