@@ -191,8 +191,18 @@ test('Fase B long report includes all four noninteractive segmental wall views',
   assert.doesNotMatch(short,/id="printView(?:A2C|A4C|A5C|ELPEI)"/);
 });
 test('Fase B names the corresponding walls on each view',()=>{
-  assert.match(html,/Pared inferoseptal · Pared anterolateral/);
-  assert.match(html,/Pared inferior · Pared anterior/);
-  assert.match(html,/Pared septal · Pared anterolateral/);
-  assert.match(html,/Pared anteroseptal · Pared inferolateral/);
+  for(const wall of ['INFEROSEPTAL','ANTEROLATERAL','INFERIOR','ANTERIOR','SEPTAL','ANTEROSEPTAL','INFEROLATERAL']){
+    assert.match(js,new RegExp('"'+wall+'"'));
+  }
+  assert.match(js,/addSvgText\(svg, 34, 57, "VD", "segment-anatomy-label"\)/);
+  assert.match(js,/addSvgText\(svg, 204, 135, "Ao", "segment-anatomy-label"\)/);
+});
+
+test('Fase B print ELPEI targets its own SVG and visual row precedes narrative',()=>{
+  assert.match(js,/function drawELPEIWallOnly\(interactive, svgId = "viewELPEI"\)/);
+  assert.match(js,/const svg = qs\(svgId\)/);
+  const print=html.slice(html.indexOf('id="print-report-moderno"'),html.indexOf('id="print-report-clasico"'));
+  assert.ok(print.indexOf('class="print-segment-visuals"')>=0);
+  assert.ok(print.indexOf('id="printViewELPEI"')>print.indexOf('id="printBull17"'));
+  assert.ok(print.indexOf('id="printSegmentosTexto"')>print.indexOf('id="printViewA5C"'));
 });
