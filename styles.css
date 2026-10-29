@@ -3355,3 +3355,91 @@ body.dark-mode .ws-attach{ color:#04221f; }
   .segment-anatomy-label{font-size:9px;}
   .print-segment-narrative{font-size:11px;}
 }
+
+/* Fase B QA PDF 2026-10-29: anula reglas historicas de ancho fijo y altura minima. */
+@media print {
+  #print-report-moderno .doppler-print-block {
+    break-before:auto !important;
+    page-break-before:auto !important;
+    break-inside:auto !important;
+    page-break-inside:auto !important;
+  }
+  #print-report-moderno .segments-print-block {
+    margin-top:6px !important;
+    break-inside:avoid !important;
+    page-break-inside:avoid !important;
+  }
+  #print-report-moderno .print-segment-visuals {
+    display:grid !important;
+    grid-template-columns:150px minmax(0,1fr) !important;
+    gap:8px !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    align-items:start !important;
+    box-sizing:border-box !important;
+  }
+  #print-report-moderno .print-segment-visuals .report-bullseye-box {
+    width:auto !important;
+    max-width:150px !important;
+    min-width:0 !important;
+    min-height:0 !important;
+    padding:6px !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+  #print-report-moderno .print-segment-visuals #printBull17,
+  #print-report-moderno .print-segment-visuals .report-bullseye-box svg {
+    width:132px !important;
+    max-width:100% !important;
+    height:132px !important;
+    min-height:0 !important;
+    display:block !important;
+    margin:0 auto !important;
+    overflow:visible !important;
+  }
+  #print-report-moderno .print-segment-visuals .print-wall-views {
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+    margin:0 !important;
+  }
+  #print-report-moderno .print-segment-visuals .print-wall-views-grid {
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:4px !important;
+    min-width:0 !important;
+    height:auto !important;
+  }
+  #print-report-moderno .print-segment-visuals .print-wall-view {
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+    padding:3px 1px !important;
+    overflow:hidden !important;
+  }
+  #print-report-moderno .print-segment-visuals .print-wall-view strong {
+    font-size:7.2pt !important;
+    line-height:1.1 !important;
+    min-height:0 !important;
+    margin-bottom:2px !important;
+  }
+  #print-report-moderno .print-segment-visuals .print-wall-view svg {
+    width:100% !important;
+    max-width:100px !important;
+    height:117px !important;
+    min-height:0 !important;
+    display:block !important;
+  }
+  #print-report-moderno .segments-print-block .print-segment-narrative,
+  #print-report-moderno .segments-print-block .report-bullseye-text {
+    min-height:0 !important;
+    height:auto !important;
+    padding:6px 8px !important;
+    margin:6px 0 !important;
+    box-sizing:border-box !important;
+  }
+}
