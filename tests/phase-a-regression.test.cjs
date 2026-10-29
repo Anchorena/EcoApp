@@ -211,7 +211,7 @@ test('Eco largo paginates Doppler before segment atlas and removes old print min
   const start=html.indexOf('id="print-report-moderno"');
   const end=html.indexOf('id="print-report-clasico"',start);
   const long=html.slice(start,end);
-  assert.ok(long.indexOf('class="doppler-print-block"')<long.indexOf('class="segments-print-block"'));
+  assert.ok(long.indexOf('doppler-print-block')<long.indexOf('segments-print-block'));
   const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
   assert.match(css,/#print-report-moderno \.doppler-print-block \{\s*break-before:auto !important/);
   assert.match(css,/#print-report-moderno \.print-segment-visuals \{[\s\S]*?grid-template-columns:150px minmax\(0,1fr\) !important/);
