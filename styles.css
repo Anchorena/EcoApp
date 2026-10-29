@@ -3334,3 +3334,24 @@ body.dark-mode .ws-attach{ color:#04221f; }
   .print-wall-view{background:#fff !important;}
   .print-wall-view svg{height:105px;}
 }
+
+/* Fase B: panel compacto de cinco diagramas y narrativa debajo, solo Eco largo. */
+.print-segment-visuals{display:grid;grid-template-columns:190px minmax(0,1fr);gap:10px;align-items:stretch;break-inside:avoid;page-break-inside:avoid;margin:8px 0;}
+.print-segment-visuals .report-bullseye-box{padding:8px;border-radius:9px;min-width:0;}
+.print-segment-visuals .report-bullseye-box h3{font-size:11px;margin:0 0 5px;}
+.print-segment-visuals .report-bullseye-box svg{width:100%;max-width:170px;}
+.print-segment-visuals .print-wall-views{margin:0;min-width:0;}
+.print-segment-visuals .print-wall-views-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;height:100%;}
+.print-segment-visuals .print-wall-view{padding:5px 1px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+.print-segment-visuals .print-wall-view strong{font-size:9px;min-height:23px;}
+.print-segment-visuals .print-wall-view svg{max-width:135px;height:165px;}
+.print-segment-narrative{margin:8px 0 10px;min-height:0;}
+.segment-anatomy-label{font-size:8px;fill:#334155;font-weight:700;pointer-events:none;}
+@media print{
+  .print-segment-visuals{grid-template-columns:145px minmax(0,1fr);gap:6px;}
+  .print-segment-visuals .report-bullseye-box svg{max-width:130px;}
+  .print-segment-visuals .print-wall-view svg{height:119px;max-width:108px;}
+  .print-segment-visuals .print-wall-view strong{font-size:8px;min-height:18px;}
+  .segment-anatomy-label{font-size:9px;}
+  .print-segment-narrative{font-size:11px;}
+}
