@@ -4197,6 +4197,16 @@ El PDF propone: ${incomingText}.
     return arr.join(" ");
   }
 
+  // Umbral operativo para revisión médica, no criterio diagnóstico ni sustituto de Simpson.
+  function feviDiscordanceReview(calc) {
+    const simpson = Number(calc.feyPrincipal);
+    const teichholz = Number(calc.feyTeichholz);
+    if (calc.feyMethod !== "Simpson" || calc.feyPrincipal === null ||
+        calc.feyTeichholz === null || !Number.isFinite(simpson) || !Number.isFinite(teichholz)) return "";
+    if (Math.abs(simpson - teichholz) < 15) return "";
+    return "Advertencia de revisión: diferencia relevante entre FEVI Simpson y estimación Teichholz (≥15 puntos porcentuales); corroborar mediciones y método. Se mantiene Simpson como referencia principal.";
+  }
+
   function buildDescription(data, calc, interp, diastolicText, segmentText, glsText) {
     const parts = [];
     parts.push("Se realizó ecocardiograma transtorácico bidimensional y Doppler cardíaco.");
@@ -4216,8 +4226,17 @@ El PDF propone: ${incomingText}.
 
     if (calc.feyPrincipal !== null || calc.feyTeichholz !== null) parts.push(interp.fey.text);
 
-    parts.push(motilityGlobalText(data.motilidadGlobal));
+    // Una FEVI global conservada no implica motilidad regional normal.
+    const hasRegionalAbnormality = Array.from({ length: 17 }, (_, i) => segmentStates[i + 1])
+      .some((state) => state === "hipocinesia" || state === "acinesia");
+    if (data.motilidadGlobal === "conservada" && hasRegionalAbnormality) {
+      parts.push("Función sistólica global conservada, con alteraciones regionales de la contractilidad descriptas a continuación.");
+    } else {
+      parts.push(motilityGlobalText(data.motilidadGlobal));
+    }
     parts.push(segmentText.long);
+    const feviReview = feviDiscordanceReview(calc);
+    if (feviReview) parts.push(feviReview);
     parts.push(diastolicText);
     parts.push(interp.ai.text);
     if (interp.ad && interp.ad.grade !== "nr") parts.push(interp.ad.text);
