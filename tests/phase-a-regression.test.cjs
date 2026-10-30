@@ -227,3 +227,11 @@ test('Safari Eco largo has no nested forced Doppler page break',()=>{
   assert.match(last,/break-before:auto !important/);
   assert.match(last,/page-break-before:auto !important/);
 });
+
+test('Eco largo hides legacy print footer that overlaps signature in Safari',()=>{
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  const last=css.slice(css.lastIndexOf('/* QA Eco largo 2026-10-30:'));
+  assert.match(last,/body\.print-moderno #print-report-moderno \.print-footer/);
+  assert.match(last,/display:none !important/);
+  assert.match(html,/styles\.css\?v=20261030-1/);
+});
