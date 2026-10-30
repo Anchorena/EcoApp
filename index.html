@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EcoApp EchoReport v1.0</title>
-  <link rel="stylesheet" href="styles.css?v=20261030-1" />
+  <link rel="stylesheet" href="styles.css?v=20261030-trace1" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
 </head>
@@ -162,6 +162,8 @@
             <div class="field"><label for="paciente">Paciente</label><input id="paciente" type="text" /></div>
             <div class="field"><label for="dni">DNI</label><input id="dni" type="text" /></div>
             <div class="field"><label for="studyId">ID estudio/ecógrafo</label><input id="studyId" type="text" readonly /></div>
+            <div class="field"><label for="equipoModelo">Equipo utilizado</label><select id="equipoModelo"><option value="">No consignado</option><option value="Mindray M7">Mindray M7</option><option value="Mindray M8">Mindray M8</option><option value="Mindray M9">Mindray M9</option><option value="Sonoscape S6">Sonoscape S6</option><option value="Esaote">Esaote</option><option value="Otro">Otro</option></select></div>
+            <div class="field"><label for="equipoSerie">N.º de serie del equipo</label><input id="equipoSerie" type="text" autocomplete="off" placeholder="Ingresar si se conoce" /></div>
             <div class="field"><label for="sexo">Sexo</label><select id="sexo"><option value=""></option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option></select></div>
             <div class="field"><label for="edad">Edad</label><input id="edad" type="number" /></div>
             <div class="field"><label for="obraSocial">Obra social / cobertura</label><select id="obraSocial"></select></div>
@@ -323,6 +325,7 @@
         </div>
       </div>
       <div id="printPaciente" class="report-patient"></div>
+      <div id="printEquipoTrace" class="report-equipment-trace"></div>
       <div class="report-summary-box">
         <h3>Resumen rápido visual</h3>
         <div id="printBadges" class="badges print-badges"></div>
@@ -403,7 +406,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
   <script src="config.js?v=20261026-1"></script>
   <script src="device-profiles.js?v=20261023-6"></script>
-  <script src="app.js?v=20261029-1"></script>
+  <script src="app.js?v=20261030-trace1"></script>
   <script src="pwa-register.js?v=20261023-1"></script>
 </body>
 </html>
