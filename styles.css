@@ -3479,3 +3479,32 @@ body.dark-mode .ws-attach{ color:#04221f; }
 @media print {
   #print-report-moderno .report-equipment-trace{font-size:7.3pt !important;margin:0 0 3px !important;break-inside:avoid !important;}
 }
+
+/* QA Fase B: no reservar hoja de portada para anexos importados.
+   La primera imagen del ecografo arranca directamente en la siguiente pagina. */
+@media print {
+  body.print-moderno #printAnexoWrap > h2,
+  body.print-moderno #printAnexoMeta,
+  body.print-resumen-os #summaryAnexoWrap > h2,
+  body.print-resumen-os #summaryAnexoMeta {
+    display:none !important;
+  }
+  body.print-moderno #printAnexoWrap,
+  body.print-resumen-os #summaryAnexoWrap {
+    break-before:page !important;
+    page-break-before:always !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+  body.print-moderno #printAnexoPages .annex-print-page,
+  body.print-resumen-os #summaryAnexoPages .annex-print-page {
+    padding:0 !important;
+    margin:0 !important;
+    break-inside:avoid !important;
+    page-break-inside:avoid !important;
+  }
+  body.print-moderno #printAnexoPages .annex-print-page img,
+  body.print-resumen-os #summaryAnexoPages .annex-print-page img {
+    max-height:230mm !important;
+  }
+}
