@@ -397,6 +397,9 @@
       await inlineCloneImages(clone, source);
       await waitForCloneImages(clone);
       clone.querySelectorAll(".print-footer").forEach((el) => el.remove());
+      // Las imagenes originales del ecografo son el anexo: no crear portada vacia.
+      clone.querySelectorAll("#printAnexoWrap > h2, #printAnexoMeta, #summaryAnexoWrap > h2, #summaryAnexoMeta")
+        .forEach((el) => el.remove());
       await waitForNextPaint();
       const options = {
         margin: [7, 7, 12, 7],
