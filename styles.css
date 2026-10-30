@@ -3472,3 +3472,10 @@ body.dark-mode .ws-attach{ color:#04221f; }
     visibility:hidden !important;
   }
 }
+
+/* Trazabilidad del equipo: línea compacta que no altera la paginación A4. */
+.report-equipment-trace{font-size:10px;color:#475569;margin:2px 0 5px;line-height:1.2;}
+.report-equipment-trace:empty{display:none;}
+@media print {
+  #print-report-moderno .report-equipment-trace{font-size:7.3pt !important;margin:0 0 3px !important;break-inside:avoid !important;}
+}
