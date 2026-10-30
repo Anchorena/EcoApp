@@ -3462,3 +3462,13 @@ body.dark-mode .ws-attach{ color:#04221f; }
     margin-top:0 !important;
   }
 }
+
+/* QA Eco largo 2026-10-30: el footer legacy se superpone a la firma en Safari.
+   No se usa numeracion ficticia: mostrar paginado solo si existe paginador real. */
+@media print {
+  body.print-moderno #print-report-moderno .print-footer,
+  body.print-moderno #print-report-moderno .print-footer * {
+    display:none !important;
+    visibility:hidden !important;
+  }
+}
