@@ -235,3 +235,22 @@ test('Eco largo hides legacy print footer that overlaps signature in Safari',()=
   assert.match(last,/display:none !important/);
   assert.match(html,/styles\.css\?v=20261030-1/);
 });
+
+test('Clinical narrative distinguishes global function from regional wall-motion abnormalities',()=>{
+  assert.match(js,/const hasRegionalAbnormality = Array\.from\(\{ length: 17 \}/);
+  assert.match(js,/data\.motilidadGlobal === "conservada" && hasRegionalAbnormality/);
+  assert.match(js,/Función sistólica global conservada, con alteraciones regionales/);
+  assert.match(js,/parts\.push\(segmentText\.long\)/);
+});
+test('Simpson versus Teichholz discordance flags medical review without replacing FEVI',()=>{
+  const start=js.indexOf('function feviDiscordanceReview(');
+  const end=js.indexOf('function buildDescription(',start);
+  assert.ok(start>=0 && end>start);
+  const func=vm.runInNewContext('('+js.slice(start,end).trim()+')');
+  const high=func({feyMethod:'Simpson',feyPrincipal:67.5,feyTeichholz:40.8});
+  assert.match(high,/Advertencia de revisión/);
+  assert.match(high,/Simpson como referencia principal/);
+  assert.equal(func({feyMethod:'Simpson',feyPrincipal:64,feyTeichholz:60}), '');
+  assert.equal(func({feyMethod:'Simpson',feyPrincipal:64,feyTeichholz:null}), '');
+  assert.equal(func({feyMethod:'Teichholz',feyPrincipal:64,feyTeichholz:40}), '');
+});
