@@ -409,6 +409,13 @@
       const worker = window.html2pdf().set(options).from(clone);
       await worker.toPdf();
       const pdf = await worker.get("pdf");
+      const equipmentData = getFormData();
+      const traceParts = [
+        equipmentData.equipoModelo ? `Equipo: ${equipmentData.equipoModelo}` : "",
+        equipmentData.equipoSerie ? `Serie: ${equipmentData.equipoSerie}` : "",
+        equipmentData.studyId ? `Estudio: ${equipmentData.studyId}` : ""
+      ].filter(Boolean);
+      const traceFooter = traceParts.join(" · ");
       const totalPages = pdf.internal.getNumberOfPages();
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
@@ -420,7 +427,7 @@
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(6.3);
         pdf.setTextColor(128, 143, 160);
-        pdf.text(PDF_FOOTER_BRAND, 8, pageHeight - 5.2, { align: "left" });
+        pdf.text(traceFooter || PDF_FOOTER_BRAND, 8, pageHeight - 5.2, { align: "left" });
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(7.2);
         pdf.setTextColor(100, 116, 139);
@@ -2448,6 +2455,8 @@ El PDF propone: ${incomingText}.
       paciente: getValue("paciente", ""),
       dni: getValue("dni", ""),
       studyId: getValue("studyId", ""),
+      equipoModelo: getValue("equipoModelo", ""),
+      equipoSerie: cleanText(getValue("equipoSerie", "")),
       sexo: getValue("sexo", ""),
       edad: safeNumber(getValue("edad", "")),
       obraSocial: getSelectedCoverage(),
@@ -4822,6 +4831,15 @@ El PDF propone: ${incomingText}.
 
     setText("printMedico", printMed);
     setText("printEspecialidad", printEsp);
+    const equipmentModel = cleanText(data.equipoModelo || "");
+    const equipmentSerial = cleanText(data.equipoSerie || "");
+    const equipmentStudyId = cleanText(data.studyId || "");
+    const equipmentTrace = [
+      equipmentModel ? `Equipo: ${equipmentModel}` : "",
+      equipmentSerial ? `Serie: ${equipmentSerial}` : "",
+      equipmentStudyId ? `ID del estudio: ${equipmentStudyId}` : ""
+    ].filter(Boolean).join(" · ");
+    setText("printEquipoTrace", equipmentTrace);
     renderReportLogo(data);
     renderInformanteSignature(data);
 
