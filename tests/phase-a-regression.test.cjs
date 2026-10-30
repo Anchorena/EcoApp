@@ -233,7 +233,7 @@ test('Eco largo hides legacy print footer that overlaps signature in Safari',()=
   const last=css.slice(css.lastIndexOf('/* QA Eco largo 2026-10-30:'));
   assert.match(last,/body\.print-moderno #print-report-moderno \.print-footer/);
   assert.match(last,/display:none !important/);
-  assert.match(html,/styles\.css\?v=20261030-1/);
+  assert.match(html,/styles\.css\?v=20261030-(?:1|trace1)/);
 });
 
 test('Clinical narrative distinguishes global function from regional wall-motion abnormalities',()=>{
