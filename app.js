@@ -2115,13 +2115,26 @@ El PDF propone: ${incomingText}.
     return true;
   }
 
-  // true = fuera de rango, false = dentro, null = sin rango evaluable o sin valor.
+  // Parámetros cuyo valor exactamente igual al límite estricto se muestra como limítrofe
+  // (sin rojo): colapso de VCI 50 % frente a ">50". Sólo afecta la marca visual.
+  const NORMAL_RANGE_BORDERLINE_AT_LIMIT = new Set(["vciColapso"]);
+
+  function isNormalRangeBorderline(key, value) {
+    if (!NORMAL_RANGE_BORDERLINE_AT_LIMIT.has(key) || !hasValue(value)) return false;
+    const cfg = NORMAL_RANGES[key];
+    const b = cfg && typeof cfg.normal === "string" ? parseNormalBounds(cfg.normal) : null;
+    const n = Number(value);
+    return !!b && ((!!b.minStrict && n === b.min) || (!!b.maxStrict && n === b.max));
+  }
+
+  // true = fuera de rango, false = dentro o limítrofe, null = sin rango evaluable o sin valor.
   // Con rango por sexo y sexo no consignado, sólo se marca si queda fuera de ambos.
   function isOutsideNormalRange(key, value, sex) {
     const cfg = NORMAL_RANGES[key];
     if (!cfg || !hasValue(value)) return null;
     const n = Number(value);
     if (!Number.isFinite(n)) return null;
+    if (isNormalRangeBorderline(key, n)) return false;
     let texts;
     if (typeof cfg.normal === "string") texts = [cfg.normal];
     else if (cfg.normal && typeof cfg.normal === "object") {
@@ -2159,7 +2172,8 @@ El PDF propone: ${incomingText}.
       }
       const value = data && hasValue(data[key]) ? data[key] : calc ? calc[key] : null;
       const out = isOutsideNormalRange(key, value, data.sexo) === true;
-      refEl.textContent = `VN: ${normalText}${out ? " · fuera de rango" : ""}`;
+      const borderline = !out && isNormalRangeBorderline(key, value);
+      refEl.textContent = `VN: ${normalText}${out ? " · fuera de rango" : borderline ? " · limítrofe" : ""}`;
       rowEl.classList.toggle("ws-out-of-range", out);
     });
   }
