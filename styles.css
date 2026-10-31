@@ -3580,3 +3580,27 @@ body.dark-mode .ws-attach{ color:#04221f; }
 @media screen and (max-width: 420px){
   .toolbar-groups .actions{ grid-template-columns:minmax(0, 1fr); }
 }
+
+/* UI valores de referencia 2026-10-31 — VN visibles y valores fuera de rango en rojo.
+   Usa sólo los rangos de NORMAL_RANGES; no agrega interpretación. Sólo pantalla. */
+@media screen {
+  :root{ --out-range-fg:#b91c1c; --out-range-bg:rgba(220,38,38,.08); --out-range-border:rgba(220,38,38,.45); }
+  body.dark-mode{ --out-range-fg:#fca5a5; --out-range-bg:rgba(248,113,113,.12); --out-range-border:rgba(248,113,113,.5); }
+
+  .field .vn{ font-size:12px; font-weight:700; color:var(--text); opacity:.8; }
+  .field.vn-out-of-range input{ color:var(--out-range-fg); font-weight:800; border-color:var(--out-range-border); background:var(--out-range-bg); }
+  .field.vn-out-of-range .vn{ color:var(--out-range-fg); opacity:1; }
+
+  .ws-row{ grid-template-areas:"label value badge" "ref ref ref" "note note note"; }
+  .ws-row-ref{ grid-area:ref; font-size:11.5px; font-weight:700; color:var(--text); opacity:.75; }
+  .ws-out-of-range .ws-row-ref{ color:var(--out-range-fg); opacity:1; }
+  .ws-out-of-range .ws-value,
+  .ws-out-of-range .ws-input{ color:var(--out-range-fg); font-weight:800; }
+  .ws-out-of-range .ws-input{ border-color:var(--out-range-border); background:var(--out-range-bg); }
+  .ws-out-of-range .ws-input::placeholder{ color:var(--out-range-fg); opacity:.85; }
+
+  .calc-item .calc-ref{ display:block; margin-top:4px; font-size:11.5px; font-weight:700; color:var(--text); opacity:.75; }
+  .calc-item.calc-out-of-range{ border-color:var(--out-range-border); background:var(--out-range-bg); }
+  .calc-item.calc-out-of-range .calc-value,
+  .calc-item.calc-out-of-range .calc-ref{ color:var(--out-range-fg); opacity:1; }
+}

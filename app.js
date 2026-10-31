@@ -1993,6 +1993,7 @@
           if (valueEl && !control) valueEl.textContent = row.display || "—";
         });
       });
+      applyWorkspaceReferenceRanges(body, data, calc);
       return;
     }
 
@@ -2008,6 +2009,7 @@
       </details>`;
     }).join("")}</div>`;
     body.dataset.wsSignature = signature;
+    applyWorkspaceReferenceRanges(body, data, calc);
   }
 
   // Un cambio en el workspace escribe en el mismo input que lee getFormData();
@@ -2089,6 +2091,77 @@ El PDF propone: ${incomingText}.
       return `H: ${cfg.normal.male} / M: ${cfg.normal.female}` + (cfg.unit ? ` ${cfg.unit}` : "");
     }
     return "";
+  }
+
+  // Interpreta sólo rangos numéricos estrictos de NORMAL_RANGES ("42–59", "<36", "≤21", ">17").
+  // Textos con "aprox.", "según…", "variable" o "—" no se evalúan: no se marca nada.
+  function parseNormalBounds(text) {
+    const clean = String(text || "").trim();
+    const num = (s) => Number(s.replace(",", "."));
+    let m = clean.match(/^(-?\d+(?:,\d+)?)\s*–\s*(-?\d+(?:,\d+)?)$/);
+    if (m) return { min: num(m[1]), max: num(m[2]), minStrict: false, maxStrict: false };
+    m = clean.match(/^(<|≤|>|≥)\s*(-?\d+(?:,\d+)?)$/);
+    if (!m) return null;
+    const v = num(m[2]);
+    if (m[1] === "<") return { max: v, maxStrict: true };
+    if (m[1] === "≤") return { max: v, maxStrict: false };
+    if (m[1] === ">") return { min: v, minStrict: true };
+    return { min: v, minStrict: false };
+  }
+
+  function isWithinBounds(value, b) {
+    if (b.min !== undefined && (b.minStrict ? value <= b.min : value < b.min)) return false;
+    if (b.max !== undefined && (b.maxStrict ? value >= b.max : value > b.max)) return false;
+    return true;
+  }
+
+  // true = fuera de rango, false = dentro, null = sin rango evaluable o sin valor.
+  // Con rango por sexo y sexo no consignado, sólo se marca si queda fuera de ambos.
+  function isOutsideNormalRange(key, value, sex) {
+    const cfg = NORMAL_RANGES[key];
+    if (!cfg || !hasValue(value)) return null;
+    const n = Number(value);
+    if (!Number.isFinite(n)) return null;
+    let texts;
+    if (typeof cfg.normal === "string") texts = [cfg.normal];
+    else if (cfg.normal && typeof cfg.normal === "object") {
+      const s = String(sex || "").toLowerCase();
+      texts = s.startsWith("m") ? [cfg.normal.male] : s.startsWith("f") ? [cfg.normal.female] : [cfg.normal.male, cfg.normal.female];
+    } else return null;
+    const bounds = texts.map(parseNormalBounds);
+    if (bounds.some((b) => !b)) return null;
+    return bounds.every((b) => !isWithinBounds(n, b));
+  }
+
+  function updateNormalHighlights(data) {
+    Object.keys(NORMAL_RANGES).forEach((key) => {
+      const span = qs(`vn_${key}`);
+      const field = span && span.closest(".field");
+      if (field) field.classList.toggle("vn-out-of-range", isOutsideNormalRange(key, data[key], data.sexo) === true);
+    });
+  }
+
+  // Línea "VN" y marca de fuera de rango en cada fila del workspace con rango en NORMAL_RANGES.
+  function applyWorkspaceReferenceRanges(body, data, calc) {
+    body.querySelectorAll("[data-ws-key]").forEach((rowEl) => {
+      const key = rowEl.dataset.wsKey;
+      const normalText = NORMAL_RANGES[key] ? getNormalText(key, data.sexo) : "";
+      let refEl = rowEl.querySelector(".ws-row-ref");
+      if (!normalText || normalText === "—") {
+        if (refEl) refEl.remove();
+        rowEl.classList.remove("ws-out-of-range");
+        return;
+      }
+      if (!refEl) {
+        refEl = document.createElement("div");
+        refEl.className = "ws-row-ref";
+        rowEl.querySelector(".ws-row-label").after(refEl);
+      }
+      const value = data && hasValue(data[key]) ? data[key] : calc ? calc[key] : null;
+      const out = isOutsideNormalRange(key, value, data.sexo) === true;
+      refEl.textContent = `VN: ${normalText}${out ? " · fuera de rango" : ""}`;
+      rowEl.classList.toggle("ws-out-of-range", out);
+    });
   }
 
   function showToast(message) {
@@ -4072,13 +4145,29 @@ El PDF propone: ${incomingText}.
     if (data.miRVol !== null) items.push(["IM volumen regurgitante", data.miRVol, "ml"]);
     if (data.gls !== null) items.push(["GLS", data.gls, "%"]);
 
+    const rangeKeys = {
+      "IMC": "imc", "BSA": "bsa", "FEVI Simpson": "feySimpson", "FEVI Teichholz (estimación secundaria)": "feyTeichholz",
+      "Fracción de acortamiento": "fa", "Relación AI/Ao": "relAiAo", "Anillo aórtico": "dvao", "E/A": "ea",
+      "e' promedio": "ePromedio", "E/e' septal": "eeSeptal", "E/e' lateral": "eeLateral", "E/e' promedio": "eSobreEprima",
+      "Área mitral PHT": "areaMitralPHT", "Área TSVI": "areaTsvi", "VS": "volumenSistolico", "VS indexado": "volumenSistolicoIndexado",
+      "Gasto cardíaco": "gastoCardiaco", "AVA continuidad": "avaContinuidad", "Masa VI ASE": "masaVIase", "Índice masa VI": "indiceMasaVI",
+      "Vol AI indexado": "volAIi", "Vol AD indexado": "volADi", "Pr AD estimada": "prADestimada", "Gradiente VD-AD": "gradVDAD",
+      "PSAP": "psap", "GLS": "gls"
+    };
+
     const html = items
-      .map(([label, value, unit]) => `
-        <div class="calc-item">
+      .map(([label, value, unit]) => {
+        const key = rangeKeys[label];
+        const normalText = key ? getNormalText(key, data.sexo) : "";
+        const out = key ? isOutsideNormalRange(key, value, data.sexo) === true : false;
+        return `
+        <div class="calc-item${out ? " calc-out-of-range" : ""}">
           <span class="calc-label">${label}</span>
           <span class="calc-value">${formatNumber(value)}${unit ? ` ${unit}` : ""}</span>
+          ${normalText && normalText !== "—" ? `<span class="calc-ref">VN: ${normalText}${out ? " · fuera de rango" : ""}</span>` : ""}
         </div>
-      `)
+      `;
+      })
       .join("");
 
     setHtml("calcGrid", html);
@@ -4924,6 +5013,7 @@ El PDF propone: ${incomingText}.
     updateFieldIndicators();
     renderAlerts(data, interp, diastolicText, segmentText, glsText);
     renderCalcGrid(data, calc);
+    updateNormalHighlights(data);
 
     const description = buildDescription(data, calc, interp, diastolicText, segmentText, glsText);
     const autoConclusion = buildConclusion(data, calc, interp, diastolicText, segmentText, glsText);
