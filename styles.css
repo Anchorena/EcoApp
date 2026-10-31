@@ -3604,3 +3604,28 @@ body.dark-mode .ws-attach{ color:#04221f; }
   .calc-item.calc-out-of-range .calc-value,
   .calc-item.calc-out-of-range .calc-ref{ color:var(--out-range-fg); opacity:1; }
 }
+
+/* UI copiar y dictado 2026-10-31 — botones de texto en narrativa, conclusión y campos manuales. */
+@media screen {
+  .preview-label-row,
+  .field-label-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+  .preview-label-row{ margin:14px 0 6px; }
+  .preview-label-row .preview-label{ margin:0; }
+  .field-label-row{ padding-right:30px; margin-bottom:6px; } /* deja lugar al indicador ✓ */
+  .field-label-row label{ margin-bottom:0; }
+  .text-tools{ display:flex; gap:6px; flex-wrap:wrap; }
+  .text-tool-btn{ border:1px solid var(--border-strong); background:var(--soft); color:var(--title); border-radius:10px; padding:6px 10px; min-height:32px; font-size:12.5px; font-weight:800; cursor:pointer; font-family:inherit; }
+  .text-tool-btn:hover{ border-color:var(--accent); color:var(--accent); }
+  .text-tool-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .dictate-btn.is-recording{ background:#dc2626; border-color:#dc2626; color:#fff; animation:dictation-pulse 1.4s ease-in-out infinite; }
+  .dictate-btn.is-unsupported{ opacity:.6; }
+  .dictation-status{ margin-top:6px; font-size:12px; font-weight:600; color:var(--muted); }
+  .dictation-status:empty{ display:none; }
+  .dictation-status[data-type="recording"]{ color:#dc2626; }
+  .dictation-status[data-type="warning"]{ color:var(--ws-rev-fg, #92400e); }
+}
+@media screen and (pointer:coarse){
+  .text-tool-btn{ min-height:40px; padding:8px 12px; font-size:13.5px; }
+}
+@keyframes dictation-pulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(220,38,38,.45); } 50%{ box-shadow:0 0 0 6px rgba(220,38,38,0); } }
+@media (prefers-reduced-motion:reduce){ .dictate-btn.is-recording{ animation:none; } }

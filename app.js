@@ -5032,6 +5032,7 @@ El PDF propone: ${incomingText}.
   }
 
   function clearAll() {
+    stopDictation(true); // evita que un dictado en curso escriba en el estudio siguiente
     document.querySelectorAll("input").forEach((el) => {
       if (["medicoInformante", "matriculaInformante", "especialidadInformante"].includes(el.id)) return;
       el.value = "";
@@ -5388,6 +5389,179 @@ El PDF propone: ${incomingText}.
     });
   }
 
+  // ===== Copiar y dictado por voz en narrativa, conclusión y textos manuales =====
+  // Sólo escribe en los textarea manuales; el informe se actualiza con el listener de input habitual.
+  const dictationState = { recognition: null, targetId: "", errorShown: false };
+
+  function setDictationStatus(targetId, message, type = "info") {
+    const el = document.querySelector(`[data-dictation-status="${targetId}"]`);
+    if (!el) return;
+    el.textContent = message || "";
+    el.dataset.type = message ? type : "";
+  }
+
+  function getSpeechRecognitionCtor() {
+    return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  }
+
+  function updateDictationButtons() {
+    document.querySelectorAll("[data-dictate-target]").forEach((btn) => {
+      const active = !!dictationState.recognition && dictationState.targetId === btn.dataset.dictateTarget;
+      btn.classList.toggle("is-recording", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+      btn.textContent = active ? "⏹ Detener" : "🎤 Dictar";
+    });
+  }
+
+  function appendDictatedText(targetId, text) {
+    const textarea = qs(targetId);
+    const chunk = cleanText(text);
+    if (!textarea || !chunk) return;
+    const current = textarea.value;
+    const separator = current && !/\s$/.test(current) ? " " : "";
+    textarea.value = current + separator + chunk;
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  function dictationErrorMessage(code) {
+    if (code === "not-allowed" || code === "service-not-allowed") {
+      return "No hay permiso para usar el micrófono o el dictado está desactivado. En iPhone/iPad: Ajustes › General › Teclado › Activar Dictado, y permitir el micrófono para este sitio.";
+    }
+    if (code === "no-speech") return "No se detectó voz. Probá de nuevo más cerca del micrófono.";
+    if (code === "audio-capture") return "No se encontró un micrófono disponible.";
+    if (code === "network") return "El servicio de dictado no respondió (requiere conexión). Podés seguir escribiendo a mano.";
+    if (code === "language-not-supported") return "El dictado en español no está disponible en este navegador.";
+    return `No se pudo completar el dictado (${code}). Podés seguir escribiendo a mano.`;
+  }
+
+  // discard = true descarta el audio pendiente (abort) en lugar de transcribirlo (stop).
+  function stopDictation(discard = false) {
+    const recognition = dictationState.recognition;
+    if (!recognition) return;
+    if (discard) recognition.onresult = null;
+    try { discard ? recognition.abort() : recognition.stop(); } catch (_) { /* ya detenido */ }
+  }
+
+  function startDictation(targetId) {
+    const Ctor = getSpeechRecognitionCtor();
+    if (!Ctor) {
+      setDictationStatus(targetId, "El dictado por voz no está disponible en este navegador. En iPhone/iPad podés tocar el campo y usar el micrófono del teclado.", "warning");
+      return;
+    }
+    if (!window.isSecureContext) {
+      setDictationStatus(targetId, "El dictado por voz requiere abrir la app por https.", "warning");
+      return;
+    }
+    if (dictationState.recognition) {
+      const previous = dictationState.targetId;
+      stopDictation();
+      if (previous === targetId) return;
+    }
+
+    let recognition;
+    try {
+      recognition = new Ctor();
+      recognition.lang = "es-AR";
+      recognition.interimResults = true;
+      recognition.continuous = true;
+      recognition.maxAlternatives = 1;
+    } catch (error) {
+      setDictationStatus(targetId, "El dictado por voz no se pudo iniciar en este navegador.", "warning");
+      return;
+    }
+
+    dictationState.recognition = recognition;
+    dictationState.targetId = targetId;
+    dictationState.errorShown = false;
+
+    recognition.onresult = (event) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        const transcript = result[0] ? result[0].transcript : "";
+        if (result.isFinal) appendDictatedText(targetId, transcript);
+        else interim += transcript;
+      }
+      setDictationStatus(targetId, interim ? `Escuchando… «${interim.trim()}»` : "Escuchando… tocá Detener para terminar.", "recording");
+    };
+    recognition.onerror = (event) => {
+      if (event.error === "aborted") return;
+      dictationState.errorShown = true;
+      setDictationStatus(targetId, dictationErrorMessage(event.error), "warning");
+    };
+    recognition.onend = () => {
+      if (dictationState.recognition === recognition) {
+        dictationState.recognition = null;
+        dictationState.targetId = "";
+      }
+      if (!dictationState.errorShown) setDictationStatus(targetId, "Dictado detenido. Revisá el texto antes de imprimir.", "info");
+      updateDictationButtons();
+    };
+
+    try {
+      recognition.start();
+      setDictationStatus(targetId, "Escuchando… tocá Detener para terminar.", "recording");
+    } catch (error) {
+      dictationState.recognition = null;
+      dictationState.targetId = "";
+      setDictationStatus(targetId, "El dictado por voz no se pudo iniciar. Podés seguir escribiendo a mano.", "warning");
+    }
+    updateDictationButtons();
+  }
+
+  async function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (_) { /* se intenta el método alternativo */ }
+    }
+    const helper = document.createElement("textarea");
+    helper.value = text;
+    helper.setAttribute("readonly", "");
+    helper.style.position = "fixed";
+    helper.style.top = "0";
+    helper.style.left = "-9999px";
+    helper.style.fontSize = "16px";
+    document.body.appendChild(helper);
+    helper.select();
+    helper.setSelectionRange(0, text.length);
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch (_) { ok = false; }
+    helper.remove();
+    return ok;
+  }
+
+  async function handleCopyClick(button) {
+    const source = qs(button.dataset.copyTarget);
+    if (!source) return;
+    const text = (source.tagName === "TEXTAREA" ? source.value : source.innerText || source.textContent || "").trim();
+    if (!text) {
+      showToast("No hay texto para copiar");
+      return;
+    }
+    const ok = await copyTextToClipboard(text);
+    showToast(ok ? "Texto copiado" : "No se pudo copiar; seleccioná el texto y copialo a mano");
+  }
+
+  function setupReportTextTools() {
+    document.addEventListener("click", (event) => {
+      const copyBtn = event.target.closest("[data-copy-target]");
+      if (copyBtn) {
+        handleCopyClick(copyBtn);
+        return;
+      }
+      const dictateBtn = event.target.closest("[data-dictate-target]");
+      if (dictateBtn) startDictation(dictateBtn.dataset.dictateTarget);
+    });
+    if (!getSpeechRecognitionCtor()) {
+      document.querySelectorAll("[data-dictate-target]").forEach((btn) => {
+        btn.classList.add("is-unsupported");
+        btn.title = "Dictado no disponible en este navegador";
+      });
+    }
+  }
+
   function init() {
     if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/legacy/build/pdf.worker.min.js";
@@ -5407,6 +5581,7 @@ El PDF propone: ${incomingText}.
     applyTheme(storedTheme || "light");
     setDefaults();
     bindButtons();
+    setupReportTextTools();
     loadPersistedOutputDirectoryHandle();
     updateFolderStatus();
     drawBullseye("bull17", true);
