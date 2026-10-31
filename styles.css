@@ -3518,12 +3518,12 @@ body.dark-mode .ws-attach{ color:#04221f; }
     size: A4;
     margin: 7mm 8mm 13mm 8mm;
     @bottom-left {
-      content: "EcoApp | Informe ecocardiografico";
+      content: "EcoApp | Informe ecocardiográfico";
       font: 6.5pt Arial, sans-serif;
       color: #64748b;
     }
     @bottom-right {
-      content: "Pagina " counter(page) " de " counter(pages);
+      content: "Página " counter(page) " de " counter(pages);
       font: 7pt Arial, sans-serif;
       color: #475569;
     }
