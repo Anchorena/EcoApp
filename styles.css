@@ -3508,3 +3508,30 @@ body.dark-mode .ws-attach{ color:#04221f; }
     max-height:230mm !important;
   }
 }
+
+
+/* Fase B — pie y numeracion de cada pagina del informe en impresion nativa.
+   Los PDF exportados con html2pdf ya se numeran desde app.js.
+   CSS margin boxes: Chrome/Edge modernos. No alterar paginas del PDF del equipo. */
+@media print {
+  @page {
+    size: A4;
+    margin: 7mm 8mm 13mm 8mm;
+    @bottom-left {
+      content: "EcoApp | Informe ecocardiografico";
+      font: 6.5pt Arial, sans-serif;
+      color: #64748b;
+    }
+    @bottom-right {
+      content: "Pagina " counter(page) " de " counter(pages);
+      font: 7pt Arial, sans-serif;
+      color: #475569;
+    }
+  }
+
+  /* Evita el pie fijo duplicado y los contadores de un unico elemento DOM. */
+  body.print-moderno #print-report-moderno .print-footer,
+  body.print-resumen-os #print-report-resumen-os .print-footer {
+    display: none !important;
+  }
+}
