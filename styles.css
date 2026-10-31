@@ -3533,3 +3533,50 @@ body.dark-mode .ws-attach{ color:#04221f; }
     display: none !important;
   }
 }
+
+/* UI informe 2026-10-31 — layout de pantalla: título a todo el ancho, botonera
+   debajo, jerarquía de títulos de sección y narrativa/conclusión a ancho completo.
+   Sólo pantalla: no modifica el PDF aprobado ni la vista de impresión. */
+@media screen {
+  .app-header{ grid-template-columns:minmax(0, 1fr); gap:16px; }
+  .app-header-copy{ max-width:none; display:grid; gap:6px; padding:18px 24px; }
+  .app-header-copy .app-kicker-row{ margin-bottom:4px; }
+  .app-header h1{ max-width:none; font-size:clamp(1.9rem, 3.4vw, 3.1rem); line-height:1.08; margin-bottom:4px; }
+  .app-header p{ max-width:none; }
+  .toolbar-groups{ display:grid; grid-template-columns:minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, .8fr); gap:14px; align-items:stretch; }
+  .toolbar-groups .actions{ grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; }
+  .toolbar-groups .actions button{ min-height:50px; padding:10px 12px; font-size:14px; }
+
+  /* Jerarquía de títulos de sección */
+  .card > h2,
+  .clinical-admin-title{ display:flex; align-items:center; gap:10px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+  .card > h2::before,
+  .clinical-admin-title::before{ content:""; flex:0 0 auto; width:5px; height:1.05em; border-radius:999px; background:var(--accent); }
+  .ws-section > summary{ background:var(--soft); border-bottom:1px solid transparent; border-radius:var(--radius-sm); }
+  .ws-section[open] > summary{ border-bottom-color:var(--border); border-radius:var(--radius-sm) var(--radius-sm) 0 0; margin-bottom:6px; }
+  .ws-section-title{ font-size:15.5px; letter-spacing:-0.01em; display:inline-flex; align-items:center; gap:8px; }
+  .ws-section-title::before{ content:""; width:4px; height:1.1em; border-radius:999px; background:var(--accent); }
+
+  /* Narrativa, conclusión y edición manual a ancho completo, debajo del layout */
+  .report-text-workspace{ display:grid; gap:18px; margin-top:18px; }
+  .report-preview-card .preview-label{ margin:14px 0 6px; font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:.12em; color:var(--accent); }
+  .report-preview-card .preview-block{ font-size:15.5px; line-height:1.75; max-width:none; }
+  .report-manual-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .report-manual-grid .field-span-2{ grid-column:span 1; }
+  .report-manual-grid textarea{ min-height:150px; }
+}
+@media screen and (max-width: 1100px){
+  .toolbar-groups{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .toolbar-group-manage{ grid-column:1 / -1; }
+}
+@media screen and (max-width: 720px){
+  .app-header-copy{ padding:16px; }
+  .app-kicker-row{ flex-wrap:wrap; }
+  .toolbar-groups{ grid-template-columns:minmax(0, 1fr); }
+  .toolbar-groups .actions{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .report-manual-grid{ grid-template-columns:minmax(0, 1fr); }
+  .report-manual-grid textarea{ font-size:16px; } /* evita el zoom automático de iOS al enfocar */
+}
+@media screen and (max-width: 420px){
+  .toolbar-groups .actions{ grid-template-columns:minmax(0, 1fr); }
+}
