@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EcoApp EchoReport v1.0</title>
-  <link rel="stylesheet" href="styles.css?v=20261023-4" />
+  <link rel="stylesheet" href="styles.css?v=20261030-trace1" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
 </head>
@@ -162,6 +162,8 @@
             <div class="field"><label for="paciente">Paciente</label><input id="paciente" type="text" /></div>
             <div class="field"><label for="dni">DNI</label><input id="dni" type="text" /></div>
             <div class="field"><label for="studyId">ID estudio/ecógrafo</label><input id="studyId" type="text" readonly /></div>
+            <div class="field"><label for="equipoModelo">Equipo utilizado</label><select id="equipoModelo"><option value="">No consignado</option><option value="Mindray M7">Mindray M7</option><option value="Mindray M8">Mindray M8</option><option value="Mindray M9">Mindray M9</option><option value="Sonoscape S6">Sonoscape S6</option><option value="Esaote">Esaote</option><option value="Otro">Otro</option></select></div>
+            <div class="field"><label for="equipoSerie">N.º de serie del equipo</label><input id="equipoSerie" type="text" autocomplete="off" placeholder="Ingresar si se conoce" /></div>
             <div class="field"><label for="sexo">Sexo</label><select id="sexo"><option value=""></option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option></select></div>
             <div class="field"><label for="edad">Edad</label><input id="edad" type="number" /></div>
             <div class="field"><label for="obraSocial">Obra social / cobertura</label><select id="obraSocial"></select></div>
@@ -271,6 +273,12 @@
               <div id="segmentReferenceList" class="segment-reference-list"></div>
             </div>
           </div>
+          <div class="segment-views-grid" aria-label="Vistas de paredes ventriculares interactivas">
+            <div class="segment-view-card"><strong>ELPEI — eje largo paraesternal</strong><svg id="viewELPEI" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en ELPEI"></svg></div>
+            <div class="segment-view-card"><strong>A2C — apical dos cámaras</strong><svg id="viewA2C" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en A2C"></svg></div>
+            <div class="segment-view-card"><strong>A4C — apical cuatro cámaras</strong><svg id="viewA4C" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en A4C"></svg></div>
+            <div class="segment-view-card"><strong>A5C — apical cinco cámaras</strong><svg id="viewA5C" viewBox="0 0 220 240" role="group" aria-label="Paredes del VI en A5C"></svg></div>
+          </div>
           <div class="legend"><span><i class="legend-normal"></i> Normal</span><span><i class="legend-hypo"></i> Hipocinesia</span><span><i class="legend-ak"></i> Acinesia</span></div>
           <div id="segmentosTexto" class="segment-summary"></div>
         </article>
@@ -317,6 +325,7 @@
         </div>
       </div>
       <div id="printPaciente" class="report-patient"></div>
+      <div id="printEquipoTrace" class="report-equipment-trace"></div>
       <div class="report-summary-box">
         <h3>Resumen rápido visual</h3>
         <div id="printBadges" class="badges print-badges"></div>
@@ -324,15 +333,24 @@
       <div class="report-section-block measurements-print-block">
         <div id="printTablaEco"></div>
       </div>
-      <div class="report-section-block segments-print-block">
-        <div class="report-bullseye-row">
-          <div class="report-bullseye-box"><h3>Segmentación miocárdica</h3><svg id="printBull17" viewBox="0 0 520 520"></svg></div>
-          <div class="report-bullseye-text"><h3>Motilidad segmentaria</h3><div id="printSegmentosTexto"></div></div>
-        </div>
-        <div id="printQuickRefs" class="report-quickrefs"></div>
-      </div>
       <div class="report-section-block doppler-print-block">
         <div id="printTablaDoppler"></div>
+      </div>
+      <div class="report-section-block segments-print-block">
+        <div class="print-segment-visuals">
+          <div class="report-bullseye-box"><h3>Segmentación miocárdica</h3><svg id="printBull17" viewBox="0 0 520 520"></svg></div>
+          <div class="print-wall-views" aria-label="Vistas segmentarias del ventrículo izquierdo">
+          
+          <div class="print-wall-views-grid">
+            <div class="print-wall-view"><strong>ELPEI</strong><svg id="printViewELPEI" viewBox="0 0 220 240" role="img" aria-label="ELPEI — eje largo paraesternal"></svg></div>
+            <div class="print-wall-view"><strong>A2C — apical dos cámaras</strong><svg id="printViewA2C" viewBox="0 0 220 240" role="img" aria-label="A2C — apical dos cámaras"></svg></div>
+            <div class="print-wall-view"><strong>A4C — apical cuatro cámaras</strong><svg id="printViewA4C" viewBox="0 0 220 240" role="img" aria-label="A4C — apical cuatro cámaras"></svg></div>
+            <div class="print-wall-view"><strong>A5C — apical cinco cámaras</strong><svg id="printViewA5C" viewBox="0 0 220 240" role="img" aria-label="A5C — apical cinco cámaras"></svg></div>
+          </div>
+        </div>
+        </div>
+        <div class="report-bullseye-text print-segment-narrative"><h3>Motilidad segmentaria</h3><div id="printSegmentosTexto"></div></div>
+        <div id="printQuickRefs" class="report-quickrefs"></div>
       </div>
       <div class="report-section-block">
         <h2>Descripción del estudio</h2>
@@ -386,9 +404,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/legacy/build/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-  <script src="config.js?v=20261023-4"></script>
+  <script src="config.js?v=20261026-1"></script>
   <script src="device-profiles.js?v=20261023-6"></script>
-  <script src="app.js?v=20261023-6"></script>
+  <script src="app.js?v=20261030-trace1"></script>
   <script src="pwa-register.js?v=20261023-1"></script>
 </body>
 </html>

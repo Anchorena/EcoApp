@@ -3241,3 +3241,295 @@ body.dark-mode .ws-attach{ color:#04221f; }
     max-height:245mm;
   }
 }
+
+/* Fase B: vistas de motilidad de un único modelo de 17 segmentos. */
+.segment-views-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin:16px 0;
+}
+.segment-view-card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  padding:12px;
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+  background:var(--card-bg,#fff);
+}
+.segment-view-card strong{font-size:13px;text-align:center;}
+.segment-view-card svg{display:block;width:100%;max-width:240px;height:auto;}
+.segment-shape.interactive:focus-visible{outline:3px solid #2563eb;outline-offset:2px;}
+@media(max-width:860px){.segment-views-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:640px){.segment-views-grid{grid-template-columns:1fr;}}
+
+/* Orientación anatómica esquemática para vistas multivista. */
+.segment-orientation-label{fill:#64748b;font-size:10px;font-weight:700;text-anchor:middle;pointer-events:none;letter-spacing:.5px;}
+.segment-view-card svg .segment-shape.interactive{touch-action:manipulation;}
+@media(hover:hover){.segment-view-card svg .segment-shape.interactive:hover{filter:brightness(.93);}}
+
+/* Coordinación visual de un mismo segmento entre esquemas y bullseye. */
+.segment-shape.segment-linked-highlight{
+  stroke:#0f172a !important;
+  stroke-width:3.5 !important;
+  filter:drop-shadow(0 0 3px rgba(15,23,42,.35));
+}
+.segment-view-card{box-shadow:0 2px 9px rgba(15,23,42,.045);}
+.segment-view-card svg{overflow:visible;}
+@media(prefers-reduced-motion:reduce){
+  .segment-shape.interactive{transition:none;}
+}
+
+
+/* Fase B: legibilidad e interacción táctil sin modificar la anatomía ni el estado. */
+.segment-view-card svg{
+  aspect-ratio:11 / 12;
+  flex-shrink:0;
+}
+.segment-view-card svg text{
+  pointer-events:none; /* Las etiquetas no bloquean el segmento SVG debajo. */
+  user-select:none;
+}
+.segment-view-card svg .segment-shape.interactive{
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.segment-view-card svg .segment-shape.interactive:focus{
+  stroke-width:3;
+}
+@media (pointer:coarse){
+  .segment-view-card{padding:14px;}
+  .segment-view-card svg{max-width:280px;}
+}
+
+/* Resaltado coordinado también en el atlas anatómico complementario. */
+.atlas-seg.segment-linked-highlight{
+  stroke:#0f172a !important;
+  stroke-width:3 !important;
+  filter:drop-shadow(0 0 3px rgba(15,23,42,.35));
+}
+
+/* Fase B aprobada: cuatro esquemas de pared ventricular, sin estructuras adyacentes. */
+.segment-views-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+.segment-view-card svg{max-width:270px;}
+@media(max-width:640px){.segment-views-grid{grid-template-columns:1fr;}}
+
+/* Fase B: nombres anatómicos y vistas segmentarias del informe largo. */
+.segment-wall-names{display:block;text-align:center;color:#64748b;font-size:12px;line-height:1.4;margin:4px 0 6px;}
+.print-wall-views{margin:10px 0 12px;break-before:auto;page-break-before:auto;}
+.print-wall-views h3{font-size:13px;margin:0 0 6px;}
+.print-wall-views-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;align-items:start;}
+.print-wall-view{border:1px solid #d5dfeb;border-radius:8px;padding:5px 3px;text-align:center;min-width:0;break-inside:avoid;page-break-inside:avoid;}
+.print-wall-view strong{display:block;font-size:10px;line-height:1.25;}
+.print-wall-view span{display:block;font-size:9px;line-height:1.2;color:#475569;min-height:20px;}
+.print-wall-view svg{display:block;width:100%;max-width:105px;height:115px;margin:0 auto;}
+.print-wall-view svg text{pointer-events:none;}
+@media(max-width:640px){.print-wall-views-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media print{
+  .print-wall-views{break-inside:auto;page-break-inside:auto;}
+  .print-wall-views-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .print-wall-view{background:#fff !important;}
+  .print-wall-view svg{height:105px;}
+}
+
+/* Fase B: panel compacto de cinco diagramas y narrativa debajo, solo Eco largo. */
+.print-segment-visuals{display:grid;grid-template-columns:190px minmax(0,1fr);gap:10px;align-items:stretch;break-inside:avoid;page-break-inside:avoid;margin:8px 0;}
+.print-segment-visuals .report-bullseye-box{padding:8px;border-radius:9px;min-width:0;}
+.print-segment-visuals .report-bullseye-box h3{font-size:11px;margin:0 0 5px;}
+.print-segment-visuals .report-bullseye-box svg{width:100%;max-width:170px;}
+.print-segment-visuals .print-wall-views{margin:0;min-width:0;}
+.print-segment-visuals .print-wall-views-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;height:100%;}
+.print-segment-visuals .print-wall-view{padding:5px 1px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+.print-segment-visuals .print-wall-view strong{font-size:9px;min-height:23px;}
+.print-segment-visuals .print-wall-view svg{max-width:135px;height:165px;}
+.print-segment-narrative{margin:8px 0 10px;min-height:0;}
+.segment-anatomy-label{font-size:8px;fill:#334155;font-weight:700;pointer-events:none;}
+@media print{
+  .print-segment-visuals{grid-template-columns:145px minmax(0,1fr);gap:6px;}
+  .print-segment-visuals .report-bullseye-box svg{max-width:130px;}
+  .print-segment-visuals .print-wall-view svg{height:119px;max-width:108px;}
+  .print-segment-visuals .print-wall-view strong{font-size:8px;min-height:18px;}
+  .segment-anatomy-label{font-size:9px;}
+  .print-segment-narrative{font-size:11px;}
+}
+
+/* Fase B QA PDF 2026-10-29: anula reglas historicas de ancho fijo y altura minima. */
+@media print {
+  #print-report-moderno .doppler-print-block {
+    break-before:auto !important;
+    page-break-before:auto !important;
+    break-inside:auto !important;
+    page-break-inside:auto !important;
+  }
+  #print-report-moderno .segments-print-block {
+    margin-top:6px !important;
+    break-inside:avoid !important;
+    page-break-inside:avoid !important;
+  }
+  #print-report-moderno .print-segment-visuals {
+    display:grid !important;
+    grid-template-columns:150px minmax(0,1fr) !important;
+    gap:8px !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    align-items:start !important;
+    box-sizing:border-box !important;
+  }
+  #print-report-moderno .print-segment-visuals .report-bullseye-box {
+    width:auto !important;
+    max-width:150px !important;
+    min-width:0 !important;
+    min-height:0 !important;
+    padding:6px !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+  #print-report-moderno .print-segment-visuals #printBull17,
+  #print-report-moderno .print-segment-visuals .report-bullseye-box svg {
+    width:132px !important;
+    max-width:100% !important;
+    height:132px !important;
+    min-height:0 !important;
+    display:block !important;
+    margin:0 auto !important;
+    overflow:visible !important;
+  }
+  #print-report-moderno .print-segment-visuals .print-wall-views {
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+    margin:0 !important;
+  }
+  #print-report-moderno .print-segment-visuals .print-wall-views-grid {
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:4px !important;
+    min-width:0 !important;
+    height:auto !important;
+  }
+  #print-report-moderno .print-segment-visuals .print-wall-view {
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+    padding:3px 1px !important;
+    overflow:hidden !important;
+  }
+  #print-report-moderno .print-segment-visuals .print-wall-view strong {
+    font-size:7.2pt !important;
+    line-height:1.1 !important;
+    min-height:0 !important;
+    margin-bottom:2px !important;
+  }
+  #print-report-moderno .print-segment-visuals .print-wall-view svg {
+    width:100% !important;
+    max-width:100px !important;
+    height:117px !important;
+    min-height:0 !important;
+    display:block !important;
+  }
+  #print-report-moderno .segments-print-block .print-segment-narrative,
+  #print-report-moderno .segments-print-block .report-bullseye-text {
+    min-height:0 !important;
+    height:auto !important;
+    padding:6px 8px !important;
+    margin:6px 0 !important;
+    box-sizing:border-box !important;
+  }
+}
+
+/* QA Safari PDF: quitar salto forzado heredado del CONTENIDO Doppler.
+   El anterior override cubria solo su contenedor: la tabla seguia forzando pagina 2. */
+@media print {
+  body.print-moderno #print-report-moderno #printTablaDoppler,
+  body.print-moderno #print-report-moderno .doppler-measurement-table,
+  body.print-moderno #print-report-moderno .doppler-print-block {
+    break-before:auto !important;
+    page-break-before:auto !important;
+    break-after:auto !important;
+    page-break-after:auto !important;
+  }
+  body.print-moderno #print-report-moderno .doppler-print-block,
+  body.print-moderno #print-report-moderno #printTablaDoppler {
+    break-inside:auto !important;
+    page-break-inside:auto !important;
+    margin-top:0 !important;
+  }
+}
+
+/* QA Eco largo 2026-10-30: el footer legacy se superpone a la firma en Safari.
+   No se usa numeracion ficticia: mostrar paginado solo si existe paginador real. */
+@media print {
+  body.print-moderno #print-report-moderno .print-footer,
+  body.print-moderno #print-report-moderno .print-footer * {
+    display:none !important;
+    visibility:hidden !important;
+  }
+}
+
+/* Trazabilidad del equipo: línea compacta que no altera la paginación A4. */
+.report-equipment-trace{font-size:10px;color:#475569;margin:2px 0 5px;line-height:1.2;}
+.report-equipment-trace:empty{display:none;}
+@media print {
+  #print-report-moderno .report-equipment-trace{font-size:7.3pt !important;margin:0 0 3px !important;break-inside:avoid !important;}
+}
+
+/* QA Fase B: no reservar hoja de portada para anexos importados.
+   La primera imagen del ecografo arranca directamente en la siguiente pagina. */
+@media print {
+  body.print-moderno #printAnexoWrap > h2,
+  body.print-moderno #printAnexoMeta,
+  body.print-resumen-os #summaryAnexoWrap > h2,
+  body.print-resumen-os #summaryAnexoMeta {
+    display:none !important;
+  }
+  body.print-moderno #printAnexoWrap,
+  body.print-resumen-os #summaryAnexoWrap {
+    break-before:page !important;
+    page-break-before:always !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+  body.print-moderno #printAnexoPages .annex-print-page,
+  body.print-resumen-os #summaryAnexoPages .annex-print-page {
+    padding:0 !important;
+    margin:0 !important;
+    break-inside:avoid !important;
+    page-break-inside:avoid !important;
+  }
+  body.print-moderno #printAnexoPages .annex-print-page img,
+  body.print-resumen-os #summaryAnexoPages .annex-print-page img {
+    max-height:230mm !important;
+  }
+}
+/* Fase B — pie y numeracion de cada pagina del informe en impresion nativa.
+   Los PDF exportados con html2pdf ya se numeran desde app.js.
+   CSS margin boxes: Chrome/Edge modernos. No alterar paginas del PDF del equipo. */
+@media print {
+  @page {
+    size: A4;
+    margin: 7mm 8mm 13mm 8mm;
+    @bottom-left {
+      content: "EcoApp | Informe ecocardiográfico";
+      font: 6.5pt Arial, sans-serif;
+      color: #64748b;
+    }
+    @bottom-right {
+      content: "Página " counter(page) " de " counter(pages);
+      font: 7pt Arial, sans-serif;
+      color: #475569;
+    }
+  }
+
+  /* Evita el pie fijo duplicado y los contadores de un unico elemento DOM. */
+  body.print-moderno #print-report-moderno .print-footer,
+  body.print-resumen-os #print-report-resumen-os .print-footer {
+    display: none !important;
+  }
+}

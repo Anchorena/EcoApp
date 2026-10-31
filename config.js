@@ -479,6 +479,8 @@ const SEGMENT_NAMES = {
 const SEGMENT_VIEW_MAPS = {
   a4c: { title: "A4C", segments: [3, 9, 14, 6, 12, 16, 17] },
   a2c: { title: "A2C", segments: [4, 10, 15, 1, 7, 13, 17] },
+  a5c: { title: "A5C", segments: [2, 8, 14, 6, 12, 16, 17] },
+  elpei: { title: "ELPEI", segments: [2, 8, 5, 11] },
   plax: { title: "PLAX", segments: [2, 8, 14, 5, 11, 16, 17] },
   saxBasal: { title: "Short axis basal", segments: [1, 2, 3, 4, 5, 6] },
   saxMid: { title: "Short axis medio", segments: [7, 8, 9, 10, 11, 12] },

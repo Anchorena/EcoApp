@@ -105,3 +105,182 @@ test('S6 imports study ID and report date, without confusing patient DOB',()=>{
   assert.match(profiles,/TV PG \(gradiente transvalvular\)/);
   assert.doesNotMatch(profiles,/field: "tvPg", label: "Gradiente TR"/);
 });
+
+
+test('Fase B exposes only the four approved wall-only views',()=>{
+  const expected=['viewELPEI','viewA2C','viewA4C','viewA5C'];
+  for(const id of expected) assert.match(html,new RegExp('id="'+id+'"'));
+  for(const id of ['viewA3C','viewSAXBasal','viewSAXMid','viewSAXApical']) {
+    assert.doesNotMatch(html,new RegExp('id="'+id+'"'));
+  }
+  assert.match(js,/drawBullseye\("bull17", true\)/);
+  assert.match(js,/drawSegmentViews\(true\)/);
+});
+test('Fase B uses clinical segment maps with no duplicates',()=>{
+  const cfg=fs.readFileSync(path.join(root,'config.js'),'utf8');
+  const expected={
+    a4c:[3,9,14,6,12,16,17],
+    a2c:[4,10,15,1,7,13,17],
+    a5c:[2,8,14,6,12,16,17],
+    elpei:[2,8,5,11]
+  };
+  for(const [view,ids] of Object.entries(expected)){
+    const pattern=new RegExp(view+': \\{ title: "[^"]+", segments: \\[([^\\]]+)\\]');
+    const match=cfg.match(pattern);
+    assert.ok(match,view+' config missing');
+    const actual=match[1].split(',').map(Number);
+    assert.deepEqual(actual,ids);
+    assert.equal(new Set(actual).size,ids.length);
+  }
+});
+test('Fase B wall render selects common state and ELPEI excludes apex',()=>{
+  const from=js.indexOf('function drawApicalWallOnly(');
+  const to=js.indexOf('function atlasBindShape(',from);
+  const render=js.slice(from,to);
+  assert.ok(from>=0 && to>from);
+  assert.match(render,/bindSegmentShape\(shape, segmentId, interactive\)/);
+  assert.match(render,/bindSegmentShape\(cap, 17, interactive\)/);
+  const elpei=render.slice(render.indexOf('function drawELPEIWallOnly('),render.indexOf('function drawSegmentViews('));
+  assert.match(elpei,/id: 8/);
+  assert.match(elpei,/id: 2/);
+  assert.match(elpei,/id: 11/);
+  assert.match(elpei,/id: 5/);
+  assert.doesNotMatch(elpei,/id: 17/);
+  assert.doesNotMatch(elpei,/bindSegmentShape\(cap/);
+  assert.doesNotMatch(render,/baseChambers|segment-chamber/);
+  assert.match(js,/segmentStates\[segmentId\] = nextState\(segmentStates\[segmentId\]\)/);
+});
+test('Fase B keyboard activation and linked highlights remain intact',()=>{
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  assert.match(js,/event\.key === "Enter" \|\| event\.key === " "/);
+  assert.match(js,/function highlightLinkedSegment\(segmentId, active\)/);
+  assert.match(js,/\.atlas-seg/);
+  assert.match(css,/\.segment-view-card svg text\s*\{[^}]*pointer-events:none/s);
+});
+
+
+test('Fase B preserves synthetic segment states through local study storage',()=>{
+  const from=js.indexOf('function normalizeSavedStudy(');
+  const to=js.indexOf('function setSelectValueOrOther(',from);
+  assert.ok(from>=0 && to>from);
+  const storage=new Map();
+  const localStorage={
+    getItem:key=>storage.get(key)||null,
+    setItem:(key,value)=>storage.set(key,value)
+  };
+  const mockData={paciente:'TEST ONLY',fecha:'2026-10-27',segmentStates:{1:'acinesia',14:'hipocinesia',17:'normal'}};
+  const context={localStorage,STUDY_STORAGE_KEY:'test_studies',getFormData:()=>mockData,buildStudyBaseName:()=> 'synthetic',Date,Math,JSON,Array};
+  const functions=vm.runInNewContext(js.slice(from,to)+';({makeStudyRecord,setSavedStudies,getSavedStudies})',context);
+  const record=functions.makeStudyRecord();
+  functions.setSavedStudies([record]);
+  const restored=functions.getSavedStudies()[0];
+  assert.equal(restored.data.segmentStates[1],'acinesia');
+  assert.equal(restored.data.segmentStates[14],'hipocinesia');
+  assert.equal(restored.data.segmentStates[17],'normal');
+});
+
+test('Fase B long report includes all four noninteractive segmental wall views',()=>{
+  for(const id of ['A2C','A4C','A5C','ELPEI']){
+    assert.match(html,new RegExp('id="printView'+id+'"'));
+  }
+  assert.match(js,/drawApicalWallOnly\("printViewA2C", \[15, 10, 4\], \[13, 7, 1\], false\)/);
+  assert.match(js,/drawApicalWallOnly\("printViewA4C", \[14, 9, 3\], \[16, 12, 6\], false\)/);
+  assert.match(js,/drawApicalWallOnly\("printViewA5C", \[14, 8, 2\], \[16, 12, 6\], false\)/);
+  assert.match(js,/drawELPEIWallOnly\(false, "printViewELPEI"\)/);
+  const short=html.slice(html.indexOf('id="print-report-resumen-os"'));
+  assert.doesNotMatch(short,/id="printView(?:A2C|A4C|A5C|ELPEI)"/);
+});
+test('Fase B names the corresponding walls on each view',()=>{
+  for(const wall of ['INFEROSEPTAL','ANTEROLATERAL','INFERIOR','ANTERIOR','SEPTAL','ANTEROSEPTAL','INFEROLATERAL']){
+    assert.match(js,new RegExp('"'+wall+'"'));
+  }
+  assert.match(js,/addSvgText\(svg, 34, 57, "VD", "segment-anatomy-label"\)/);
+  assert.match(js,/addSvgText\(svg, 204, 135, "Ao", "segment-anatomy-label"\)/);
+});
+
+test('Fase B print ELPEI targets its own SVG and visual row precedes narrative',()=>{
+  assert.match(js,/function drawELPEIWallOnly\(interactive, svgId = "viewELPEI"\)/);
+  assert.match(js,/const svg = qs\(svgId\)/);
+  const print=html.slice(html.indexOf('id="print-report-moderno"'),html.indexOf('id="print-report-clasico"'));
+  assert.ok(print.indexOf('class="print-segment-visuals"')>=0);
+  assert.ok(print.indexOf('id="printViewELPEI"')>print.indexOf('id="printBull17"'));
+  assert.ok(print.indexOf('id="printSegmentosTexto"')>print.indexOf('id="printViewA5C"'));
+});
+
+test('Eco largo paginates Doppler before segment atlas and removes old print minimum heights',()=>{
+  const start=html.indexOf('id="print-report-moderno"');
+  const end=html.indexOf('id="print-report-clasico"',start);
+  const long=html.slice(start,end);
+  assert.ok(long.indexOf('doppler-print-block')<long.indexOf('segments-print-block'));
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  assert.match(css,/#print-report-moderno \.doppler-print-block \{\s*break-before:auto !important/);
+  assert.match(css,/#print-report-moderno \.print-segment-visuals \{[\s\S]*?grid-template-columns:150px minmax\(0,1fr\) !important/);
+  assert.match(css,/#print-report-moderno \.segments-print-block \.report-bullseye-text \{[\s\S]*?min-height:0 !important/);
+  assert.match(css,/#print-report-moderno \.print-segment-visuals #printBull17,[\s\S]*?width:132px !important/);
+});
+
+test('Safari Eco largo has no nested forced Doppler page break',()=>{
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  const last=css.slice(css.lastIndexOf('/* QA Safari PDF:'));
+  assert.match(last,/body\.print-moderno #print-report-moderno #printTablaDoppler/);
+  assert.match(last,/body\.print-moderno #print-report-moderno \.doppler-measurement-table/);
+  assert.match(last,/break-before:auto !important/);
+  assert.match(last,/page-break-before:auto !important/);
+});
+
+test('Eco largo hides legacy print footer that overlaps signature in Safari',()=>{
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  const last=css.slice(css.lastIndexOf('/* QA Eco largo 2026-10-30:'));
+  assert.match(last,/body\.print-moderno #print-report-moderno \.print-footer/);
+  assert.match(last,/display:none !important/);
+  assert.match(html,/styles\.css\?v=20261030-(?:1|trace1)/);
+});
+
+test('Clinical narrative distinguishes global function from regional wall-motion abnormalities',()=>{
+  assert.match(js,/const hasRegionalAbnormality = Array\.from\(\{ length: 17 \}/);
+  assert.match(js,/data\.motilidadGlobal === "conservada" && hasRegionalAbnormality/);
+  assert.match(js,/Función sistólica global conservada, con alteraciones regionales/);
+  assert.match(js,/parts\.push\(segmentText\.long\)/);
+});
+test('Simpson versus Teichholz discordance flags medical review without replacing FEVI',()=>{
+  const start=js.indexOf('function feviDiscordanceReview(');
+  const end=js.indexOf('function buildDescription(',start);
+  assert.ok(start>=0 && end>start);
+  const func=vm.runInNewContext('('+js.slice(start,end).trim()+')');
+  const high=func({feyMethod:'Simpson',feyPrincipal:67.5,feyTeichholz:40.8});
+  assert.match(high,/Advertencia de revisión/);
+  assert.match(high,/Simpson como referencia principal/);
+  assert.equal(func({feyMethod:'Simpson',feyPrincipal:64,feyTeichholz:60}), '');
+  assert.equal(func({feyMethod:'Simpson',feyPrincipal:64,feyTeichholz:null}), '');
+  assert.equal(func({feyMethod:'Teichholz',feyPrincipal:64,feyTeichholz:40}), '');
+});
+
+test('Equipment trace distinguishes study ID, model and physical machine serial',()=>{
+  for(const id of ['studyId','equipoModelo','equipoSerie','printEquipoTrace']){
+    assert.match(html,new RegExp('id="'+id+'"'));
+  }
+  assert.match(js,/equipoModelo: getValue\("equipoModelo", ""\)/);
+  assert.match(js,/equipoSerie: cleanText\(getValue\("equipoSerie", ""\)\)/);
+  assert.match(js,/equipmentSerial \? `Serie:/);
+  assert.match(js,/equipmentStudyId \? `ID del estudio:/);
+});
+test('PDF generated by html2pdf has real page count and optional provenance footer',()=>{
+  assert.match(js,/const traceFooter = traceParts\.join\(" · "\)/);
+  assert.match(js,/const totalPages = pdf\.internal\.getNumberOfPages\(\)/);
+  assert.match(js,/pdf\.text\(`Página \$\{i\} \/ \$\{totalPages\}`/);
+  assert.match(js,/pdf\.text\(traceFooter \|\| PDF_FOOTER_BRAND/);
+});
+
+test('No standalone blank annex cover in print or downloaded PDF',()=>{
+  const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  assert.match(css,/body\.print-moderno #printAnexoWrap > h2/);
+  assert.match(css,/body\.print-moderno #printAnexoMeta/);
+  assert.match(css,/max-height:230mm !important/);
+  assert.match(js,/clone\.querySelectorAll\("#printAnexoWrap > h2, #printAnexoMeta, #summaryAnexoWrap > h2, #summaryAnexoMeta"\)/);
+});
+test('Downloaded Eco largo page numbers derive from actual PDF page count',()=>{
+  assert.match(js,/const totalPages = pdf\.internal\.getNumberOfPages\(\)/);
+  assert.match(js,/pdf\.setPage\(i\)/);
+  assert.match(js,/pdf\.text\(`Página \$\{i\} \/ \$\{totalPages\}`/);
+  assert.match(js,/pdf\.text\(traceFooter \|\| PDF_FOOTER_BRAND/);
+});

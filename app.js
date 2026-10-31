@@ -397,6 +397,9 @@
       await inlineCloneImages(clone, source);
       await waitForCloneImages(clone);
       clone.querySelectorAll(".print-footer").forEach((el) => el.remove());
+      // Las imagenes originales del ecografo son el anexo: no crear portada vacia.
+      clone.querySelectorAll("#printAnexoWrap > h2, #printAnexoMeta, #summaryAnexoWrap > h2, #summaryAnexoMeta")
+        .forEach((el) => el.remove());
       await waitForNextPaint();
       const options = {
         margin: [7, 7, 12, 7],
@@ -409,6 +412,13 @@
       const worker = window.html2pdf().set(options).from(clone);
       await worker.toPdf();
       const pdf = await worker.get("pdf");
+      const equipmentData = getFormData();
+      const traceParts = [
+        equipmentData.equipoModelo ? `Equipo: ${equipmentData.equipoModelo}` : "",
+        equipmentData.equipoSerie ? `Serie: ${equipmentData.equipoSerie}` : "",
+        equipmentData.studyId ? `Estudio: ${equipmentData.studyId}` : ""
+      ].filter(Boolean);
+      const traceFooter = traceParts.join(" · ");
       const totalPages = pdf.internal.getNumberOfPages();
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
@@ -420,7 +430,7 @@
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(6.3);
         pdf.setTextColor(128, 143, 160);
-        pdf.text(PDF_FOOTER_BRAND, 8, pageHeight - 5.2, { align: "left" });
+        pdf.text(traceFooter || PDF_FOOTER_BRAND, 8, pageHeight - 5.2, { align: "left" });
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(7.2);
         pdf.setTextColor(100, 116, 139);
@@ -2448,6 +2458,8 @@ El PDF propone: ${incomingText}.
       paciente: getValue("paciente", ""),
       dni: getValue("dni", ""),
       studyId: getValue("studyId", ""),
+      equipoModelo: getValue("equipoModelo", ""),
+      equipoSerie: cleanText(getValue("equipoSerie", "")),
       sexo: getValue("sexo", ""),
       edad: safeNumber(getValue("edad", "")),
       obraSocial: getSelectedCoverage(),
@@ -3343,15 +3355,49 @@ El PDF propone: ${incomingText}.
             Q ${leftX} ${cy - 4}, ${leftX + 8} ${cy - height / 2} Z`;
   }
 
+  // Resalta en todas las vistas la misma región anatómica sin modificar el dato.
+  function highlightLinkedSegment(segmentId, active) {
+    document.querySelectorAll('[data-segment-id="' + segmentId + '"].segment-shape, [data-segment-id="' + segmentId + '"].atlas-seg').forEach((shape) => {
+      shape.classList.toggle("segment-linked-highlight", active);
+    });
+  }
+
   function bindSegmentShape(node, segmentId, interactive) {
     node.setAttribute("fill", colorForState(segmentStates[segmentId]));
     node.setAttribute("stroke", "#475569");
     node.setAttribute("stroke-width", "1.4");
     node.setAttribute("class", `segment-shape${interactive ? " interactive" : ""}`);
+    node.setAttribute("data-segment-id", String(segmentId));
+    node.setAttribute("aria-description", "Vista anatómica esquemática; estado compartido con el ojo de buey");
+    // El estado clínico es único: bullseye y todas las vistas se actualizan juntos.
     if (interactive) {
-      node.addEventListener("click", () => {
+      node.setAttribute("role", "button");
+      node.setAttribute("tabindex", "0");
+      node.setAttribute("aria-label", `Segmento ${segmentId}: ${SEGMENT_NAMES[segmentId] || "miocardio"}, ${segmentStates[segmentId]}. Activar para cambiar estado`);
+      const advance = () => {
+        const parentId = node.ownerSVGElement && node.ownerSVGElement.id;
+        const keepFocus = document.activeElement === node;
         segmentStates[segmentId] = nextState(segmentStates[segmentId]);
         updateAll();
+        // Al regenerarse los SVG, conservamos el foco para uso por teclado.
+        if (parentId) {
+          const svg = qs(parentId);
+          const replacement = svg && [...svg.querySelectorAll(".segment-shape")].find((el) => el.getAttribute("data-segment-id") === String(segmentId));
+          if (replacement && keepFocus) {
+            try { replacement.focus({ preventScroll: true }); } catch (_) { replacement.focus(); }
+          }
+        }
+      };
+      node.addEventListener("mouseenter", () => highlightLinkedSegment(segmentId, true));
+      node.addEventListener("mouseleave", () => highlightLinkedSegment(segmentId, false));
+      node.addEventListener("focus", () => highlightLinkedSegment(segmentId, true));
+      node.addEventListener("blur", () => highlightLinkedSegment(segmentId, false));
+      node.addEventListener("click", advance);
+      node.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          advance();
+        }
       });
     }
     return node;
@@ -3407,19 +3453,28 @@ El PDF propone: ${incomingText}.
     svg.innerHTML = "";
 
     const yBands = [
-      [48, 92],
-      [92, 136],
-      [136, 184]
+      [60, 104],
+      [104, 146],
+      [146, 184]
     ];
 
-    const leftOuter = { p1: { x: 109, y: 34 }, p2: { x: 82, y: 190 } };
-    const leftInner = { p1: { x: 109, y: 52 }, p2: { x: 100, y: 186 } };
-    const rightOuter = { p1: { x: 111, y: 34 }, p2: { x: 138, y: 190 } };
-    const rightInner = { p1: { x: 111, y: 52 }, p2: { x: 120, y: 186 } };
+    const leftOuter = { p1: { x: 101, y: 48 }, p2: { x: 68, y: 190 } };
+    const leftInner = { p1: { x: 106, y: 52 }, p2: { x: 96, y: 186 } };
+    const rightOuter = { p1: { x: 119, y: 48 }, p2: { x: 152, y: 190 } };
+    const rightInner = { p1: { x: 114, y: 52 }, p2: { x: 124, y: 186 } };
 
+    // Dibujar cavidades accesorias primero: nunca deben tapar segmentos basales.
+    const lowerShapes = spec.baseChambers || [];
+    lowerShapes.forEach((item) => {
+      svg.appendChild(createSvgNode("path", { d: item.path, class: "segment-chamber" }));
+      addSvgText(svg, item.label.x, item.label.y, item.label.text, "segment-small-label");
+    });
+
+    // Cavidad esquemática central: se mantiene dentro del borde endocárdico de los seis sectores.
+    // Se dibuja primero para que jamás tape los polígonos clicables ni su numeración.
     svg.appendChild(createSvgNode("path", {
-      d: "M 70 26 Q 46 20 34 48 Q 22 86 26 142 Q 30 184 48 214",
-      class: "segment-outline"
+      d: "M 110 52 C 106 75 104 110 103 136 C 102 154 101 172 100 184 L 120 184 C 119 172 118 154 117 136 C 116 110 114 75 110 52 Z",
+      class: "segment-chamber"
     }));
 
     [
@@ -3447,21 +3502,9 @@ El PDF propone: ${incomingText}.
     svg.appendChild(cap);
     addSvgText(svg, 110, 25, "17", "segment-number");
 
-    svg.appendChild(createSvgNode("path", {
-      d: "M 110 48 C 92 64 84 96 84 132 C 84 158 92 182 102 194 L 110 188 L 118 194 C 128 182 136 158 136 132 C 136 96 128 64 110 48 Z",
-      class: "segment-outline"
-    }));
-
-    svg.appendChild(createSvgNode("path", {
-      d: "M 106 190 Q 94 203 86 226 M 114 190 Q 126 203 134 226",
-      class: "segment-outline"
-    }));
-
-    const lowerShapes = spec.baseChambers || [];
-    lowerShapes.forEach((item) => {
-      svg.appendChild(createSvgNode("path", { d: item.path, class: "segment-chamber" }));
-      addSvgText(svg, item.label.x, item.label.y, item.label.text, "segment-small-label");
-    });
+    // Las vistas apicales se presentan con ápice arriba y base abajo.
+    addSvgText(svg, 173, 22, "ÁPEX", "segment-orientation-label");
+    addSvgText(svg, 110, 236, "BASE", "segment-orientation-label");
   }
 
   function drawPLAXView(svgId, interactive) {
@@ -3518,8 +3561,9 @@ El PDF propone: ${incomingText}.
     if (!svg) return;
     svg.innerHTML = "";
 
-    const cx = 132;
-    const cy = 84;
+    // Centrado dentro del viewBox 220 × 240; evita cortes laterales y espacio vacío inferior.
+    const cx = 110;
+    const cy = 114;
     let outer = 56;
     let inner = 28;
     let defs = [];
@@ -3544,8 +3588,7 @@ El PDF propone: ${incomingText}.
       ];
     }
 
-    svg.appendChild(createSvgNode("path", { d: `M ${cx - 54} ${cy - 52} Q ${cx - 92} ${cy - 70} ${cx - 102} ${cy - 16} Q ${cx - 108} ${cy + 30} ${cx - 76} ${cy + 64}`, class: "segment-outline" }));
-
+    // Corte transversal esquemático: evitar contornos extracavitarios sin identificación.
     defs.forEach(([id, a1, a2]) => {
       const path = createSvgNode("path", { d: ringSectorPath(cx, cy, outer, inner, a1, a2) });
       bindSegmentShape(path, id, interactive);
@@ -3556,10 +3599,12 @@ El PDF propone: ${incomingText}.
       addSvgText(svg, pt.x, pt.y + 1, String(id), "segment-number");
     });
 
-    const cavity = svgId === "viewSAXBasal"
-      ? createSvgNode("path", { d: `M ${cx - 8} ${cy - 18} Q ${cx + 22} ${cy - 6} ${cx + 18} ${cy + 16} Q ${cx} ${cy + 26} ${cx - 14} ${cy + 8} Q ${cx - 20} ${cy - 6} ${cx - 8} ${cy - 18} Z`, class: "segment-chamber" })
-      : createSvgNode("path", { d: `M ${cx - 18} ${cy - 8} Q ${cx} ${cy - 26} ${cx + 18} ${cy - 8} Q ${cx + 22} ${cy + 10} ${cx} ${cy + 20} Q ${cx - 22} ${cy + 10} ${cx - 18} ${cy - 8} Z`, class: "segment-chamber" });
+    // La luz central debe ser concéntrica a los sectores; no simula hallazgos patológicos.
+    const cavity = createSvgNode("circle", { cx, cy, r: inner - 2, class: "segment-chamber" });
     svg.appendChild(cavity);
+    // Etiquetas orientativas, por fuera de las regiones segmentarias clicables.
+    addSvgText(svg, cx, cy + 4, "VI", "segment-small-label");
+    addSvgText(svg, cx, cy + outer + 27, svgId === "viewSAXBasal" ? "BASAL" : svgId === "viewSAXMid" ? "MEDIO" : "APICAL", "segment-orientation-label");
   }
 
   function drawApicalCapView(svgId, interactive) {
@@ -3572,40 +3617,116 @@ El PDF propone: ${incomingText}.
     addSvgText(svg, 80, 102, "17", "segment-number");
   }
 
+  // Correspondencia fija con el modelo ASE/EACVI de 17 segmentos.
+  // En los esquemas apicales el ápice se muestra arriba y la base abajo.
+  function assertSegmentViewMapping(view, sideA, sideB) {
+    const expected = SEGMENT_VIEW_MAPS[view].segments;
+    const actual = [...sideA, ...sideB, 17];
+    if (expected.length !== 7 || expected.some((id) => !actual.includes(id)) || new Set(actual).size !== 7) {
+      throw new Error(`Mapa anatómico inconsistente: ${view}`);
+    }
+  }
+
+  // Solo las paredes segmentarias visibles: mismo estado, colores y eventos que el ojo de buey.
+  function drawApicalWallOnly(svgId, leftIds, rightIds, interactive) {
+    const svg = qs(svgId);
+    if (!svg) return;
+    svg.innerHTML = "";
+    // Contornos curvos en lugar de bandas rectas. Ápex arriba, base abajo.
+    // Los segmentos se ordenan desde ápex hacia base.
+    const heights = [42, 88, 137, 187];
+    const edges = {
+      left: { outer: [91, 71, 53, 37], inner: [103, 86, 74, 66] },
+      right: { outer: [129, 149, 167, 183], inner: [117, 134, 146, 154] }
+    };
+    const createWall = (ids, side) => {
+      const e = edges[side];
+      ids.forEach((segmentId, i) => {
+        const y0 = heights[i], y1 = heights[i+1];
+        const mid = (y0+y1)/2;
+        const d = `M ${e.outer[i]} ${y0}
+          Q ${(e.outer[i]+e.outer[i+1])/2} ${mid-3} ${e.outer[i+1]} ${y1}
+          L ${e.inner[i+1]} ${y1}
+          Q ${(e.inner[i]+e.inner[i+1])/2} ${mid-3} ${e.inner[i]} ${y0} Z`;
+        const shape = createSvgNode("path", { d });
+        bindSegmentShape(shape, segmentId, interactive);
+        svg.appendChild(shape);
+        addSvgText(svg, (e.outer[i]+e.inner[i]+e.outer[i+1]+e.inner[i+1])/4, mid+4, String(segmentId), "segment-number");
+      });
+    };
+    createWall(leftIds, "left");
+    createWall(rightIds, "right");
+    const cap = createSvgNode("path", { d: "M 91 42 Q 110 6 129 42 L 117 50 Q 110 33 103 50 Z" });
+    bindSegmentShape(cap, 17, interactive);
+    svg.appendChild(cap);
+    addSvgText(svg, 110, 32, "17", "segment-number");
+    const wallNames = {
+      viewA2C: ["INFERIOR", "ANTERIOR"],
+      printViewA2C: ["INFERIOR", "ANTERIOR"],
+      viewA4C: ["INFEROSEPTAL", "ANTEROLATERAL"],
+      printViewA4C: ["INFEROSEPTAL", "ANTEROLATERAL"],
+      viewA5C: ["SEPTAL", "ANTEROLATERAL"],
+      printViewA5C: ["SEPTAL", "ANTEROLATERAL"]
+    };
+    const names = wallNames[svgId] || [];
+    if (names.length) {
+      addSvgText(svg, 35, 109, names[0], "segment-anatomy-label segment-label-left");
+      addSvgText(svg, 187, 109, names[1], "segment-anatomy-label segment-label-right");
+    }
+    if (/A4C$/.test(svgId)) {
+      addSvgText(svg, 26, 171, "VD", "segment-anatomy-label");
+      addSvgText(svg, 37, 210, "AD", "segment-anatomy-label");
+      addSvgText(svg, 184, 210, "AI", "segment-anatomy-label");
+    } else if (/A5C$/.test(svgId)) {
+      addSvgText(svg, 26, 171, "VD", "segment-anatomy-label");
+      addSvgText(svg, 185, 208, "AI", "segment-anatomy-label");
+      addSvgText(svg, 196, 170, "Ao", "segment-anatomy-label");
+    } else if (/A2C$/.test(svgId)) {
+      addSvgText(svg, 110, 214, "AI", "segment-anatomy-label");
+    }
+    addSvgText(svg, 175, 24, "ÁPEX", "segment-orientation-label");
+  }
+
+  // ELPEI paraesternal: solo anteroseptal 8/2 e inferolateral 11/5.
+  // El ápex NO está representado ni es seleccionable en este plano.
+  function drawELPEIWallOnly(interactive, svgId = "viewELPEI") {
+    const svg = qs(svgId);
+    if (!svg) return;
+    svg.innerHTML = "";
+    const wallSegments = [
+      { id: 8, d: "M 27 93 Q 58 57 108 70 L 108 94 Q 62 83 36 117 Z", x: 72, y: 85 },
+      { id: 2, d: "M 108 70 Q 152 76 196 96 L 196 119 Q 148 101 108 94 Z", x: 153, y: 95 },
+      { id: 11, d: "M 27 150 Q 66 165 108 164 L 108 186 Q 60 185 27 170 Z", x: 73, y: 174 },
+      { id: 5, d: "M 108 164 Q 150 163 196 142 L 196 161 Q 159 186 108 186 Z", x: 154, y: 171 }
+    ];
+    wallSegments.forEach(({ id, d, x, y }) => {
+      const shape = createSvgNode("path", { d });
+      bindSegmentShape(shape, id, interactive);
+      svg.appendChild(shape);
+      addSvgText(svg, x, y, String(id), "segment-number");
+    });
+    addSvgText(svg, 110, 32, "ELPEI", "segment-orientation-label");
+    addSvgText(svg, 112, 54, "ANTEROSEPTAL", "segment-anatomy-label");
+    addSvgText(svg, 112, 207, "INFEROLATERAL", "segment-anatomy-label");
+    addSvgText(svg, 34, 57, "VD", "segment-anatomy-label");
+    addSvgText(svg, 204, 135, "Ao", "segment-anatomy-label");
+    addSvgText(svg, 188, 218, "AI", "segment-anatomy-label");
+  }
+
   function drawSegmentViews(interactive) {
-    drawVerticalSegmentView(
-      "viewA4C",
-      {
-        leftIds: [14, 9, 3],
-        rightIds: [16, 12, 6],
-        baseChambers: [
-          { path: "M 18 182 Q 42 170 66 186 L 66 222 Q 42 230 18 216 Z", label: { x: 42, y: 204, text: "RA" } },
-          { path: "M 154 182 Q 178 170 202 186 L 202 222 Q 178 230 154 216 Z", label: { x: 178, y: 204, text: "LA" } }
-        ]
-      },
-      interactive
-    );
-
-    drawVerticalSegmentView(
-      "viewA2C",
-      {
-        leftIds: [15, 10, 4],
-        rightIds: [13, 7, 1],
-        baseChambers: [{ path: "M 48 184 Q 110 164 172 184 L 172 222 Q 110 230 48 222 Z", label: { x: 110, y: 204, text: "LA" } }]
-      },
-      interactive
-    );
-
-    drawPLAXView("viewPLAX", interactive);
-    drawShortAxisView("viewSAXBasal", SEGMENT_VIEW_MAPS.saxBasal.segments, interactive);
-    drawShortAxisView("viewSAXMid", SEGMENT_VIEW_MAPS.saxMid.segments, interactive);
-    drawShortAxisView("viewSAXApical", SEGMENT_VIEW_MAPS.saxApical.segments, interactive);
-    drawApicalCapView("viewApicalCap", interactive);
+    assertSegmentViewMapping("a4c", [14, 9, 3], [16, 12, 6]);
+    assertSegmentViewMapping("a2c", [15, 10, 4], [13, 7, 1]);
+    assertSegmentViewMapping("a5c", [14, 8, 2], [16, 12, 6]);
+    drawApicalWallOnly("viewA4C", [14, 9, 3], [16, 12, 6], interactive);
+    drawApicalWallOnly("viewA2C", [15, 10, 4], [13, 7, 1], interactive);
+    drawApicalWallOnly("viewA5C", [14, 8, 2], [16, 12, 6], interactive);
+    drawELPEIWallOnly(interactive);
   }
 
   function atlasBindShape(node, segmentId, interactive) {
     node.setAttribute("fill", colorForState(segmentStates[segmentId]));
     node.setAttribute("class", "atlas-seg");
+    node.setAttribute("data-segment-id", String(segmentId));
     if (interactive) {
       node.addEventListener("click", () => {
         segmentStates[segmentId] = nextState(segmentStates[segmentId]);
@@ -4088,6 +4209,16 @@ El PDF propone: ${incomingText}.
     return arr.join(" ");
   }
 
+  // Umbral operativo para revisión médica, no criterio diagnóstico ni sustituto de Simpson.
+  function feviDiscordanceReview(calc) {
+    const simpson = Number(calc.feyPrincipal);
+    const teichholz = Number(calc.feyTeichholz);
+    if (calc.feyMethod !== "Simpson" || calc.feyPrincipal === null ||
+        calc.feyTeichholz === null || !Number.isFinite(simpson) || !Number.isFinite(teichholz)) return "";
+    if (Math.abs(simpson - teichholz) < 15) return "";
+    return "Advertencia de revisión: diferencia relevante entre FEVI Simpson y estimación Teichholz (≥15 puntos porcentuales); corroborar mediciones y método. Se mantiene Simpson como referencia principal.";
+  }
+
   function buildDescription(data, calc, interp, diastolicText, segmentText, glsText) {
     const parts = [];
     parts.push("Se realizó ecocardiograma transtorácico bidimensional y Doppler cardíaco.");
@@ -4107,8 +4238,17 @@ El PDF propone: ${incomingText}.
 
     if (calc.feyPrincipal !== null || calc.feyTeichholz !== null) parts.push(interp.fey.text);
 
-    parts.push(motilityGlobalText(data.motilidadGlobal));
+    // Una FEVI global conservada no implica motilidad regional normal.
+    const hasRegionalAbnormality = Array.from({ length: 17 }, (_, i) => segmentStates[i + 1])
+      .some((state) => state === "hipocinesia" || state === "acinesia");
+    if (data.motilidadGlobal === "conservada" && hasRegionalAbnormality) {
+      parts.push("Función sistólica global conservada, con alteraciones regionales de la contractilidad descriptas a continuación.");
+    } else {
+      parts.push(motilityGlobalText(data.motilidadGlobal));
+    }
     parts.push(segmentText.long);
+    const feviReview = feviDiscordanceReview(calc);
+    if (feviReview) parts.push(feviReview);
     parts.push(diastolicText);
     parts.push(interp.ai.text);
     if (interp.ad && interp.ad.grade !== "nr") parts.push(interp.ad.text);
@@ -4694,6 +4834,15 @@ El PDF propone: ${incomingText}.
 
     setText("printMedico", printMed);
     setText("printEspecialidad", printEsp);
+    const equipmentModel = cleanText(data.equipoModelo || "");
+    const equipmentSerial = cleanText(data.equipoSerie || "");
+    const equipmentStudyId = cleanText(data.studyId || "");
+    const equipmentTrace = [
+      equipmentModel ? `Equipo: ${equipmentModel}` : "",
+      equipmentSerial ? `Serie: ${equipmentSerial}` : "",
+      equipmentStudyId ? `ID del estudio: ${equipmentStudyId}` : ""
+    ].filter(Boolean).join(" · ");
+    setText("printEquipoTrace", equipmentTrace);
     renderReportLogo(data);
     renderInformanteSignature(data);
 
@@ -4728,6 +4877,10 @@ El PDF propone: ${incomingText}.
     }
     renderSummaryOS(data, calc, conclusion);
     drawBullseye("printBull17", false);
+    drawApicalWallOnly("printViewA2C", [15, 10, 4], [13, 7, 1], false);
+    drawApicalWallOnly("printViewA4C", [14, 9, 3], [16, 12, 6], false);
+    drawApicalWallOnly("printViewA5C", [14, 8, 2], [16, 12, 6], false);
+    drawELPEIWallOnly(false, "printViewELPEI");
     renderPrintAnnex();
   }
 
