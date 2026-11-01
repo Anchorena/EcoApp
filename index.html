@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EcoApp EchoReport v1.0</title>
-  <link rel="stylesheet" href="styles.css?v=20261031-ui2" />
+  <link rel="stylesheet" href="styles.css?v=20261031-ui3" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
 </head>
@@ -307,12 +307,12 @@
     </main>
 
     <section class="report-text-workspace no-print" aria-label="Narrativa, conclusión y edición manual">
-        <article class="card report-preview-card"><h2>Vista previa del informe</h2><h3 class="preview-label">Descripción del estudio</h3><div id="previewNarrativa" class="preview-block"></div><h3 class="preview-label">Conclusión</h3><div id="previewConclusion" class="preview-block preview-conclusion"></div><div id="previewNotasWrap" style="display:none;"><h3>Notas adicionales</h3><div id="previewNotas" class="preview-block"></div></div></article>
+        <article class="card report-preview-card"><h2>Vista previa del informe</h2><div class="preview-label-row"><h3 class="preview-label">Descripción del estudio</h3><button type="button" class="text-tool-btn" data-copy-target="previewNarrativa" aria-label="Copiar descripción del estudio">Copiar</button></div><div id="previewNarrativa" class="preview-block"></div><div class="preview-label-row"><h3 class="preview-label">Conclusión</h3><button type="button" class="text-tool-btn" data-copy-target="previewConclusion" aria-label="Copiar conclusión">Copiar</button></div><div id="previewConclusion" class="preview-block preview-conclusion"></div><div id="previewNotasWrap" style="display:none;"><h3>Notas adicionales</h3><div id="previewNotas" class="preview-block"></div></div></article>
         <article class="card report-manual-card">
           <h2>Edición manual del informe</h2>
           <div class="form-grid report-manual-grid">
-            <div class="field field-span-2"><label for="conclusionManual">Conclusión manual</label><textarea id="conclusionManual" rows="5" placeholder="Si escribís aquí, reemplaza la conclusión automática en la vista previa y en el PDF."></textarea></div>
-            <div class="field field-span-2"><label for="notasAdicionales">Notas adicionales</label><textarea id="notasAdicionales" rows="5" placeholder="Campo libre para agregar observaciones, aclaraciones o comentarios puntuales."></textarea></div>
+            <div class="field field-span-2"><div class="field-label-row"><label for="conclusionManual">Conclusión manual</label><div class="text-tools"><button type="button" class="text-tool-btn dictate-btn" data-dictate-target="conclusionManual" aria-pressed="false" aria-label="Dictar conclusión manual">🎤 Dictar</button><button type="button" class="text-tool-btn" data-copy-target="conclusionManual" aria-label="Copiar conclusión manual">Copiar</button></div></div><textarea id="conclusionManual" rows="5" placeholder="Si escribís aquí, reemplaza la conclusión automática en la vista previa y en el PDF."></textarea><div class="dictation-status" data-dictation-status="conclusionManual" role="status" aria-live="polite"></div></div>
+            <div class="field field-span-2"><div class="field-label-row"><label for="notasAdicionales">Notas adicionales</label><div class="text-tools"><button type="button" class="text-tool-btn dictate-btn" data-dictate-target="notasAdicionales" aria-pressed="false" aria-label="Dictar notas adicionales">🎤 Dictar</button><button type="button" class="text-tool-btn" data-copy-target="notasAdicionales" aria-label="Copiar notas adicionales">Copiar</button></div></div><textarea id="notasAdicionales" rows="5" placeholder="Campo libre para agregar observaciones, aclaraciones o comentarios puntuales."></textarea><div class="dictation-status" data-dictation-status="notasAdicionales" role="status" aria-live="polite"></div></div>
           </div>
         </article>
     </section>
@@ -409,7 +409,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
   <script src="config.js?v=20261026-1"></script>
   <script src="device-profiles.js?v=20261023-6"></script>
-  <script src="app.js?v=20261031-ui4"></script>
+  <script src="app.js?v=20261031-ui5"></script>
   <script src="pwa-register.js?v=20261023-1"></script>
 </body>
 </html>
